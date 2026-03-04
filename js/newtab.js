@@ -802,6 +802,26 @@ function setupImportBookmarksListeners() {
         return;
       }
 
+      // Handle Toby format (version + lists with cards)
+      if (data.lists && Array.isArray(data.lists)) {
+        const folders = parseTobyJson(data);
+        if (folders.length === 0) {
+          alert('No bookmarks found in the Toby JSON file.');
+          e.target.value = '';
+          document.getElementById('importBookmarksModal').classList.add('hidden');
+          return;
+        }
+        const totalTabs = folders.reduce((sum, f) => sum + f.tabs.length, 0);
+        if (confirm(`Import ${folders.length} collections with ${totalTabs} bookmarks from Toby?`)) {
+          const count = await Storage.importBookmarkFolders(activeSpaceId, folders);
+          alert(`Imported ${count} bookmarks into ${folders.length} collections.`);
+          await renderCollections();
+        }
+        e.target.value = '';
+        document.getElementById('importBookmarksModal').classList.add('hidden');
+        return;
+      }
+
       // Handle Chrome JSON bookmark format (nested with children)
       const folders = parseJsonBookmarks(data);
       if (folders.length === 0) {
@@ -865,6 +885,30 @@ function parseJsonBookmarks(data) {
     walk(data, 'Imported');
   }
 
+  return folders;
+}
+
+// Parse Toby JSON format (version + lists with cards)
+function parseTobyJson(data) {
+  const folders = [];
+  if (!data.lists || !Array.isArray(data.lists)) return folders;
+
+  for (const list of data.lists) {
+    if (!list.cards || list.cards.length === 0) continue;
+    const tabs = [];
+    for (const card of list.cards) {
+      if (card.url) {
+        tabs.push({
+          title: card.customTitle || card.title || 'Untitled',
+          url: card.url,
+          favicon: ''
+        });
+      }
+    }
+    if (tabs.length > 0) {
+      folders.push({ name: list.title || 'Imported', tabs });
+    }
+  }
   return folders;
 }
 
