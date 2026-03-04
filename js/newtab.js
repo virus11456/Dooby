@@ -321,10 +321,15 @@ function createTabElement(tab, collectionId) {
   const faviconSrc = tab.favicon || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(new URL(tab.url).hostname)}&sz=32`;
 
   el.innerHTML = `
-    <img class="tab-favicon" src="${escapeHtml(faviconSrc)}" alt="" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><rect width=%2216%22 height=%2216%22 rx=%222%22 fill=%22%236C5CE7%22/><text x=%228%22 y=%2212%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2210%22>${escapeHtml(tab.title.charAt(0).toUpperCase())}</text></svg>'">
+    <img class="tab-favicon" src="${escapeHtml(faviconSrc)}" alt="">
     <span class="tab-title" title="${escapeHtml(tab.url)}">${escapeHtml(tab.title)}</span>
     <button class="tab-remove" title="Remove">&times;</button>
   `;
+
+  // Handle favicon load error via JS (CSP does not allow inline handlers)
+  el.querySelector('.tab-favicon').addEventListener('error', function() {
+    this.style.display = 'none';
+  });
 
   // Click to open tab
   el.querySelector('.tab-title').addEventListener('click', (e) => {
@@ -403,9 +408,13 @@ async function renderOpenTabs() {
     const faviconSrc = tab.favIconUrl || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(new URL(tab.url).hostname)}&sz=32`;
 
     li.innerHTML = `
-      <img src="${escapeHtml(faviconSrc)}" alt="" onerror="this.style.display='none'">
+      <img src="${escapeHtml(faviconSrc)}" alt="">
       <span class="open-tab-title" title="${escapeHtml(tab.url)}">${escapeHtml(tab.title || 'Untitled')}</span>
     `;
+
+    li.querySelector('img').addEventListener('error', function() {
+      this.style.display = 'none';
+    });
 
     // Make draggable
     DragDrop.makeDraggable(li, {
@@ -486,12 +495,15 @@ async function handleSearch(query) {
       item.className = 'search-result-item';
       const faviconSrc = result.favicon || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(new URL(result.url).hostname)}&sz=32`;
       item.innerHTML = `
-        <img src="${escapeHtml(faviconSrc)}" alt="" onerror="this.style.display='none'">
+        <img src="${escapeHtml(faviconSrc)}" alt="">
         <span class="search-result-info">
           <span class="search-result-title">${escapeHtml(result.title)}</span>
           <span class="search-result-collection">${escapeHtml(result.collectionName)}</span>
         </span>
       `;
+      item.querySelector('img').addEventListener('error', function() {
+        this.style.display = 'none';
+      });
       item.addEventListener('click', () => {
         chrome.tabs.create({ url: result.url });
         resultsEl.classList.add('hidden');
