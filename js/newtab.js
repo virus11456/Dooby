@@ -846,6 +846,26 @@ function setupImportBookmarksListeners() {
         return;
       }
 
+      // Handle TabMe format (isTabme flag + spaces[].folders[].items[])
+      if (data.isTabme && data.spaces) {
+        const folders = parseTabMeJson(data);
+        if (folders.length === 0) {
+          alert('No bookmarks found in the TabMe JSON file.');
+          e.target.value = '';
+          document.getElementById('importBookmarksModal').classList.add('hidden');
+          return;
+        }
+        const totalTabs = folders.reduce((sum, f) => sum + f.tabs.length, 0);
+        if (confirm(`Import ${folders.length} collections with ${totalTabs} bookmarks from TabMe?`)) {
+          const count = await Storage.importBookmarkFolders(activeSpaceId, folders);
+          alert(`Imported ${count} bookmarks into ${folders.length} collections.`);
+          await renderCollections();
+        }
+        e.target.value = '';
+        document.getElementById('importBookmarksModal').classList.add('hidden');
+        return;
+      }
+
       // Handle Toby format (version + lists with cards)
       if (data.lists && Array.isArray(data.lists)) {
         const folders = parseTobyJson(data);
@@ -951,6 +971,33 @@ function parseTobyJson(data) {
     }
     if (tabs.length > 0) {
       folders.push({ name: list.title || 'Imported', tabs });
+    }
+  }
+  return folders;
+}
+
+// Parse TabMe JSON format (spaces[].folders[].items[])
+function parseTabMeJson(data) {
+  const folders = [];
+  if (!data.spaces || !Array.isArray(data.spaces)) return folders;
+
+  for (const space of data.spaces) {
+    if (!space.folders || !Array.isArray(space.folders)) continue;
+    for (const folder of space.folders) {
+      if (!folder.items || folder.items.length === 0) continue;
+      const tabs = [];
+      for (const item of folder.items) {
+        if (item.url) {
+          tabs.push({
+            title: item.title || 'Untitled',
+            url: item.url,
+            favicon: item.favIconUrl || ''
+          });
+        }
+      }
+      if (tabs.length > 0) {
+        folders.push({ name: folder.title || 'Imported', tabs });
+      }
     }
   }
   return folders;
