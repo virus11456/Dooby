@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Tooby - Tab & Bookmark Manager",
+  "version": "1.0.0",
+  "description": "A visual workspace for organizing your tabs and bookmarks into collections. Better than bookmarks.",
+  "permissions": [
+    "tabs",
+    "storage",
+    "sessions"
+  ],
+  "chrome_url_overrides": {
+    "newtab": "pages/newtab.html"
+  },
+  "background": {
+    "service_worker": "js/background.js"
+  },
+  "action": {
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "Tooby - Save current tab"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

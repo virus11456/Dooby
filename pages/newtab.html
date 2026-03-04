@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tooby - New Tab</title>
+  <link rel="stylesheet" href="../css/newtab.css">
+</head>
+<body>
+  <!-- Top Bar -->
+  <header class="top-bar">
+    <div class="top-bar-left">
+      <div class="logo">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <rect width="28" height="28" rx="6" fill="#6C5CE7"/>
+          <text x="14" y="20" text-anchor="middle" fill="white" font-size="16" font-weight="bold" font-family="sans-serif">T</text>
+        </svg>
+        <span class="logo-text">Tooby</span>
+      </div>
+    </div>
+    <div class="top-bar-center">
+      <div class="search-box">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" stroke-width="1.5"/>
+          <line x1="10.5" y1="10.5" x2="15" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <input type="text" id="searchInput" placeholder="Search tabs and collections..." autocomplete="off">
+        <div id="searchResults" class="search-results hidden"></div>
+      </div>
+    </div>
+    <div class="top-bar-right">
+      <button id="btnSaveSession" class="btn btn-primary" title="Save all open tabs as a session">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M2 2h8l4 4v8H2V2z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+          <rect x="5" y="2" width="4" height="4" stroke="currentColor" stroke-width="1"/>
+          <rect x="4" y="9" width="6" height="5" stroke="currentColor" stroke-width="1"/>
+        </svg>
+        Save Session
+      </button>
+    </div>
+  </header>
+
+  <div class="main-layout">
+    <!-- Spaces Sidebar -->
+    <aside class="spaces-sidebar">
+      <div class="sidebar-header">
+        <h3>Spaces</h3>
+        <button id="btnAddSpace" class="btn-icon" title="Add new space">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <line x1="8" y1="2" x2="8" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <ul id="spacesList" class="spaces-list"></ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content">
+      <div class="content-header">
+        <h2 id="spaceTitle">My Space</h2>
+        <button id="btnAddCollection" class="btn btn-secondary">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <line x1="8" y1="2" x2="8" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          Add Collection
+        </button>
+      </div>
+      <div id="collectionsGrid" class="collections-grid"></div>
+    </main>
+
+    <!-- Open Tabs Sidebar -->
+    <aside class="tabs-sidebar">
+      <div class="sidebar-header">
+        <h3>Open Tabs</h3>
+        <span id="openTabCount" class="badge">0</span>
+      </div>
+      <ul id="openTabsList" class="open-tabs-list"></ul>
+    </aside>
+  </div>
+
+  <!-- Context Menu -->
+  <div id="contextMenu" class="context-menu hidden">
+    <ul></ul>
+  </div>
+
+  <script src="../js/storage.js"></script>
+  <script src="../js/dragdrop.js"></script>
+  <script src="../js/newtab.js"></script>
+</body>
+</html>
