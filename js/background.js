@@ -73,4 +73,34 @@ chrome.runtime.onInstalled.addListener(async () => {
     collections: defaultCollections,
     activeSpaceId: 'space-default'
   });
+
+  // Set up periodic sync alarm (every 5 minutes)
+  chrome.alarms.create('tooby-sync', { periodInMinutes: 5 });
+});
+
+// Periodic sync alarm handler
+chrome.alarms.onAlarm.addListener(async (alarm) => {
+  if (alarm.name === 'tooby-sync') {
+    const { syncUser } = await chrome.storage.local.get('syncUser');
+    if (!syncUser) return;
+
+    // Notify any open new tab pages to sync
+    const tabs = await chrome.tabs.query({});
+    for (const tab of tabs) {
+      if (tab.url && tab.url.includes('newtab.html')) {
+        try {
+          chrome.tabs.sendMessage(tab.id, { type: 'TOOBY_SYNC_TRIGGER' });
+        } catch (e) {
+          // Tab might not have content script
+        }
+      }
+    }
+  }
+});
+
+// Ensure sync alarm exists on startup
+chrome.alarms.get('tooby-sync', (alarm) => {
+  if (!alarm) {
+    chrome.alarms.create('tooby-sync', { periodInMinutes: 5 });
+  }
 });

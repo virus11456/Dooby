@@ -1,13 +1,23 @@
 {
   "manifest_version": 3,
   "name": "Tooby - Tab & Bookmark Manager",
-  "version": "1.0.0",
-  "description": "A visual workspace for organizing your tabs and bookmarks into collections. Better than bookmarks.",
+  "version": "1.1.0",
+  "description": "A visual workspace for organizing your tabs and bookmarks into collections with cloud sync. Better than bookmarks.",
   "permissions": [
     "tabs",
     "storage",
-    "sessions"
+    "sessions",
+    "identity",
+    "alarms"
   ],
+  "oauth2": {
+    "client_id": "YOUR_CHROME_CLIENT_ID.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/userinfo.profile",
+      "https://www.googleapis.com/auth/datastore"
+    ]
+  },
   "chrome_url_overrides": {
     "newtab": "pages/newtab.html"
   },
@@ -26,5 +36,6 @@
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
-  }
+  },
+  "key": "YOUR_EXTENSION_KEY"
 }

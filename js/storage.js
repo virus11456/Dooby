@@ -34,6 +34,7 @@ const Storage = {
     };
     spaces.push(newSpace);
     await chrome.storage.local.set({ spaces });
+    this._onDataChanged();
     return newSpace;
   },
 
@@ -43,6 +44,7 @@ const Storage = {
     if (space) {
       space.name = name;
       await chrome.storage.local.set({ spaces });
+      this._onDataChanged();
     }
   },
 
@@ -52,6 +54,7 @@ const Storage = {
     let collections = await this.getCollections();
     collections = collections.filter(c => c.spaceId !== spaceId);
     await chrome.storage.local.set({ spaces, collections });
+    this._onDataChanged();
   },
 
   async addCollection(spaceId, name) {
@@ -65,6 +68,7 @@ const Storage = {
     };
     collections.push(newCollection);
     await chrome.storage.local.set({ collections });
+    this._onDataChanged();
     return newCollection;
   },
 
@@ -74,6 +78,7 @@ const Storage = {
     if (col) {
       col.name = name;
       await chrome.storage.local.set({ collections });
+      this._onDataChanged();
     }
   },
 
@@ -81,6 +86,7 @@ const Storage = {
     let collections = await this.getCollections();
     collections = collections.filter(c => c.id !== collectionId);
     await chrome.storage.local.set({ collections });
+    this._onDataChanged();
   },
 
   async addTabToCollection(collectionId, tab) {
@@ -95,6 +101,7 @@ const Storage = {
         addedAt: Date.now()
       });
       await chrome.storage.local.set({ collections });
+      this._onDataChanged();
     }
   },
 
@@ -104,6 +111,7 @@ const Storage = {
     if (col) {
       col.tabs = col.tabs.filter(t => t.id !== tabId);
       await chrome.storage.local.set({ collections });
+      this._onDataChanged();
     }
   },
 
@@ -119,10 +127,12 @@ const Storage = {
     const [tab] = fromCol.tabs.splice(tabIndex, 1);
     toCol.tabs.splice(toIndex, 0, tab);
     await chrome.storage.local.set({ collections });
+    this._onDataChanged();
   },
 
   async saveCollections(collections) {
     await chrome.storage.local.set({ collections });
+    this._onDataChanged();
   },
 
   async searchTabs(query) {
@@ -137,5 +147,12 @@ const Storage = {
       }
     }
     return results;
+  },
+
+  // Notify sync manager when data changes
+  _onDataChanged() {
+    if (typeof SyncManager !== 'undefined' && SyncManager.isSignedIn()) {
+      SyncManager.scheduleSyncAfterChange();
+    }
   }
 };

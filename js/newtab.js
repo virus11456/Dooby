@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   DragDrop.init();
   await loadApp();
   setupEventListeners();
+  await initSync();
 });
 
 async function loadApp() {
@@ -550,4 +551,157 @@ function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
+}
+
+// ============================================
+// Cloud Sync
+// ============================================
+
+async function initSync() {
+  const user = await SyncManager.init();
+
+  // Listen for sync events
+  SyncManager.on('*', (event, data) => {
+    switch (event) {
+      case 'sync_start':
+        updateSyncUI('syncing', 'Syncing...');
+        break;
+      case 'sync_complete':
+        updateSyncUI('success', 'Synced');
+        setTimeout(() => updateSyncUI('idle', ''), 3000);
+        break;
+      case 'sync_error':
+        updateSyncUI('error', 'Sync failed');
+        setTimeout(() => updateSyncUI('idle', ''), 5000);
+        break;
+      case 'data_updated':
+        // Remote data was pulled, refresh UI
+        loadApp();
+        break;
+      case 'signed_in':
+        renderUserUI(data);
+        break;
+      case 'signed_out':
+        renderUserUI(null);
+        break;
+    }
+  });
+
+  renderUserUI(user);
+  setupSyncEventListeners();
+}
+
+function renderUserUI(user) {
+  const btnSignIn = document.getElementById('btnSignIn');
+  const userProfile = document.getElementById('userProfile');
+  const syncStatusEl = document.getElementById('syncStatus');
+  const btnSync = document.getElementById('btnSync');
+
+  if (user) {
+    btnSignIn.style.display = 'none';
+    userProfile.classList.remove('hidden');
+    syncStatusEl.classList.remove('hidden');
+    btnSync.classList.remove('hidden');
+
+    document.getElementById('userAvatar').src = user.photoURL || '';
+    document.getElementById('userName').textContent = user.displayName || user.email || '';
+  } else {
+    btnSignIn.style.display = '';
+    userProfile.classList.add('hidden');
+    syncStatusEl.classList.add('hidden');
+    btnSync.classList.add('hidden');
+  }
+}
+
+function updateSyncUI(status, text) {
+  const el = document.getElementById('syncStatus');
+  const textEl = document.getElementById('syncStatusText');
+
+  el.classList.remove('syncing', 'success', 'error');
+  if (status !== 'idle') {
+    el.classList.add(status);
+    el.classList.remove('hidden');
+  }
+  textEl.textContent = text;
+}
+
+function setupSyncEventListeners() {
+  // Sign In
+  document.getElementById('btnSignIn').addEventListener('click', async () => {
+    try {
+      await SyncManager.signIn();
+    } catch (err) {
+      alert('Sign in failed: ' + err.message);
+    }
+  });
+
+  // User menu (sign out)
+  document.getElementById('btnUserMenu').addEventListener('click', (e) => {
+    e.stopPropagation();
+    showContextMenu(e, [
+      { label: 'Sync now', action: () => SyncManager.syncNow() },
+      { type: 'separator' },
+      { label: 'Sign out', danger: true, action: async () => {
+        if (confirm('Sign out? Your data will remain on this device.')) {
+          await SyncManager.signOut();
+        }
+      }}
+    ]);
+  });
+
+  // Manual sync button
+  document.getElementById('btnSync').addEventListener('click', () => {
+    SyncManager.syncNow();
+  });
+
+  // Export/Import modal
+  document.getElementById('btnExportImport').addEventListener('click', () => {
+    document.getElementById('exportImportModal').classList.remove('hidden');
+  });
+
+  document.getElementById('btnCloseExportImport').addEventListener('click', () => {
+    document.getElementById('exportImportModal').classList.add('hidden');
+  });
+
+  // Export
+  document.getElementById('btnExportData').addEventListener('click', async () => {
+    const data = await SyncManager.exportData();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `tooby-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    document.getElementById('exportImportModal').classList.add('hidden');
+  });
+
+  // Import
+  document.getElementById('importFileInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if (confirm(`Import ${data.spaces?.length || 0} spaces and ${data.collections?.length || 0} collections? This will replace your current data.`)) {
+        await SyncManager.importData(data);
+        await loadApp();
+      }
+    } catch (err) {
+      alert('Import failed: ' + err.message);
+    }
+    e.target.value = '';
+    document.getElementById('exportImportModal').classList.add('hidden');
+  });
+
+  // Listen for sync triggers from background
+  try {
+    chrome.runtime.onMessage.addListener((msg) => {
+      if (msg.type === 'TOOBY_SYNC_TRIGGER') {
+        SyncManager.syncNow();
+      }
+    });
+  } catch (e) {
+    // Not in extension context
+  }
 }
