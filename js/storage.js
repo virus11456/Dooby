@@ -337,6 +337,22 @@ const Storage = {
     return importedCount;
   },
 
+  async togglePinTab(collectionId, tabId) {
+    const collections = await this.getCollections();
+    const col = collections.find(c => c.id === collectionId);
+    if (!col) return false;
+    const tab = col.tabs.find(t => t.id === tabId);
+    if (!tab) return false;
+    tab.pinned = !tab.pinned;
+    // Move pinned tabs to top, unpinned below
+    const pinned = col.tabs.filter(t => t.pinned);
+    const unpinned = col.tabs.filter(t => !t.pinned);
+    col.tabs = [...pinned, ...unpinned];
+    await chrome.storage.local.set({ collections });
+    this._onDataChanged();
+    return tab.pinned;
+  },
+
   // Notify sync manager when data changes
   _onDataChanged() {
     if (typeof SyncManager !== 'undefined') {

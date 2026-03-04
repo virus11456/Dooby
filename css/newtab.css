@@ -669,6 +669,24 @@ body::before {
   background: rgba(239, 68, 68, 0.1);
 }
 
+/* Pinned tabs */
+.tab-item.pinned {
+  background: var(--card-accent-bg, rgba(99, 102, 241, 0.06));
+  border-left: 2px solid var(--card-accent, var(--accent));
+  padding-left: 8px;
+}
+
+.tab-item.pinned .tab-title {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.tab-item .tab-pin-icon {
+  flex-shrink: 0;
+  color: var(--card-accent, var(--accent));
+  opacity: 0.7;
+}
+
 /* ============================================
    Open Tabs Sidebar (Right)
    ============================================ */

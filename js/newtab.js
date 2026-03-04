@@ -385,13 +385,16 @@ function createCollectionCard(collection, colorIndex = 0) {
 
 function createTabElement(tab, collectionId) {
   const el = document.createElement('div');
-  el.className = 'tab-item';
+  el.className = 'tab-item' + (tab.pinned ? ' pinned' : '');
   el.dataset.tabId = tab.id;
 
   const faviconSrc = tab.favicon || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(new URL(tab.url).hostname)}&sz=32`;
 
+  const pinIcon = `<svg class="tab-pin-icon" width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M9.828.722a.5.5 0 0 1 .354.146l4.95 4.95a.5.5 0 0 1-.707.708l-.159-.16-2.12 3.536a1.5 1.5 0 0 1-.451.462l-.057.035L9.5 12.5l-1.793 1.793a.5.5 0 0 1-.707 0L4.5 11.793l-3.146 3.147a.5.5 0 0 1-.708-.708L3.793 11.086.707 8a.5.5 0 0 1 0-.707L2.5 5.5l2.1-2.138a1.5 1.5 0 0 1 .462-.45l.035-.058L8.634 .734l-.16-.16a.5.5 0 0 1 .708-.706l.646.854z"/></svg>`;
+
   el.innerHTML = `
     <input type="checkbox" class="tab-checkbox">
+    ${tab.pinned ? pinIcon : ''}
     <img class="tab-favicon" src="${escapeHtml(faviconSrc)}" alt="">
     <span class="tab-title" title="${escapeHtml(tab.url)}">${escapeHtml(tab.title)}</span>
     <button class="tab-remove" title="Remove">&times;</button>
@@ -443,6 +446,11 @@ function createTabElement(tab, collectionId) {
   el.addEventListener('contextmenu', (e) => {
     e.preventDefault();
     showContextMenu(e, [
+      { label: tab.pinned ? 'Unpin' : 'Pin to top', action: async () => {
+        await Storage.togglePinTab(collectionId, tab.id);
+        await renderCollections();
+      }},
+      { type: 'separator' },
       { label: 'Open in new tab', action: () => chrome.tabs.create({ url: tab.url }) },
       { label: 'Open in new window', action: () => chrome.windows.create({ url: tab.url }) },
       { label: 'Copy URL', action: () => navigator.clipboard.writeText(tab.url) },
