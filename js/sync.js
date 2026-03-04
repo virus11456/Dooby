@@ -1,4 +1,4 @@
-// Tooby - Cloud Sync Manager
+// Dooby - Cloud Sync Manager
 // Uses chrome.storage.sync for automatic cross-device sync via Chrome account.
 // No Firebase or sign-in required — works if the user is signed into Chrome.
 //
@@ -47,8 +47,8 @@ const SyncManager = {
       const syncData = {};
 
       // Spaces are small, store directly
-      syncData['tooby_spaces'] = JSON.stringify(spaces);
-      syncData['tooby_meta'] = JSON.stringify({
+      syncData['dooby_spaces'] = JSON.stringify(spaces);
+      syncData['dooby_meta'] = JSON.stringify({
         updatedAt: Date.now(),
         version: 1,
         chunkCount: 0
@@ -60,7 +60,7 @@ const SyncManager = {
 
       // Clear old chunks first
       const existing = await chrome.storage.sync.get(null);
-      const oldChunkKeys = Object.keys(existing).filter(k => k.startsWith('tooby_col_'));
+      const oldChunkKeys = Object.keys(existing).filter(k => k.startsWith('dooby_col_'));
       if (oldChunkKeys.length > 0) {
         await chrome.storage.sync.remove(oldChunkKeys);
       }
@@ -72,11 +72,11 @@ const SyncManager = {
       }
 
       for (let i = 0; i < chunks.length; i++) {
-        syncData[`tooby_col_${i}`] = chunks[i];
+        syncData[`dooby_col_${i}`] = chunks[i];
       }
 
       // Update meta with chunk count
-      syncData['tooby_meta'] = JSON.stringify({
+      syncData['dooby_meta'] = JSON.stringify({
         updatedAt: Date.now(),
         version: 1,
         chunkCount: chunks.length
@@ -85,7 +85,7 @@ const SyncManager = {
       await chrome.storage.sync.set(syncData);
       this._notifyListeners('sync_complete', { time: Date.now() });
     } catch (err) {
-      console.error('Tooby: Sync push failed:', err);
+      console.error('Dooby: Sync push failed:', err);
       this._notifyListeners('sync_error', { error: err.message });
     } finally {
       this._pushing = false;
@@ -96,10 +96,10 @@ const SyncManager = {
     try {
       const syncData = await chrome.storage.sync.get(null);
 
-      // Check if there's any Tooby data in sync storage
-      if (!syncData['tooby_meta']) return false;
+      // Check if there's any Dooby data in sync storage
+      if (!syncData['dooby_meta']) return false;
 
-      const meta = JSON.parse(syncData['tooby_meta']);
+      const meta = JSON.parse(syncData['dooby_meta']);
 
       // Check if sync data is newer than local
       const { localUpdateTime } = await chrome.storage.local.get('localUpdateTime');
@@ -108,8 +108,8 @@ const SyncManager = {
       }
 
       // Restore spaces
-      if (syncData['tooby_spaces']) {
-        const spaces = JSON.parse(syncData['tooby_spaces']);
+      if (syncData['dooby_spaces']) {
+        const spaces = JSON.parse(syncData['dooby_spaces']);
         if (spaces && spaces.length > 0) {
           await chrome.storage.local.set({ spaces });
         }
@@ -119,7 +119,7 @@ const SyncManager = {
       if (meta.chunkCount > 0) {
         let collectionsStr = '';
         for (let i = 0; i < meta.chunkCount; i++) {
-          const chunk = syncData[`tooby_col_${i}`];
+          const chunk = syncData[`dooby_col_${i}`];
           if (chunk) collectionsStr += chunk;
         }
 
@@ -132,7 +132,7 @@ const SyncManager = {
       await chrome.storage.local.set({ localUpdateTime: meta.updatedAt });
       return true;
     } catch (err) {
-      console.error('Tooby: Sync pull failed:', err);
+      console.error('Dooby: Sync pull failed:', err);
       return false;
     }
   },
@@ -170,7 +170,7 @@ const SyncManager = {
         try {
           listener.callback(event, data);
         } catch (e) {
-          console.error('Tooby: Listener error:', e);
+          console.error('Dooby: Listener error:', e);
         }
       }
     }

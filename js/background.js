@@ -1,4 +1,4 @@
-// Background service worker for Tooby
+// Background service worker for Dooby
 
 // When the extension icon is clicked, save the current tab to the default collection
 chrome.action.onClicked.addListener(async (tab) => {
@@ -75,12 +75,12 @@ chrome.runtime.onInstalled.addListener(async () => {
   });
 
   // Set up periodic sync alarm (every 5 minutes)
-  chrome.alarms.create('tooby-sync', { periodInMinutes: 5 });
+  chrome.alarms.create('dooby-sync', { periodInMinutes: 5 });
 });
 
 // Periodic sync alarm handler
 chrome.alarms.onAlarm.addListener(async (alarm) => {
-  if (alarm.name === 'tooby-sync') {
+  if (alarm.name === 'dooby-sync') {
     const { syncUser } = await chrome.storage.local.get('syncUser');
     if (!syncUser) return;
 
@@ -89,7 +89,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     for (const tab of tabs) {
       if (tab.url && tab.url.includes('newtab.html')) {
         try {
-          chrome.tabs.sendMessage(tab.id, { type: 'TOOBY_SYNC_TRIGGER' });
+          chrome.tabs.sendMessage(tab.id, { type: 'DOOBY_SYNC_TRIGGER' });
         } catch (e) {
           // Tab might not have content script
         }
@@ -99,8 +99,8 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 });
 
 // Ensure sync alarm exists on startup
-chrome.alarms.get('tooby-sync', (alarm) => {
+chrome.alarms.get('dooby-sync', (alarm) => {
   if (!alarm) {
-    chrome.alarms.create('tooby-sync', { periodInMinutes: 5 });
+    chrome.alarms.create('dooby-sync', { periodInMinutes: 5 });
   }
 });

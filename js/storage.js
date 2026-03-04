@@ -1,4 +1,4 @@
-// Storage layer for Tooby
+// Storage layer for Dooby
 
 const Storage = {
   async getSpaces() {

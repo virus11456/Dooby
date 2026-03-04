@@ -1,4 +1,4 @@
-// Drag and Drop manager for Tooby
+// Drag and Drop manager for Dooby
 
 const DragDrop = {
   draggedElement: null,

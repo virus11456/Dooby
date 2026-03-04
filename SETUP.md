@@ -1,11 +1,11 @@
-# Tooby - Setup Guide
+# Dooby - Setup Guide
 
 ## Basic Installation (Local Only, No Sync)
 
 1. Open Chrome, go to `chrome://extensions/`
 2. Enable **Developer mode** (toggle in top-right)
-3. Click **Load unpacked** and select the `Tooby` folder
-4. Open a new tab - Tooby is ready!
+3. Click **Load unpacked** and select the `Dooby` folder
+4. Open a new tab - Dooby is ready!
 
 > Without cloud sync setup, you can still use Export/Import (JSON file) to manually transfer data between devices.
 
@@ -18,7 +18,7 @@ To enable cross-device cloud sync, you need to set up a Firebase project and con
 ### Step 1: Create a Firebase Project
 
 1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Click **Add project**, name it (e.g., "tooby-sync")
+2. Click **Add project**, name it (e.g., "dooby-sync")
 3. Disable Google Analytics (optional), then **Create project**
 
 ### Step 2: Enable Firestore Database
@@ -87,7 +87,7 @@ In Google Cloud Console, go to **APIs & Services > Library** and enable:
 ### Step 7: Reload Extension
 
 1. Go to `chrome://extensions/`
-2. Click the refresh icon on Tooby
+2. Click the refresh icon on Dooby
 3. Open a new tab
 4. Click **Sign In** to connect your Google account
 

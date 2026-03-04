@@ -1,4 +1,4 @@
-// Tooby - New Tab Main Application
+// Dooby - New Tab Main Application
 
 let activeSpaceId = null;
 let allCollections = [];
@@ -791,7 +791,7 @@ function setupImportBookmarksListeners() {
       const text = await file.text();
       const data = JSON.parse(text);
 
-      // Handle Tooby format
+      // Handle Dooby format
       if (data.spaces && data.collections) {
         if (confirm(`Import ${data.spaces.length} spaces and ${data.collections.length} collections? This will replace your current data.`)) {
           await SyncManager.importData(data);
@@ -932,7 +932,7 @@ function setupSyncEventListeners() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `tooby-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `dooby-backup-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
     document.getElementById('exportImportModal').classList.add('hidden');

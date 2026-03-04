@@ -1,4 +1,4 @@
-# Tooby - Tab & Bookmark Manager
+# Dooby - Tab & Bookmark Manager
 
 A Chrome extension for organizing your tabs and bookmarks into visual collections. Better than bookmarks.
 
@@ -9,7 +9,7 @@ A Chrome extension for organizing your tabs and bookmarks into visual collection
 - **Session Save** - Save all open tabs as a collection with one click
 - **Search** - Instantly search across all your saved tabs (Ctrl+K)
 - **Drag & Drop** - Drag open tabs from the sidebar into any collection
-- **New Tab Override** - Replaces your new tab page with the Tooby dashboard
+- **New Tab Override** - Replaces your new tab page with the Dooby dashboard
 - **Context Menus** - Right-click tabs for quick actions (open, copy URL, delete)
 - **Local Storage** - All data stored locally in your browser
 
@@ -18,8 +18,8 @@ A Chrome extension for organizing your tabs and bookmarks into visual collection
 1. Clone or download this repository
 2. Open Chrome and go to `chrome://extensions/`
 3. Enable **Developer mode** (toggle in top-right)
-4. Click **Load unpacked** and select the `Tooby` folder
-5. Open a new tab to see Tooby in action
+4. Click **Load unpacked** and select the `Dooby` folder
+5. Open a new tab to see Dooby in action
 
 ## Usage
 
@@ -34,7 +34,7 @@ A Chrome extension for organizing your tabs and bookmarks into visual collection
 ## Project Structure
 
 ```
-Tooby/
+Dooby/
 ├── manifest.json          # Chrome extension manifest (v3)
 ├── css/
 │   └── newtab.css         # Styles for the new tab page
