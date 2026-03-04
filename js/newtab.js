@@ -554,11 +554,11 @@ function escapeHtml(str) {
 }
 
 // ============================================
-// Cloud Sync
+// Cloud Sync (via chrome.storage.sync)
 // ============================================
 
 async function initSync() {
-  const user = await SyncManager.init();
+  await SyncManager.init();
 
   // Listen for sync events
   SyncManager.on('*', (event, data) => {
@@ -568,49 +568,20 @@ async function initSync() {
         break;
       case 'sync_complete':
         updateSyncUI('success', 'Synced');
-        setTimeout(() => updateSyncUI('idle', ''), 3000);
+        setTimeout(() => updateSyncUI('idle', 'Synced'), 3000);
         break;
       case 'sync_error':
         updateSyncUI('error', 'Sync failed');
-        setTimeout(() => updateSyncUI('idle', ''), 5000);
+        setTimeout(() => updateSyncUI('idle', 'Synced'), 5000);
         break;
       case 'data_updated':
-        // Remote data was pulled, refresh UI
+        // Remote data was pulled from another device, refresh UI
         loadApp();
-        break;
-      case 'signed_in':
-        renderUserUI(data);
-        break;
-      case 'signed_out':
-        renderUserUI(null);
         break;
     }
   });
 
-  renderUserUI(user);
   setupSyncEventListeners();
-}
-
-function renderUserUI(user) {
-  const btnSignIn = document.getElementById('btnSignIn');
-  const userProfile = document.getElementById('userProfile');
-  const syncStatusEl = document.getElementById('syncStatus');
-  const btnSync = document.getElementById('btnSync');
-
-  if (user) {
-    btnSignIn.style.display = 'none';
-    userProfile.classList.remove('hidden');
-    syncStatusEl.classList.remove('hidden');
-    btnSync.classList.remove('hidden');
-
-    document.getElementById('userAvatar').src = user.photoURL || '';
-    document.getElementById('userName').textContent = user.displayName || user.email || '';
-  } else {
-    btnSignIn.style.display = '';
-    userProfile.classList.add('hidden');
-    syncStatusEl.classList.add('hidden');
-    btnSync.classList.add('hidden');
-  }
 }
 
 function updateSyncUI(status, text) {
@@ -620,38 +591,14 @@ function updateSyncUI(status, text) {
   el.classList.remove('syncing', 'success', 'error');
   if (status !== 'idle') {
     el.classList.add(status);
-    el.classList.remove('hidden');
   }
   textEl.textContent = text;
 }
 
 function setupSyncEventListeners() {
-  // Sign In
-  document.getElementById('btnSignIn').addEventListener('click', async () => {
-    try {
-      await SyncManager.signIn();
-    } catch (err) {
-      alert('Sign in failed: ' + err.message);
-    }
-  });
-
-  // User menu (sign out)
-  document.getElementById('btnUserMenu').addEventListener('click', (e) => {
-    e.stopPropagation();
-    showContextMenu(e, [
-      { label: 'Sync now', action: () => SyncManager.syncNow() },
-      { type: 'separator' },
-      { label: 'Sign out', danger: true, action: async () => {
-        if (confirm('Sign out? Your data will remain on this device.')) {
-          await SyncManager.signOut();
-        }
-      }}
-    ]);
-  });
-
   // Manual sync button
   document.getElementById('btnSync').addEventListener('click', () => {
-    SyncManager.syncNow();
+    SyncManager.pushToSync();
   });
 
   // Export/Import modal
@@ -693,15 +640,4 @@ function setupSyncEventListeners() {
     e.target.value = '';
     document.getElementById('exportImportModal').classList.add('hidden');
   });
-
-  // Listen for sync triggers from background
-  try {
-    chrome.runtime.onMessage.addListener((msg) => {
-      if (msg.type === 'TOOBY_SYNC_TRIGGER') {
-        SyncManager.syncNow();
-      }
-    });
-  } catch (e) {
-    // Not in extension context
-  }
 }

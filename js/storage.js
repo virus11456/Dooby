@@ -151,7 +151,7 @@ const Storage = {
 
   // Notify sync manager when data changes
   _onDataChanged() {
-    if (typeof SyncManager !== 'undefined' && SyncManager.isSignedIn()) {
+    if (typeof SyncManager !== 'undefined') {
       SyncManager.scheduleSyncAfterChange();
     }
   }
