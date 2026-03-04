@@ -193,6 +193,22 @@ async function addSpace() {
 // Collections
 // ============================================
 
+// Color palette for collection cards
+const CARD_COLORS = [
+  { border: '#10b981', bg: 'rgba(16, 185, 129, 0.08)', badge: 'rgba(16, 185, 129, 0.15)', text: '#10b981' },
+  { border: '#6366f1', bg: 'rgba(99, 102, 241, 0.08)', badge: 'rgba(99, 102, 241, 0.15)', text: '#6366f1' },
+  { border: '#f59e0b', bg: 'rgba(245, 158, 11, 0.08)', badge: 'rgba(245, 158, 11, 0.15)', text: '#f59e0b' },
+  { border: '#ec4899', bg: 'rgba(236, 72, 153, 0.08)', badge: 'rgba(236, 72, 153, 0.15)', text: '#ec4899' },
+  { border: '#06b6d4', bg: 'rgba(6, 182, 212, 0.08)', badge: 'rgba(6, 182, 212, 0.15)', text: '#06b6d4' },
+  { border: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.08)', badge: 'rgba(139, 92, 246, 0.15)', text: '#8b5cf6' },
+  { border: '#ef4444', bg: 'rgba(239, 68, 68, 0.08)', badge: 'rgba(239, 68, 68, 0.15)', text: '#ef4444' },
+  { border: '#14b8a6', bg: 'rgba(20, 184, 166, 0.08)', badge: 'rgba(20, 184, 166, 0.15)', text: '#14b8a6' },
+];
+
+function getCardColor(index) {
+  return CARD_COLORS[index % CARD_COLORS.length];
+}
+
 async function renderCollections() {
   const grid = document.getElementById('collectionsGrid');
   grid.innerHTML = '';
@@ -204,21 +220,29 @@ async function renderCollections() {
   const space = spaces.find(s => s.id === activeSpaceId);
   document.getElementById('spaceTitle').textContent = space ? space.name : 'Untitled';
 
-  for (const collection of allCollections) {
-    const card = createCollectionCard(collection);
+  for (let i = 0; i < allCollections.length; i++) {
+    const card = createCollectionCard(allCollections[i], i);
     grid.appendChild(card);
   }
 }
 
-function createCollectionCard(collection) {
+function createCollectionCard(collection, colorIndex = 0) {
   const card = document.createElement('div');
   card.className = 'collection-card';
   card.dataset.collectionId = collection.id;
+
+  // Apply per-card color
+  const color = getCardColor(colorIndex);
+  card.style.setProperty('--card-accent', color.border);
+  card.style.setProperty('--card-accent-bg', color.bg);
+  card.style.setProperty('--card-badge-bg', color.badge);
+  card.style.setProperty('--card-accent-text', color.text);
 
   // Header
   const header = document.createElement('div');
   header.className = 'collection-header';
   header.innerHTML = `
+    <span class="collection-color-dot"></span>
     <span class="collection-title" contenteditable="false">${escapeHtml(collection.name)}</span>
     <span class="collection-count">${collection.tabs.length}</span>
     <div class="collection-actions">

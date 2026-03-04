@@ -470,6 +470,10 @@ body::before {
 }
 
 .collection-card {
+  --card-accent: var(--accent);
+  --card-accent-bg: var(--accent-light);
+  --card-badge-bg: var(--accent-light);
+  --card-accent-text: var(--accent);
   background: var(--bg-card);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
@@ -478,51 +482,65 @@ body::before {
   position: relative;
   break-inside: avoid;
   margin-bottom: 22px;
-  border-top: 3px solid var(--accent);
+  border-left: 4px solid var(--card-accent);
 }
 
 .collection-card:hover {
   border-color: rgba(255, 255, 255, 0.12);
-  border-top-color: var(--accent-hover);
-  box-shadow: var(--shadow), var(--shadow-glow);
+  border-left-color: var(--card-accent);
+  box-shadow: var(--shadow), 0 0 20px color-mix(in srgb, var(--card-accent) 15%, transparent);
   transform: translateY(-2px);
 }
 
 .collection-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 18px 18px 14px;
+  gap: 12px;
+  padding: 16px 18px 13px;
   border-bottom: 1px solid var(--border);
+  background: var(--card-accent-bg);
+}
+
+.collection-color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--card-accent);
+  flex-shrink: 0;
+  box-shadow: 0 0 6px color-mix(in srgb, var(--card-accent) 40%, transparent);
 }
 
 .collection-title {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 800;
   flex: 1;
   cursor: text;
   letter-spacing: -0.02em;
   color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .collection-title:focus {
   outline: none;
-  color: var(--accent);
+  color: var(--card-accent-text);
 }
 
 .collection-count {
   font-size: 11px;
-  color: var(--accent);
-  margin-right: 8px;
+  color: var(--card-accent-text);
   font-weight: 700;
-  background: var(--accent-light);
+  background: var(--card-badge-bg);
   padding: 3px 10px;
   border-radius: 10px;
+  flex-shrink: 0;
 }
 
 .collection-actions {
   display: flex;
   gap: 2px;
+  flex-shrink: 0;
   opacity: 0;
   transition: opacity var(--transition);
 }
