@@ -232,15 +232,20 @@ async function renderCollections() {
   const space = spaces.find(s => s.id === activeSpaceId);
   document.getElementById('spaceTitle').textContent = space ? space.name : 'Untitled';
 
-  for (let i = 0; i < allCollections.length; i++) {
-    const card = createCollectionCard(allCollections[i], i);
+  // Sort: pinned collections first, then original order
+  const pinned = allCollections.filter(c => c.pinned);
+  const unpinned = allCollections.filter(c => !c.pinned);
+  const sorted = [...pinned, ...unpinned];
+
+  for (let i = 0; i < sorted.length; i++) {
+    const card = createCollectionCard(sorted[i], i);
     grid.appendChild(card);
   }
 }
 
 function createCollectionCard(collection, colorIndex = 0) {
   const card = document.createElement('div');
-  card.className = 'collection-card';
+  card.className = 'collection-card' + (collection.pinned ? ' pinned-card' : '');
   card.dataset.collectionId = collection.id;
 
   // Apply per-card color
@@ -250,11 +255,14 @@ function createCollectionCard(collection, colorIndex = 0) {
   card.style.setProperty('--card-badge-bg', color.badge);
   card.style.setProperty('--card-accent-text', color.text);
 
+  const pinIndicator = collection.pinned ? '<svg class="collection-pin-icon" width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M4.146.146A.5.5 0 0 1 4.5 0h7a.5.5 0 0 1 .5.5c0 .68-.342 1.174-.646 1.479-.126.125-.25.224-.354.298v4.431l.078.048c.203.127.476.314.751.555C12.36 7.775 13 8.527 13 9.5a.5.5 0 0 1-.5.5h-4v4.5c0 .276-.224 1.5-.5 1.5s-.5-1.224-.5-1.5V10h-4a.5.5 0 0 1-.5-.5c0-.973.64-1.725 1.17-2.189a5.1 5.1 0 0 1 .752-.555l.078-.048V2.323a2 2 0 0 1-.354-.298C4.342 1.674 4 1.179 4 .5a.5.5 0 0 1 .146-.354z"/></svg>' : '';
+
   // Header
   const header = document.createElement('div');
   header.className = 'collection-header';
   header.innerHTML = `
     <span class="collection-color-dot"></span>
+    ${pinIndicator}
     <span class="collection-title" contenteditable="false">${escapeHtml(collection.name)}</span>
     <span class="collection-count">${collection.tabs.length}</span>
     <div class="collection-actions">
@@ -305,6 +313,11 @@ function createCollectionCard(collection, colorIndex = 0) {
   header.querySelector('.btn-more').addEventListener('click', (e) => {
     e.stopPropagation();
     showContextMenu(e, [
+      { label: collection.pinned ? 'Unpin card' : 'Pin card to top', action: async () => {
+        await Storage.togglePinCollection(collection.id);
+        await renderCollections();
+      }},
+      { type: 'separator' },
       { label: 'Rename', action: () => { titleEl.contentEditable = 'true'; titleEl.focus(); document.execCommand('selectAll'); } },
       { label: 'Open all in new window', action: () => {
         if (collection.tabs.length > 0) {

@@ -492,6 +492,18 @@ body::before {
   transform: translateY(-2px);
 }
 
+/* Pinned collection card */
+.collection-card.pinned-card {
+  border-top: 2px solid var(--card-accent);
+  box-shadow: var(--shadow), 0 0 12px color-mix(in srgb, var(--card-accent) 20%, transparent);
+}
+
+.collection-pin-icon {
+  flex-shrink: 0;
+  color: var(--card-accent);
+  opacity: 0.8;
+}
+
 .collection-header {
   display: flex;
   align-items: center;

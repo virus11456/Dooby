@@ -337,6 +337,16 @@ const Storage = {
     return importedCount;
   },
 
+  async togglePinCollection(collectionId) {
+    const collections = await this.getCollections();
+    const col = collections.find(c => c.id === collectionId);
+    if (!col) return false;
+    col.pinned = !col.pinned;
+    await chrome.storage.local.set({ collections });
+    this._onDataChanged();
+    return col.pinned;
+  },
+
   async togglePinTab(collectionId, tabId) {
     const collections = await this.getCollections();
     const col = collections.find(c => c.id === collectionId);
