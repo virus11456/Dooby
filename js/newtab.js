@@ -292,12 +292,32 @@ function createCollectionCard(collection) {
   const body = document.createElement('div');
   body.className = 'collection-body';
 
+  const MAX_VISIBLE = 5;
   if (collection.tabs.length === 0) {
     body.innerHTML = '<div class="collection-body-empty">Drag tabs here</div>';
   } else {
+    if (collection.tabs.length > MAX_VISIBLE) {
+      body.classList.add('collapsed');
+    }
     for (const tab of collection.tabs) {
       const tabEl = createTabElement(tab, collection.id);
       body.appendChild(tabEl);
+    }
+    if (collection.tabs.length > MAX_VISIBLE) {
+      const showMoreBtn = document.createElement('button');
+      showMoreBtn.className = 'btn-show-more';
+      const hiddenCount = collection.tabs.length - MAX_VISIBLE;
+      showMoreBtn.innerHTML = `<span>Show ${hiddenCount} more</span><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+      showMoreBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isCollapsed = body.classList.toggle('collapsed');
+        if (isCollapsed) {
+          showMoreBtn.innerHTML = `<span>Show ${hiddenCount} more</span><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+        } else {
+          showMoreBtn.innerHTML = `<span>Show less</span><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 10l4-4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+        }
+      });
+      body.appendChild(showMoreBtn);
     }
   }
 

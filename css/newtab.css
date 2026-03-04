@@ -453,10 +453,20 @@ body::before {
    ============================================ */
 
 .collections-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 22px;
-  align-items: start;
+  column-count: 3;
+  column-gap: 22px;
+}
+
+@media (max-width: 1400px) {
+  .collections-grid {
+    column-count: 2;
+  }
+}
+
+@media (max-width: 900px) {
+  .collections-grid {
+    column-count: 1;
+  }
 }
 
 .collection-card {
@@ -466,6 +476,8 @@ body::before {
   overflow: hidden;
   transition: all var(--transition-slow);
   position: relative;
+  break-inside: avoid;
+  margin-bottom: 22px;
 }
 
 .collection-card::before {
@@ -529,6 +541,30 @@ body::before {
   min-height: 60px;
   padding: 4px 10px 10px;
   transition: background var(--transition);
+}
+
+.collection-body.collapsed .tab-item:nth-child(n+6) {
+  display: none;
+}
+
+.btn-show-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 6px 0;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color var(--transition);
+  gap: 4px;
+}
+
+.btn-show-more:hover {
+  color: var(--accent);
 }
 
 .collection-body.drag-over {
