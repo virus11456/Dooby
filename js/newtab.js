@@ -13,8 +13,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   DragDrop.init();
   await loadApp();
   setupEventListeners();
+  setupTabListeners();
   await initSync();
 });
+
+function setupTabListeners() {
+  if (typeof chrome === 'undefined' || !chrome.tabs) return;
+  chrome.tabs.onCreated.addListener(() => renderOpenTabs());
+  chrome.tabs.onRemoved.addListener(() => renderOpenTabs());
+  chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+    if (changeInfo.title || changeInfo.url || changeInfo.status === 'complete') {
+      renderOpenTabs();
+    }
+  });
+}
 
 async function loadApp() {
   const spaces = await Storage.getSpaces();
