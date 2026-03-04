@@ -2,6 +2,8 @@
 
 let activeSpaceId = null;
 let allCollections = [];
+let bulkMode = false;
+let selectedTabs = new Map(); // tabId -> { collectionId, url, title }
 
 // ============================================
 // Initialization
@@ -74,12 +76,23 @@ function setupEventListeners() {
       e.preventDefault();
       searchInput.focus();
     }
-    // Escape to close search
+    // Escape to close search or exit bulk mode
     if (e.key === 'Escape') {
-      searchInput.blur();
-      document.getElementById('searchResults').classList.add('hidden');
+      if (bulkMode) {
+        toggleBulkMode();
+      } else {
+        searchInput.blur();
+        document.getElementById('searchResults').classList.add('hidden');
+        // Close modals
+        document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'));
+      }
     }
   });
+
+  // New feature listeners
+  setupBulkEventListeners();
+  setupDuplicatesListeners();
+  setupImportBookmarksListeners();
 }
 
 // ============================================
@@ -262,6 +275,7 @@ function createCollectionCard(collection) {
           chrome.windows.create({ url: collection.tabs.map(t => t.url) });
         }
       }},
+      { label: bulkMode ? 'Exit select mode' : 'Select tabs', action: () => toggleBulkMode() },
       { type: 'separator' },
       { label: 'Delete collection', danger: true, action: async () => {
         if (confirm(`Delete "${collection.name}" and all its tabs?`)) {
@@ -321,6 +335,7 @@ function createTabElement(tab, collectionId) {
   const faviconSrc = tab.favicon || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(new URL(tab.url).hostname)}&sz=32`;
 
   el.innerHTML = `
+    <input type="checkbox" class="tab-checkbox">
     <img class="tab-favicon" src="${escapeHtml(faviconSrc)}" alt="">
     <span class="tab-title" title="${escapeHtml(tab.url)}">${escapeHtml(tab.title)}</span>
     <button class="tab-remove" title="Remove">&times;</button>
@@ -329,6 +344,20 @@ function createTabElement(tab, collectionId) {
   // Handle favicon load error via JS (CSP does not allow inline handlers)
   el.querySelector('.tab-favicon').addEventListener('error', function() {
     this.style.display = 'none';
+  });
+
+  // Checkbox for bulk selection
+  const checkbox = el.querySelector('.tab-checkbox');
+  checkbox.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (checkbox.checked) {
+      selectedTabs.set(tab.id, { collectionId, url: tab.url, title: tab.title });
+      el.classList.add('selected');
+    } else {
+      selectedTabs.delete(tab.id);
+      el.classList.remove('selected');
+    }
+    updateBulkBar();
   });
 
   // Click to open tab
@@ -563,6 +592,280 @@ function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
+}
+
+// ============================================
+// Bulk Operations
+// ============================================
+
+function toggleBulkMode() {
+  bulkMode = !bulkMode;
+  selectedTabs.clear();
+  document.body.classList.toggle('bulk-mode', bulkMode);
+  document.getElementById('bulkActionBar').classList.toggle('hidden', !bulkMode);
+  // Uncheck all checkboxes
+  document.querySelectorAll('.tab-checkbox').forEach(cb => {
+    cb.checked = false;
+  });
+  document.querySelectorAll('.tab-item.selected').forEach(el => {
+    el.classList.remove('selected');
+  });
+  updateBulkBar();
+}
+
+function updateBulkBar() {
+  const count = selectedTabs.size;
+  document.getElementById('bulkSelectedCount').textContent = `${count} selected`;
+}
+
+function setupBulkEventListeners() {
+  document.getElementById('btnBulkCancel').addEventListener('click', () => {
+    toggleBulkMode();
+  });
+
+  document.getElementById('btnBulkOpen').addEventListener('click', () => {
+    for (const [, data] of selectedTabs) {
+      chrome.tabs.create({ url: data.url, active: false });
+    }
+    toggleBulkMode();
+  });
+
+  document.getElementById('btnBulkDelete').addEventListener('click', async () => {
+    if (selectedTabs.size === 0) return;
+    if (!confirm(`Delete ${selectedTabs.size} selected tabs?`)) return;
+
+    // Group by collection
+    const byCollection = {};
+    for (const [tabId, data] of selectedTabs) {
+      if (!byCollection[data.collectionId]) byCollection[data.collectionId] = [];
+      byCollection[data.collectionId].push(tabId);
+    }
+
+    for (const [colId, tabIds] of Object.entries(byCollection)) {
+      await Storage.removeTabsFromCollection(colId, tabIds);
+    }
+
+    toggleBulkMode();
+    await renderCollections();
+  });
+
+  document.getElementById('btnBulkMove').addEventListener('click', async (e) => {
+    if (selectedTabs.size === 0) return;
+
+    // Show collection picker as context menu
+    const collections = await Storage.getCollectionsBySpace(activeSpaceId);
+    const items = collections.map(col => ({
+      label: col.name,
+      action: async () => {
+        const byCollection = {};
+        for (const [tabId, data] of selectedTabs) {
+          if (data.collectionId === col.id) continue; // skip same collection
+          if (!byCollection[data.collectionId]) byCollection[data.collectionId] = [];
+          byCollection[data.collectionId].push(tabId);
+        }
+        for (const [fromColId, tabIds] of Object.entries(byCollection)) {
+          await Storage.moveTabsBulk(fromColId, col.id, tabIds);
+        }
+        toggleBulkMode();
+        await renderCollections();
+      }
+    }));
+    showContextMenu(e, items);
+  });
+}
+
+// ============================================
+// Duplicate Detection
+// ============================================
+
+async function showDuplicatesModal() {
+  const duplicates = await Storage.findDuplicates();
+  const modal = document.getElementById('duplicatesModal');
+  const list = document.getElementById('duplicatesList');
+  const desc = document.getElementById('duplicatesDesc');
+
+  list.innerHTML = '';
+
+  if (duplicates.length === 0) {
+    desc.textContent = 'No duplicate URLs found. Your collections are clean!';
+    document.getElementById('btnRemoveAllDuplicates').style.display = 'none';
+  } else {
+    const totalDups = duplicates.reduce((sum, d) => sum + d.entries.length - 1, 0);
+    desc.textContent = `Found ${duplicates.length} URLs with duplicates (${totalDups} extra copies).`;
+    document.getElementById('btnRemoveAllDuplicates').style.display = '';
+
+    for (const dup of duplicates) {
+      const group = document.createElement('div');
+      group.className = 'duplicate-group';
+
+      const urlEl = document.createElement('div');
+      urlEl.className = 'duplicate-url';
+      urlEl.textContent = dup.entries[0].tab.url;
+      group.appendChild(urlEl);
+
+      dup.entries.forEach((entry, i) => {
+        const entryEl = document.createElement('div');
+        entryEl.className = 'duplicate-entry';
+        entryEl.innerHTML = `
+          <span>${escapeHtml(entry.tab.title)}</span>
+          <span class="dup-collection">${escapeHtml(entry.collectionName)}</span>
+          <span class="${i === 0 ? 'dup-keep' : 'dup-remove'}">${i === 0 ? 'KEEP' : 'REMOVE'}</span>
+        `;
+        group.appendChild(entryEl);
+      });
+
+      list.appendChild(group);
+    }
+  }
+
+  modal.classList.remove('hidden');
+
+  // Store duplicates for removal
+  modal._duplicates = duplicates;
+}
+
+function setupDuplicatesListeners() {
+  document.getElementById('btnFindDuplicates').addEventListener('click', showDuplicatesModal);
+
+  document.getElementById('btnCloseDuplicates').addEventListener('click', () => {
+    document.getElementById('duplicatesModal').classList.add('hidden');
+  });
+
+  document.getElementById('btnRemoveAllDuplicates').addEventListener('click', async () => {
+    const modal = document.getElementById('duplicatesModal');
+    const duplicates = modal._duplicates;
+    if (!duplicates || duplicates.length === 0) return;
+
+    const totalDups = duplicates.reduce((sum, d) => sum + d.entries.length - 1, 0);
+    if (!confirm(`Remove ${totalDups} duplicate tabs? The first copy of each will be kept.`)) return;
+
+    const removed = await Storage.removeDuplicates(duplicates);
+    alert(`Removed ${removed} duplicate tabs.`);
+    modal.classList.add('hidden');
+    await renderCollections();
+  });
+}
+
+// ============================================
+// Import Bookmarks
+// ============================================
+
+function setupImportBookmarksListeners() {
+  document.getElementById('btnImportBookmarks').addEventListener('click', () => {
+    document.getElementById('importBookmarksModal').classList.remove('hidden');
+  });
+
+  document.getElementById('btnCloseImportBookmarks').addEventListener('click', () => {
+    document.getElementById('importBookmarksModal').classList.add('hidden');
+  });
+
+  // Import HTML bookmarks
+  document.getElementById('importBookmarkHtml').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const html = await file.text();
+      const folders = Storage.parseBookmarksHtml(html);
+      if (folders.length === 0) {
+        alert('No bookmarks found in the file.');
+        return;
+      }
+      const totalTabs = folders.reduce((sum, f) => sum + f.tabs.length, 0);
+      if (confirm(`Import ${folders.length} folders with ${totalTabs} bookmarks?`)) {
+        const count = await Storage.importBookmarkFolders(activeSpaceId, folders);
+        alert(`Imported ${count} bookmarks into ${folders.length} collections.`);
+        await renderCollections();
+      }
+    } catch (err) {
+      alert('Import failed: ' + err.message);
+    }
+    e.target.value = '';
+    document.getElementById('importBookmarksModal').classList.add('hidden');
+  });
+
+  // Import JSON bookmarks
+  document.getElementById('importBookmarkJson').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+
+      // Handle Tooby format
+      if (data.spaces && data.collections) {
+        if (confirm(`Import ${data.spaces.length} spaces and ${data.collections.length} collections? This will replace your current data.`)) {
+          await SyncManager.importData(data);
+          await loadApp();
+        }
+        e.target.value = '';
+        document.getElementById('importBookmarksModal').classList.add('hidden');
+        return;
+      }
+
+      // Handle Chrome JSON bookmark format (nested with children)
+      const folders = parseJsonBookmarks(data);
+      if (folders.length === 0) {
+        alert('No bookmarks found in the JSON file.');
+        return;
+      }
+      const totalTabs = folders.reduce((sum, f) => sum + f.tabs.length, 0);
+      if (confirm(`Import ${folders.length} folders with ${totalTabs} bookmarks?`)) {
+        const count = await Storage.importBookmarkFolders(activeSpaceId, folders);
+        alert(`Imported ${count} bookmarks into ${folders.length} collections.`);
+        await renderCollections();
+      }
+    } catch (err) {
+      alert('Import failed: ' + err.message);
+    }
+    e.target.value = '';
+    document.getElementById('importBookmarksModal').classList.add('hidden');
+  });
+}
+
+function parseJsonBookmarks(data) {
+  const folders = [];
+
+  function walk(node, parentName) {
+    if (!node) return;
+
+    // Chrome bookmark JSON format has "children" array
+    if (node.children) {
+      const name = node.name || parentName || 'Bookmarks';
+      const tabs = [];
+
+      for (const child of node.children) {
+        if (child.url) {
+          tabs.push({
+            title: child.name || 'Untitled',
+            url: child.url,
+            favicon: ''
+          });
+        } else if (child.children) {
+          walk(child, child.name);
+        }
+      }
+
+      if (tabs.length > 0) {
+        folders.push({ name, tabs });
+      }
+    }
+
+    // Handle "roots" object (Chrome bookmark tree root)
+    if (node.roots) {
+      for (const key of Object.keys(node.roots)) {
+        walk(node.roots[key], node.roots[key]?.name || key);
+      }
+    }
+  }
+
+  // Handle array of items or single object
+  if (Array.isArray(data)) {
+    for (const item of data) walk(item, 'Imported');
+  } else {
+    walk(data, 'Imported');
+  }
+
+  return folders;
 }
 
 // ============================================

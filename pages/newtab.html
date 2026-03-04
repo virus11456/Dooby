@@ -87,13 +87,30 @@
     <main class="content">
       <div class="content-header">
         <h2 id="spaceTitle">My Space</h2>
-        <button id="btnAddCollection" class="btn btn-secondary">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-            <line x1="8" y1="2" x2="8" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            <line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          Add Collection
-        </button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button id="btnAddCollection" class="btn btn-secondary">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <line x1="8" y1="2" x2="8" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Add Collection
+          </button>
+          <button id="btnImportBookmarks" class="btn btn-secondary" title="Import Chrome bookmarks">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <path d="M4 6l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="8" y1="2" x2="8" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M2 12v2h12v-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Import Bookmarks
+          </button>
+          <button id="btnFindDuplicates" class="btn btn-secondary" title="Find duplicate URLs">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <rect x="1" y="1" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+              <rect x="6" y="6" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+            Duplicates
+          </button>
+        </div>
       </div>
       <div id="collectionsGrid" class="collections-grid"></div>
     </main>
@@ -108,9 +125,58 @@
     </aside>
   </div>
 
+  <!-- Bulk Action Bar -->
+  <div id="bulkActionBar" class="bulk-action-bar hidden">
+    <span id="bulkSelectedCount">0 selected</span>
+    <button id="btnBulkOpen" class="btn btn-secondary btn-sm">Open All</button>
+    <button id="btnBulkMove" class="btn btn-secondary btn-sm">Move to...</button>
+    <button id="btnBulkDelete" class="btn btn-secondary btn-sm danger-text">Delete</button>
+    <button id="btnBulkCancel" class="btn btn-secondary btn-sm">Cancel</button>
+  </div>
+
   <!-- Context Menu -->
   <div id="contextMenu" class="context-menu hidden">
     <ul></ul>
+  </div>
+
+  <!-- Duplicates Modal -->
+  <div id="duplicatesModal" class="modal-overlay hidden">
+    <div class="modal" style="width:550px;">
+      <h3>Duplicate URLs</h3>
+      <p class="modal-desc" id="duplicatesDesc"></p>
+      <div id="duplicatesList" class="duplicates-list"></div>
+      <div class="modal-actions" style="margin-top:16px;">
+        <button id="btnRemoveAllDuplicates" class="btn btn-primary">Remove All Duplicates</button>
+        <button id="btnCloseDuplicates" class="btn btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import Bookmarks Modal -->
+  <div id="importBookmarksModal" class="modal-overlay hidden">
+    <div class="modal" style="width:450px;">
+      <h3>Import Bookmarks</h3>
+      <p class="modal-desc">Import bookmarks from Chrome exported HTML or JSON file. Each bookmark folder becomes a collection.</p>
+      <div class="modal-actions" style="flex-direction:column;gap:12px;align-items:stretch;">
+        <label class="btn btn-primary" style="justify-content:center;cursor:pointer;">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <path d="M4 6l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="8" y1="2" x2="8" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Import HTML (Chrome Bookmarks)
+          <input type="file" id="importBookmarkHtml" accept=".html,.htm" style="display:none;">
+        </label>
+        <label class="btn btn-secondary" style="justify-content:center;cursor:pointer;">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <path d="M4 6l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="8" y1="2" x2="8" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Import JSON
+          <input type="file" id="importBookmarkJson" accept=".json" style="display:none;">
+        </label>
+        <button id="btnCloseImportBookmarks" class="btn btn-secondary" style="justify-content:center;">Cancel</button>
+      </div>
+    </div>
   </div>
 
   <!-- Export/Import Modal -->

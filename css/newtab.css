@@ -828,3 +828,137 @@ body {
 .btn-icon.hidden {
   display: none;
 }
+
+/* ============================================
+   Bulk Action Bar
+   ============================================ */
+
+.bulk-action-bar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 500;
+  animation: slideUp 0.2s ease;
+}
+
+.bulk-action-bar.hidden {
+  display: none;
+}
+
+.bulk-action-bar span {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-right: 8px;
+}
+
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.danger-text {
+  color: var(--danger) !important;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ============================================
+   Tab Selection (Bulk Mode)
+   ============================================ */
+
+.tab-item .tab-checkbox {
+  display: none;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.bulk-mode .tab-item .tab-checkbox {
+  display: block;
+}
+
+.tab-item.selected {
+  background: var(--accent-light);
+}
+
+/* ============================================
+   Duplicates
+   ============================================ */
+
+.duplicates-list {
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+.duplicate-group {
+  margin-bottom: 12px;
+  padding: 10px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius);
+}
+
+.duplicate-url {
+  font-size: 12px;
+  color: var(--accent);
+  word-break: break-all;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.duplicate-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.duplicate-entry:first-of-type {
+  color: var(--text-primary);
+}
+
+.duplicate-entry .dup-collection {
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--bg-hover);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.duplicate-entry .dup-keep {
+  font-size: 10px;
+  color: var(--success);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.duplicate-entry .dup-remove {
+  font-size: 10px;
+  color: var(--danger);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.collection-header .btn-select-all {
+  display: none;
+}
+
+.bulk-mode .collection-header .btn-select-all {
+  display: inline-flex;
+}
