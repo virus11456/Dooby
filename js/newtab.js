@@ -1054,6 +1054,7 @@ async function initSync() {
         break;
       case 'sync_complete':
         updateSyncUI('success', 'Synced');
+        updateStorageUsage();
         setTimeout(() => updateSyncUI('idle', 'Synced'), 3000);
         break;
       case 'sync_error':
@@ -1063,11 +1064,13 @@ async function initSync() {
       case 'data_updated':
         // Remote data was pulled from another device, refresh UI
         loadApp();
+        updateStorageUsage();
         break;
     }
   });
 
   setupSyncEventListeners();
+  updateStorageUsage();
 }
 
 function updateSyncUI(status, text) {
@@ -1079,6 +1082,34 @@ function updateSyncUI(status, text) {
     el.classList.add(status);
   }
   textEl.textContent = text;
+}
+
+async function updateStorageUsage() {
+  try {
+    const { bytesInUse, quota, percent } = await SyncManager.getUsage();
+    const fill = document.getElementById('storageUsageFill');
+    const text = document.getElementById('storageUsageText');
+    const container = document.getElementById('storageUsage');
+
+    fill.style.width = percent + '%';
+
+    const kb = (bytesInUse / 1024).toFixed(1);
+    const totalKb = (quota / 1024).toFixed(0);
+    text.textContent = `${kb} / ${totalKb} KB`;
+
+    container.classList.remove('usage-warning', 'usage-critical');
+    if (percent >= 90) {
+      container.classList.add('usage-critical');
+      container.title = `Storage almost full! ${percent}% used`;
+    } else if (percent >= 70) {
+      container.classList.add('usage-warning');
+      container.title = `Storage ${percent}% used`;
+    } else {
+      container.title = `Chrome Sync storage: ${percent}% used`;
+    }
+  } catch (e) {
+    console.error('Dooby: Failed to get storage usage:', e);
+  }
 }
 
 function setupSyncEventListeners() {

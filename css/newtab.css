@@ -1035,6 +1035,55 @@ body::before {
   to { transform: rotate(360deg); }
 }
 
+/* Storage Usage Indicator */
+.storage-usage {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: var(--bg-tertiary);
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+  cursor: default;
+}
+
+.storage-usage-bar {
+  width: 48px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.storage-usage-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--accent);
+  transition: width 0.4s ease, background 0.3s ease;
+  min-width: 2px;
+}
+
+.storage-usage-text {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.storage-usage.usage-warning .storage-usage-fill {
+  background: var(--warning, #f59e0b);
+}
+
+.storage-usage.usage-critical .storage-usage-fill {
+  background: var(--danger);
+  animation: pulse-bar 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-bar {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
 .btn-icon.hidden {
   display: none;
 }

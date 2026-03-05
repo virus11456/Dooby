@@ -177,6 +177,16 @@ const SyncManager = {
   },
 
   // ============================================
+  // Storage Usage
+  // ============================================
+
+  async getUsage() {
+    const bytesInUse = await chrome.storage.sync.getBytesInUse(null);
+    const quota = 102400; // chrome.storage.sync QUOTA_BYTES
+    return { bytesInUse, quota, percent: Math.round((bytesInUse / quota) * 100) };
+  },
+
+  // ============================================
   // Export / Import (Offline backup)
   // ============================================
 
