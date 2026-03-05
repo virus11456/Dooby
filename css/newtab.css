@@ -1100,6 +1100,31 @@ body::before {
   stroke: var(--accent);
 }
 
+/* VIP Badge */
+.vip-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #f59e0b, #f97316);
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.4), 0 2px 6px rgba(0, 0, 0, 0.2);
+  animation: vip-glow 2s ease-in-out infinite alternate;
+  cursor: default;
+  user-select: none;
+}
+.vip-badge.hidden {
+  display: none;
+}
+@keyframes vip-glow {
+  from { box-shadow: 0 0 8px rgba(245, 158, 11, 0.3), 0 2px 6px rgba(0, 0, 0, 0.2); }
+  to { box-shadow: 0 0 18px rgba(245, 158, 11, 0.6), 0 2px 8px rgba(0, 0, 0, 0.3); }
+}
+
 .donate-modal {
   text-align: center;
 }

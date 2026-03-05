@@ -1148,12 +1148,15 @@ function refreshDonateUI() {
 
   // Update heart button style for donors
   const heartBtn = document.getElementById('btnDonate');
+  const vipBadge = document.getElementById('vipBadge');
   if (isActivated) {
     heartBtn.classList.add('donor-active');
     heartBtn.title = 'Dooby Supporter ✨';
+    vipBadge.classList.remove('hidden');
   } else {
     heartBtn.classList.remove('donor-active');
     heartBtn.title = 'Support the developer ❤';
+    vipBadge.classList.add('hidden');
   }
 }
 
