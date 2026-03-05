@@ -10,11 +10,13 @@ let selectedTabs = new Map(); // tabId -> { collectionId, url, title }
 // ============================================
 
 document.addEventListener('DOMContentLoaded', async () => {
+  await DonorManager.init();
   DragDrop.init();
   await loadApp();
   setupEventListeners();
   setupTabListeners();
   await initSync();
+  refreshDonateUI();
 });
 
 function setupTabListeners() {
@@ -1112,21 +1114,185 @@ async function updateStorageUsage() {
   }
 }
 
+// ============================================
+// Donate / Donor / Theme System
+// ============================================
+
+function openDonateModal(tab) {
+  document.getElementById('donateModal').classList.remove('hidden');
+  switchDonateTab(tab || 'support');
+  refreshDonateUI();
+  renderThemeGrid();
+  renderWallOfFame();
+}
+
+function switchDonateTab(tabId) {
+  document.querySelectorAll('.donate-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === tabId);
+  });
+  document.querySelectorAll('.donate-tab-content').forEach(c => {
+    c.classList.toggle('active', c.dataset.tab === tabId);
+  });
+}
+
+function refreshDonateUI() {
+  const isActivated = DonorManager.isActivated();
+
+  // Activate tab: show/hide forms
+  document.getElementById('activateNotDonor').classList.toggle('hidden', isActivated);
+  document.getElementById('activateIsDonor').classList.toggle('hidden', !isActivated);
+
+  if (isActivated) {
+    document.getElementById('donorDisplayName').textContent = DonorManager.getDonorName();
+  }
+
+  // Update heart button style for donors
+  const heartBtn = document.getElementById('btnDonate');
+  if (isActivated) {
+    heartBtn.classList.add('donor-active');
+    heartBtn.title = 'Dooby Supporter ✨';
+  } else {
+    heartBtn.classList.remove('donor-active');
+    heartBtn.title = 'Support the developer ❤';
+  }
+}
+
+function renderThemeGrid() {
+  const grid = document.getElementById('themeGrid');
+  const themes = DonorManager.getThemeList();
+  const avatarColors = ['#10b981', '#7c3aed', '#f97316', '#0ea5e9', '#ec4899'];
+
+  grid.innerHTML = themes.map(t => {
+    const colors = DonorManager.THEMES[t.id].colors;
+    const swatches = [
+      colors['--bg-primary'],
+      colors['--bg-secondary'],
+      colors['--accent'],
+      colors['--accent-2']
+    ];
+
+    let badgeHtml = '';
+    if (t.free) {
+      badgeHtml = '<span class="theme-card-badge free">Free</span>';
+    } else if (t.locked) {
+      badgeHtml = '<span class="theme-card-badge premium">Premium</span>';
+    } else {
+      badgeHtml = '<span class="theme-card-badge unlocked">Unlocked</span>';
+    }
+
+    let statusIcon = '';
+    if (t.active) {
+      statusIcon = '<div class="theme-card-active-dot"></div>';
+    } else if (t.locked) {
+      statusIcon = '<span class="theme-lock-icon">🔒</span>';
+    }
+
+    return `
+      <div class="theme-card ${t.active ? 'active' : ''} ${t.locked ? 'locked' : ''}"
+           data-theme-id="${t.id}">
+        ${statusIcon}
+        <div class="theme-card-preview">
+          ${swatches.map(c => `<div class="theme-color-swatch" style="background:${c}"></div>`).join('')}
+        </div>
+        <span class="theme-card-name">${t.name}</span>
+        ${badgeHtml}
+      </div>
+    `;
+  }).join('');
+
+  // Click handlers
+  grid.querySelectorAll('.theme-card').forEach(card => {
+    card.addEventListener('click', async () => {
+      const themeId = card.dataset.themeId;
+      const theme = DonorManager.THEMES[themeId];
+
+      if (!theme.free && !DonorManager.isActivated()) {
+        // Locked - switch to support tab
+        switchDonateTab('support');
+        return;
+      }
+
+      const success = await DonorManager.setTheme(themeId);
+      if (success) {
+        renderThemeGrid();
+      }
+    });
+  });
+}
+
+function renderWallOfFame() {
+  const container = document.getElementById('wallOfFame');
+  const donors = DonorManager.WALL_OF_FAME;
+  const avatarColors = ['#10b981', '#7c3aed', '#f97316', '#0ea5e9', '#ec4899', '#6366f1', '#14b8a6', '#f59e0b'];
+
+  // Add current donor if activated and not already in list
+  const allDonors = [...donors];
+  if (DonorManager.isActivated()) {
+    const donorName = DonorManager.getDonorName();
+    if (!allDonors.find(d => d.name === donorName)) {
+      allDonors.push({ name: donorName, date: 'You!', message: '' });
+    }
+  }
+
+  if (allDonors.length === 0) {
+    container.innerHTML = `
+      <div class="wof-empty">
+        <div class="wof-empty-icon">🏆</div>
+        <p>Be the first supporter!<br>Your name will appear here.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = allDonors.map((d, i) => {
+    const color = avatarColors[i % avatarColors.length];
+    const initial = d.name.charAt(0).toUpperCase();
+    return `
+      <div class="wof-entry">
+        <div class="wof-avatar" style="background:${color}">${initial}</div>
+        <span class="wof-name">${d.name}</span>
+        <span class="wof-date">${d.date}</span>
+        ${d.message ? `<span class="wof-message">"${d.message}"</span>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
 function setupSyncEventListeners() {
   // Manual sync button
   document.getElementById('btnSync').addEventListener('click', () => {
     SyncManager.pushToSync();
   });
 
-  // Donate modal
+  // Donate modal open/close
   document.getElementById('btnDonate').addEventListener('click', () => {
-    document.getElementById('donateModal').classList.remove('hidden');
+    openDonateModal('support');
   });
 
   document.getElementById('btnCloseDonate').addEventListener('click', () => {
     document.getElementById('donateModal').classList.add('hidden');
   });
 
+  // Theme button opens donate modal on Themes tab
+  document.getElementById('btnTheme').addEventListener('click', () => {
+    openDonateModal('themes');
+  });
+
+  // Donate tab switching
+  document.querySelectorAll('.donate-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      switchDonateTab(tab.dataset.tab);
+    });
+  });
+
+  // "Switch to tab" buttons inside content
+  document.querySelectorAll('[data-switch-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      switchDonateTab(btn.dataset.switchTab);
+    });
+  });
+
+  // Copy address
   document.getElementById('btnCopyAddress').addEventListener('click', () => {
     const address = document.getElementById('donateAddress').textContent;
     navigator.clipboard.writeText(address).then(() => {
@@ -1139,6 +1305,44 @@ function setupSyncEventListeners() {
         btn.style.color = '';
       }, 2000);
     });
+  });
+
+  // Activate donor code
+  document.getElementById('btnActivate').addEventListener('click', async () => {
+    const name = document.getElementById('activateName').value.trim();
+    const code = document.getElementById('activateCode').value.trim();
+    const errorEl = document.getElementById('activateError');
+
+    if (!name) {
+      errorEl.textContent = 'Please enter your display name';
+      errorEl.classList.remove('hidden');
+      return;
+    }
+    if (!code) {
+      errorEl.textContent = 'Please enter your activation code';
+      errorEl.classList.remove('hidden');
+      return;
+    }
+
+    const result = await DonorManager.activate(code, name);
+    if (result.success) {
+      errorEl.classList.add('hidden');
+      refreshDonateUI();
+      renderThemeGrid();
+    } else {
+      errorEl.textContent = result.error;
+      errorEl.classList.remove('hidden');
+    }
+  });
+
+  // Deactivate
+  document.getElementById('btnDeactivate').addEventListener('click', async () => {
+    if (confirm('This will deactivate your donor perks. You can re-activate anytime with your code.')) {
+      await DonorManager.deactivate();
+      await DonorManager.setTheme('midnight');
+      refreshDonateUI();
+      renderThemeGrid();
+    }
   });
 
   // Export/Import modal

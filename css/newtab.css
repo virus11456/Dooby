@@ -1092,6 +1092,13 @@ body::before {
   fill: #ef4444;
   transition: fill 0.2s ease;
 }
+.btn-donate.donor-active {
+  color: var(--accent) !important;
+}
+.btn-donate.donor-active svg path {
+  fill: var(--accent);
+  stroke: var(--accent);
+}
 
 .donate-modal {
   text-align: center;
@@ -1212,6 +1219,348 @@ body::before {
   line-height: 1.5;
 }
 
+/* Donate Tab Navigation */
+.donate-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-tertiary);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 24px;
+}
+
+.donate-tab {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.donate-tab:hover {
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.donate-tab.active {
+  background: var(--bg-card);
+  color: var(--accent);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.donate-tab-content {
+  display: none;
+}
+
+.donate-tab-content.active {
+  display: block;
+}
+
+/* Donate Steps */
+.donate-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.donate-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent-light);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Theme Grid */
+.theme-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.theme-card {
+  position: relative;
+  padding: 16px;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  background: var(--bg-tertiary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.theme-card:hover {
+  border-color: var(--border-light);
+  transform: translateY(-1px);
+}
+
+.theme-card.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+
+.theme-card.locked {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.theme-card.locked:hover {
+  transform: none;
+}
+
+.theme-card-preview {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 10px;
+  height: 24px;
+}
+
+.theme-color-swatch {
+  flex: 1;
+  border-radius: 4px;
+}
+
+.theme-card-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.theme-card-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.theme-card-badge.free {
+  background: var(--accent-light);
+  color: var(--accent);
+}
+
+.theme-card-badge.premium {
+  background: rgba(249, 115, 22, 0.12);
+  color: #f97316;
+}
+
+.theme-card-badge.unlocked {
+  background: var(--accent-light);
+  color: var(--accent);
+}
+
+.theme-lock-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 14px;
+  opacity: 0.5;
+}
+
+.theme-card-active-dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent-glow);
+}
+
+/* Wall of Fame */
+.wall-of-fame {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+  min-height: 80px;
+}
+
+.wof-entry {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 10px;
+  background: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  text-align: center;
+  transition: border-color 0.2s ease;
+}
+
+.wof-entry:hover {
+  border-color: var(--accent);
+}
+
+.wof-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+}
+
+.wof-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.wof-date {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.wof-message {
+  font-size: 10px;
+  color: var(--text-secondary);
+  font-style: italic;
+  line-height: 1.3;
+}
+
+.wof-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 30px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.wof-empty-icon {
+  font-size: 40px;
+  margin-bottom: 10px;
+  opacity: 0.4;
+}
+
+.wof-cta {
+  text-align: center;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--accent-light), rgba(6, 182, 212, 0.08));
+  border-radius: 12px;
+  border: 1px dashed var(--accent);
+}
+
+.wof-cta p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+/* Activate Form */
+.activate-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.activate-input {
+  padding: 12px 14px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.activate-input:focus {
+  border-color: var(--accent);
+}
+
+.activate-input::placeholder {
+  color: var(--text-muted);
+}
+
+.activate-error {
+  font-size: 12px;
+  color: var(--danger);
+  text-align: center;
+  margin: 0;
+}
+
+/* Donor Status Card */
+.donor-status-card {
+  text-align: center;
+  padding: 24px;
+}
+
+.donor-badge-large {
+  font-size: 48px;
+  margin-bottom: 12px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.donor-perks-unlocked {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.perk-badge {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.perk-badge.unlocked {
+  background: var(--accent-light);
+  color: var(--accent);
+  border-color: transparent;
+}
+
+/* Link Button (text-style) */
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.link-btn:hover {
+  color: var(--accent-hover);
+}
 
 .btn-icon.hidden {
   display: none;

@@ -69,6 +69,14 @@
         Save Session
       </button>
 
+      <!-- Theme Switcher -->
+      <button id="btnTheme" class="btn-icon" title="Change theme">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M8 2.5a5.5 5.5 0 0 0 0 11V2.5z" fill="currentColor"/>
+        </svg>
+      </button>
+
       <!-- Donate -->
       <button id="btnDonate" class="btn-icon btn-donate" title="Support the developer ❤">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -223,62 +231,130 @@
     </div>
   </div>
 
-  <!-- Donate Modal -->
+  <!-- Donate & Support Modal -->
   <div id="donateModal" class="modal-overlay hidden">
-    <div class="modal donate-modal" style="width:480px;">
-      <div class="donate-header">
-        <div class="donate-coffee-icon">☕</div>
-        <h3>Buy the Developer a Coffee</h3>
-        <p class="modal-desc">If you enjoy using Dooby, consider buying the developer a coffee for just <strong>$1 USDT</strong>! Your name will be featured in the <span class="accent-text">Contributors Wall of Fame</span>.</p>
+    <div class="modal donate-modal" style="width:560px; max-height:90vh; overflow-y:auto;">
+
+      <!-- Tab Navigation -->
+      <div class="donate-tabs">
+        <button class="donate-tab active" data-tab="support">Support</button>
+        <button class="donate-tab" data-tab="themes">Themes</button>
+        <button class="donate-tab" data-tab="wall-of-fame">Wall of Fame</button>
+        <button class="donate-tab" data-tab="activate">Activate</button>
       </div>
 
-      <div class="donate-perks">
-        <div class="donate-perk">
-          <span class="perk-icon">⭐</span>
-          <div>
-            <strong>Wall of Fame</strong>
-            <p>Your name permanently listed in the contributor credits</p>
+      <!-- ===== Tab: Support ===== -->
+      <div class="donate-tab-content active" data-tab="support">
+        <div class="donate-header">
+          <div class="donate-coffee-icon">☕</div>
+          <h3>Buy the Developer a Coffee</h3>
+          <p class="modal-desc">Enjoy using Dooby? For just <strong>$1 USDT</strong>, you can support development and unlock <span class="accent-text">exclusive perks</span>!</p>
+        </div>
+
+        <div class="donate-perks">
+          <div class="donate-perk">
+            <span class="perk-icon">⭐</span>
+            <div>
+              <strong>Wall of Fame</strong>
+              <p>Your name permanently in the contributor credits</p>
+            </div>
+          </div>
+          <div class="donate-perk">
+            <span class="perk-icon">🎨</span>
+            <div>
+              <strong>4 Premium Themes</strong>
+              <p>Aurora, Sunset, Ocean, Sakura</p>
+            </div>
+          </div>
+          <div class="donate-perk">
+            <span class="perk-icon">🚀</span>
+            <div>
+              <strong>Early Access</strong>
+              <p>New features before everyone else</p>
+            </div>
+          </div>
+          <div class="donate-perk">
+            <span class="perk-icon">💬</span>
+            <div>
+              <strong>Priority Features</strong>
+              <p>Vote on what gets built next</p>
+            </div>
           </div>
         </div>
-        <div class="donate-perk">
-          <span class="perk-icon">🎨</span>
-          <div>
-            <strong>Exclusive Themes</strong>
-            <p>Unlock premium color themes (coming soon)</p>
+
+        <div class="donate-address-section">
+          <label class="donate-label">USDT (TRC-20) — Just $1</label>
+          <div class="donate-address-row">
+            <code id="donateAddress" class="donate-address">TATQGiRcFx14XGv2kBVmxQWwDENZwFSnap</code>
+            <button id="btnCopyAddress" class="btn btn-secondary btn-sm" title="Copy address">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M3 11V3a1 1 0 0 1 1-1h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              Copy
+            </button>
           </div>
-        </div>
-        <div class="donate-perk">
-          <span class="perk-icon">🚀</span>
-          <div>
-            <strong>Early Access</strong>
-            <p>Get new features before everyone else</p>
-          </div>
-        </div>
-        <div class="donate-perk">
-          <span class="perk-icon">💬</span>
-          <div>
-            <strong>Feature Requests</strong>
-            <p>Priority voting on upcoming features</p>
+          <div class="donate-steps">
+            <div class="donate-step"><span class="step-num">1</span> Send $1+ USDT to the address above</div>
+            <div class="donate-step"><span class="step-num">2</span> DM the developer with your <strong>name + TX hash</strong></div>
+            <div class="donate-step"><span class="step-num">3</span> Receive your activation code & get listed!</div>
           </div>
         </div>
       </div>
 
-      <div class="donate-address-section">
-        <label class="donate-label">USDT (TRC-20)</label>
-        <div class="donate-address-row">
-          <code id="donateAddress" class="donate-address">TATQGiRcFx14XGv2kBVmxQWwDENZwFSnap</code>
-          <button id="btnCopyAddress" class="btn btn-secondary btn-sm" title="Copy address">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-              <rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
-              <path d="M3 11V3a1 1 0 0 1 1-1h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-            Copy
-          </button>
+      <!-- ===== Tab: Themes ===== -->
+      <div class="donate-tab-content" data-tab="themes">
+        <h3 style="margin-bottom: 6px;">Color Themes</h3>
+        <p class="modal-desc" style="margin-bottom: 20px;">Personalize your Dooby workspace. Premium themes unlock with a donation.</p>
+        <div id="themeGrid" class="theme-grid">
+          <!-- Populated by JS -->
         </div>
-        <p class="donate-note">After donating, email <strong>your name + TX hash</strong> to get listed in the Wall of Fame!</p>
       </div>
 
-      <div class="modal-actions" style="justify-content:center;">
+      <!-- ===== Tab: Wall of Fame ===== -->
+      <div class="donate-tab-content" data-tab="wall-of-fame">
+        <h3 style="margin-bottom: 6px;">Wall of Fame</h3>
+        <p class="modal-desc" style="margin-bottom: 20px;">Thank you to everyone who supports Dooby's development!</p>
+        <div id="wallOfFame" class="wall-of-fame">
+          <!-- Populated by JS -->
+        </div>
+        <div class="wof-cta">
+          <p>Want your name here?</p>
+          <button class="btn btn-primary btn-sm" data-switch-tab="support">Donate $1 & Join</button>
+        </div>
+      </div>
+
+      <!-- ===== Tab: Activate ===== -->
+      <div class="donate-tab-content" data-tab="activate">
+        <div id="activateNotDonor">
+          <h3 style="margin-bottom: 6px;">Activate Donor Perks</h3>
+          <p class="modal-desc" style="margin-bottom: 20px;">Enter the activation code you received after donating.</p>
+          <div class="activate-form">
+            <input type="text" id="activateName" class="activate-input" placeholder="Your display name">
+            <input type="text" id="activateCode" class="activate-input" placeholder="DOOBY-XXXX-XXXX">
+            <button id="btnActivate" class="btn btn-primary" style="width:100%;">Activate</button>
+            <p id="activateError" class="activate-error hidden"></p>
+          </div>
+          <p class="donate-note" style="margin-top: 16px; text-align:center;">Don't have a code yet? <button class="link-btn" data-switch-tab="support">Donate to get one</button></p>
+        </div>
+
+        <div id="activateIsDonor" class="hidden">
+          <div class="donor-status-card">
+            <div class="donor-badge-large">✨</div>
+            <h3>Welcome back, <span id="donorDisplayName"></span>!</h3>
+            <p class="modal-desc">You're a verified Dooby supporter. All premium features are unlocked!</p>
+            <div class="donor-perks-unlocked">
+              <span class="perk-badge unlocked">🎨 Themes</span>
+              <span class="perk-badge unlocked">⭐ Wall of Fame</span>
+              <span class="perk-badge unlocked">🚀 Early Access</span>
+              <span class="perk-badge unlocked">💬 Priority</span>
+            </div>
+            <button id="btnDeactivate" class="btn btn-secondary btn-sm" style="margin-top:16px; opacity: 0.6;">Deactivate</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="justify-content:center; margin-top: 20px;">
         <button id="btnCloseDonate" class="btn btn-secondary">Close</button>
       </div>
     </div>
@@ -286,6 +362,7 @@
 
   <script src="../js/storage.js"></script>
   <script src="../js/sync.js"></script>
+  <script src="../js/donor.js"></script>
   <script src="../js/dragdrop.js"></script>
   <script src="../js/newtab.js"></script>
 </body>
