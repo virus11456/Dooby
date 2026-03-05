@@ -1118,6 +1118,29 @@ function setupSyncEventListeners() {
     SyncManager.pushToSync();
   });
 
+  // Donate modal
+  document.getElementById('btnDonate').addEventListener('click', () => {
+    document.getElementById('donateModal').classList.remove('hidden');
+  });
+
+  document.getElementById('btnCloseDonate').addEventListener('click', () => {
+    document.getElementById('donateModal').classList.add('hidden');
+  });
+
+  document.getElementById('btnCopyAddress').addEventListener('click', () => {
+    const address = document.getElementById('donateAddress').textContent;
+    navigator.clipboard.writeText(address).then(() => {
+      const btn = document.getElementById('btnCopyAddress');
+      const original = btn.innerHTML;
+      btn.innerHTML = '✓ Copied!';
+      btn.style.color = 'var(--accent)';
+      setTimeout(() => {
+        btn.innerHTML = original;
+        btn.style.color = '';
+      }, 2000);
+    });
+  });
+
   // Export/Import modal
   document.getElementById('btnExportImport').addEventListener('click', () => {
     document.getElementById('exportImportModal').classList.remove('hidden');

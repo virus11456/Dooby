@@ -69,6 +69,13 @@
         Save Session
       </button>
 
+      <!-- Donate -->
+      <button id="btnDonate" class="btn-icon btn-donate" title="Support the developer ❤">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 14s-5.5-3.5-5.5-7A3 3 0 0 1 8 4.5 3 3 0 0 1 13.5 7C13.5 10.5 8 14 8 14z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
       <!-- Export/Import -->
       <button id="btnExportImport" class="btn-icon" title="Export / Import data">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -212,6 +219,67 @@
           <input type="file" id="importFileInput" accept=".json" style="display: none;">
         </label>
         <button id="btnCloseExportImport" class="btn btn-secondary" style="justify-content: center;">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Donate Modal -->
+  <div id="donateModal" class="modal-overlay hidden">
+    <div class="modal donate-modal" style="width:480px;">
+      <div class="donate-header">
+        <div class="donate-coffee-icon">☕</div>
+        <h3>Buy the Developer a Coffee</h3>
+        <p class="modal-desc">If you enjoy using Dooby, consider buying the developer a coffee for just <strong>$1 USDT</strong>! Your name will be featured in the <span class="accent-text">Contributors Wall of Fame</span>.</p>
+      </div>
+
+      <div class="donate-perks">
+        <div class="donate-perk">
+          <span class="perk-icon">⭐</span>
+          <div>
+            <strong>Wall of Fame</strong>
+            <p>Your name permanently listed in the contributor credits</p>
+          </div>
+        </div>
+        <div class="donate-perk">
+          <span class="perk-icon">🎨</span>
+          <div>
+            <strong>Exclusive Themes</strong>
+            <p>Unlock premium color themes (coming soon)</p>
+          </div>
+        </div>
+        <div class="donate-perk">
+          <span class="perk-icon">🚀</span>
+          <div>
+            <strong>Early Access</strong>
+            <p>Get new features before everyone else</p>
+          </div>
+        </div>
+        <div class="donate-perk">
+          <span class="perk-icon">💬</span>
+          <div>
+            <strong>Feature Requests</strong>
+            <p>Priority voting on upcoming features</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="donate-address-section">
+        <label class="donate-label">USDT (TRC-20)</label>
+        <div class="donate-address-row">
+          <code id="donateAddress" class="donate-address">TATQGiRcFx14XGv2kBVmxQWwDENZwFSnap</code>
+          <button id="btnCopyAddress" class="btn btn-secondary btn-sm" title="Copy address">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M3 11V3a1 1 0 0 1 1-1h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Copy
+          </button>
+        </div>
+        <p class="donate-note">After donating, email <strong>your name + TX hash</strong> to get listed in the Wall of Fame!</p>
+      </div>
+
+      <div class="modal-actions" style="justify-content:center;">
+        <button id="btnCloseDonate" class="btn btn-secondary">Close</button>
       </div>
     </div>
   </div>
