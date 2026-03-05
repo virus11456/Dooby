@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dooby - 隱私權政策 / Privacy Policy</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.8;
+      color: #1a1a1a;
+      background: #fafafa;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 12px;
+      padding: 48px 40px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+      color: #111;
+    }
+    .subtitle {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+    h2 {
+      font-size: 20px;
+      margin-top: 32px;
+      margin-bottom: 12px;
+      color: #222;
+      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 8px;
+    }
+    p, li {
+      font-size: 15px;
+      color: #333;
+      margin-bottom: 12px;
+    }
+    ul {
+      padding-left: 24px;
+      margin-bottom: 16px;
+    }
+    li { margin-bottom: 6px; }
+    strong { color: #111; }
+    .highlight {
+      background: #f0fdf4;
+      border-left: 4px solid #10b981;
+      padding: 16px 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .highlight p { margin-bottom: 0; }
+    .lang-toggle {
+      text-align: right;
+      margin-bottom: 24px;
+    }
+    .lang-toggle a {
+      color: #6366f1;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .section { margin-bottom: 8px; }
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      color: #999;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="lang-toggle">
+      <a href="#english">English</a> ｜ <a href="#chinese">中文</a>
+    </div>
+
+    <!-- 中文版 -->
+    <div id="chinese">
+      <h1>Dooby 隱私權政策</h1>
+      <p class="subtitle">最後更新日期：2026 年 3 月 5 日</p>
+
+      <div class="highlight">
+        <p><strong>簡單來說：Dooby 不會收集、傳送或分享您的任何個人資料。所有資料都儲存在您自己的瀏覽器中。</strong></p>
+      </div>
+
+      <h2>1. 我們是誰</h2>
+      <p>Dooby - Tab & Bookmark Manager 是一款 Chrome 瀏覽器擴充功能，用於在新分頁頁面上以視覺化方式管理分頁和書籤。</p>
+
+      <h2>2. 我們收集哪些資料</h2>
+      <p><strong>我們不收集任何個人資料。</strong></p>
+      <p>Dooby 存取以下瀏覽器資訊，但這些資訊<strong>僅在您的裝置本機處理</strong>，絕不會傳送至任何外部伺服器：</p>
+      <ul>
+        <li><strong>分頁資訊：</strong>目前開啟的分頁標題和網址，用於在新分頁頁面上顯示和管理。</li>
+        <li><strong>書籤集合：</strong>您建立的分類和已儲存的分頁，儲存於 <code>chrome.storage.local</code>。</li>
+        <li><strong>主題與偏好設定：</strong>您選擇的佈景主題和介面設定。</li>
+        <li><strong>贊助者啟用狀態：</strong>若您輸入了捐款啟用碼，該狀態僅儲存在本機。</li>
+      </ul>
+
+      <h2>3. 跨裝置同步</h2>
+      <p>若您選擇啟用同步功能，Dooby 會透過 <code>chrome.storage.sync</code>（Chrome 內建的同步機制）在您已登入相同 Google 帳號的裝置之間同步您的集合資料。此資料由 Google 基礎架構處理，Dooby 的開發者無法存取。</p>
+
+      <h2>4. 資料儲存方式</h2>
+      <p>所有資料儲存於：</p>
+      <ul>
+        <li><code>chrome.storage.local</code> — 您裝置上的本機儲存空間</li>
+        <li><code>chrome.storage.sync</code> — Chrome 內建的同步儲存空間（選用）</li>
+      </ul>
+      <p>我們沒有外部伺服器、資料庫或分析服務。</p>
+
+      <h2>5. 第三方分享</h2>
+      <p><strong>我們不會與任何第三方分享、販售或轉移您的資料。</strong></p>
+
+      <h2>6. 遠端程式碼</h2>
+      <p>Dooby 不使用任何遠端程式碼。所有 JavaScript 程式碼都包含在擴充功能套件中，於本機執行。沒有外部腳本載入、沒有 <code>eval()</code>、沒有遠端模組。</p>
+
+      <h2>7. 所需權限說明</h2>
+      <ul>
+        <li><strong>tabs：</strong>讀取已開啟的分頁以便在新分頁頁面上顯示和管理。</li>
+        <li><strong>storage：</strong>將您的集合、設定和偏好儲存在本機及 Chrome 同步空間。</li>
+        <li><strong>sessions：</strong>還原最近關閉的分頁，讓您能恢復意外關閉的瀏覽作業。</li>
+        <li><strong>alarms：</strong>排程自動儲存工作，確保您的資料在瀏覽器意外關閉時不會遺失。</li>
+      </ul>
+
+      <h2>8. 您的權利</h2>
+      <p>您可以隨時：</p>
+      <ul>
+        <li>透過擴充功能的匯出功能下載您的所有資料</li>
+        <li>透過 Chrome 的擴充功能設定清除所有儲存的資料</li>
+        <li>解除安裝擴充功能以移除所有本機資料</li>
+      </ul>
+
+      <h2>9. 政策變更</h2>
+      <p>如果此隱私權政策有任何變更，我們會更新本頁面及「最後更新日期」。由於我們不收集電子郵件或聯絡資訊，變更將透過擴充功能更新發布。</p>
+
+      <h2>10. 聯絡方式</h2>
+      <p>如有任何關於此隱私權政策的問題，請透過 Chrome Web Store 的開發者聯絡資訊與我們聯繫。</p>
+    </div>
+
+    <hr style="margin: 48px 0; border: none; border-top: 2px solid #f0f0f0;">
+
+    <!-- English Version -->
+    <div id="english">
+      <h1>Dooby Privacy Policy</h1>
+      <p class="subtitle">Last updated: March 5, 2026</p>
+
+      <div class="highlight">
+        <p><strong>In short: Dooby does not collect, transmit, or share any of your personal data. All data stays in your browser.</strong></p>
+      </div>
+
+      <h2>1. Who We Are</h2>
+      <p>Dooby - Tab & Bookmark Manager is a Chrome extension that replaces the new tab page with a visual workspace for organizing tabs and bookmarks.</p>
+
+      <h2>2. What Data We Access</h2>
+      <p><strong>We do not collect any personal data.</strong></p>
+      <p>Dooby accesses the following browser information, which is <strong>processed entirely on your local device</strong> and never sent to any external server:</p>
+      <ul>
+        <li><strong>Tab information:</strong> Titles and URLs of your currently open tabs, used to display and manage them on the new tab page.</li>
+        <li><strong>Collections:</strong> Your saved tab groups and categories, stored in <code>chrome.storage.local</code>.</li>
+        <li><strong>Theme & preferences:</strong> Your selected theme and interface settings.</li>
+        <li><strong>Donor activation status:</strong> If you enter a donation activation code, that status is stored locally only.</li>
+      </ul>
+
+      <h2>3. Cross-Device Sync</h2>
+      <p>If you enable sync, Dooby uses <code>chrome.storage.sync</code> (Chrome's built-in sync mechanism) to synchronize your collections across devices signed into the same Google account. This data is handled by Google's infrastructure and is not accessible to Dooby's developer.</p>
+
+      <h2>4. Data Storage</h2>
+      <p>All data is stored in:</p>
+      <ul>
+        <li><code>chrome.storage.local</code> — local storage on your device</li>
+        <li><code>chrome.storage.sync</code> — Chrome's built-in sync storage (optional)</li>
+      </ul>
+      <p>We have no external servers, databases, or analytics services.</p>
+
+      <h2>5. Third-Party Sharing</h2>
+      <p><strong>We do not share, sell, or transfer your data to any third party.</strong></p>
+
+      <h2>6. Remote Code</h2>
+      <p>Dooby does not use any remote code. All JavaScript is bundled within the extension package and executed locally. There are no external script loads, no <code>eval()</code>, and no remote modules.</p>
+
+      <h2>7. Permissions Explained</h2>
+      <ul>
+        <li><strong>tabs:</strong> Read open tabs to display and manage them on the new tab page.</li>
+        <li><strong>storage:</strong> Save your collections, settings, and preferences locally and via Chrome sync.</li>
+        <li><strong>sessions:</strong> Restore recently closed tabs so you can recover accidentally closed sessions.</li>
+        <li><strong>alarms:</strong> Schedule periodic auto-save tasks to prevent data loss if the browser closes unexpectedly.</li>
+      </ul>
+
+      <h2>8. Your Rights</h2>
+      <p>You can at any time:</p>
+      <ul>
+        <li>Export all your data using the extension's export feature</li>
+        <li>Clear all stored data through Chrome's extension settings</li>
+        <li>Uninstall the extension to remove all local data</li>
+      </ul>
+
+      <h2>9. Changes to This Policy</h2>
+      <p>If this privacy policy changes, we will update this page and the "Last updated" date. Since we do not collect email or contact information, changes will be communicated through extension updates.</p>
+
+      <h2>10. Contact</h2>
+      <p>If you have any questions about this privacy policy, please contact us through the developer contact information on the Chrome Web Store.</p>
+    </div>
+
+    <footer>
+      <p>&copy; 2026 Dooby - Tab & Bookmark Manager. All rights reserved.</p>
+    </footer>
+  </div>
+</body>
+</html>
