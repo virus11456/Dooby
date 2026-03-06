@@ -1071,6 +1071,17 @@ async function initSync() {
     }
   });
 
+  // Listen for messages from background service worker
+  chrome.runtime.onMessage.addListener((message) => {
+    if (message.type === 'DOOBY_SYNC_TRIGGER') {
+      SyncManager.pushToSync();
+    } else if (message.type === 'DOOBY_DATA_CHANGED') {
+      // Data was changed externally (e.g. icon click save), refresh and sync
+      loadApp();
+      SyncManager.scheduleSyncAfterChange();
+    }
+  });
+
   setupSyncEventListeners();
   updateStorageUsage();
 }
