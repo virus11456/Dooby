@@ -22,12 +22,17 @@ const SyncManager = {
     // Listen for changes from other devices
     chrome.storage.onChanged.addListener((changes, area) => {
       if (area === 'sync' && !this._pushing) {
-        this._notifyListeners('data_updated');
+        // Only react to dooby keys to avoid spurious triggers
+        const doobyKeys = Object.keys(changes).filter(k => k.startsWith('dooby_'));
+        if (doobyKeys.length > 0) {
+          this._notifyListeners('data_updated');
+        }
       }
     });
 
-    // Try initial pull from sync storage
-    await this.pullFromSync();
+    // Try initial pull from sync storage, return whether data was pulled
+    const pulled = await this.pullFromSync();
+    return pulled;
   },
 
   // ============================================
@@ -58,13 +63,6 @@ const SyncManager = {
       const MAX_CHUNK_SIZE = 7000; // bytes, conservative limit
       const collectionsStr = JSON.stringify(collections);
 
-      // Clear old chunks first
-      const existing = await chrome.storage.sync.get(null);
-      const oldChunkKeys = Object.keys(existing).filter(k => k.startsWith('dooby_col_'));
-      if (oldChunkKeys.length > 0) {
-        await chrome.storage.sync.remove(oldChunkKeys);
-      }
-
       // Split into chunks
       const chunks = [];
       for (let i = 0; i < collectionsStr.length; i += MAX_CHUNK_SIZE) {
@@ -82,7 +80,20 @@ const SyncManager = {
         chunkCount: chunks.length
       });
 
+      // Write all new data atomically first (meta + spaces + chunks)
+      // meta.chunkCount ensures readers only read the correct number of chunks
       await chrome.storage.sync.set(syncData);
+
+      // Then clean up any stale old chunks (safe because meta already has correct count)
+      const existing = await chrome.storage.sync.get(null);
+      const staleKeys = Object.keys(existing).filter(k => {
+        if (!k.startsWith('dooby_col_')) return false;
+        const idx = parseInt(k.replace('dooby_col_', ''), 10);
+        return idx >= chunks.length;
+      });
+      if (staleKeys.length > 0) {
+        await chrome.storage.sync.remove(staleKeys);
+      }
       this._notifyListeners('sync_complete', { time: Date.now() });
     } catch (err) {
       console.error('Dooby: Sync push failed:', err);

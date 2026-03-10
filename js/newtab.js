@@ -1046,9 +1046,7 @@ function parseTabMeJson(data) {
 // ============================================
 
 async function initSync() {
-  await SyncManager.init();
-
-  // Listen for sync events
+  // Register event listeners BEFORE init so we don't miss events
   SyncManager.on('*', (event, data) => {
     switch (event) {
       case 'sync_start':
@@ -1061,7 +1059,7 @@ async function initSync() {
         break;
       case 'sync_error':
         updateSyncUI('error', 'Sync failed');
-        setTimeout(() => updateSyncUI('idle', 'Synced'), 5000);
+        // Keep error visible — only clear on next successful sync
         break;
       case 'data_updated':
         // Remote data was pulled from another device, refresh UI
@@ -1070,6 +1068,13 @@ async function initSync() {
         break;
     }
   });
+
+  // Now init sync manager (may pull newer data from cloud)
+  const pulled = await SyncManager.init();
+  if (pulled) {
+    // Sync had newer data, reload UI with updated data
+    await loadApp();
+  }
 
   // Listen for messages from background service worker
   chrome.runtime.onMessage.addListener((message) => {

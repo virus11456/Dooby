@@ -31,15 +31,10 @@ chrome.action.onClicked.addListener(async (tab) => {
   await chrome.storage.local.set({ localUpdateTime: Date.now() });
 
   // Notify any open new tab pages to refresh and sync
-  const allTabs = await chrome.tabs.query({});
-  for (const t of allTabs) {
-    if (t.url && t.url.includes('newtab.html')) {
-      try {
-        chrome.tabs.sendMessage(t.id, { type: 'DOOBY_DATA_CHANGED' });
-      } catch (e) {
-        // Tab might not have content script
-      }
-    }
+  try {
+    chrome.runtime.sendMessage({ type: 'DOOBY_DATA_CHANGED' });
+  } catch (e) {
+    // No listeners available
   }
 
   // Close the saved tab
@@ -95,15 +90,10 @@ chrome.runtime.onInstalled.addListener(async () => {
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === 'dooby-sync') {
     // Notify any open new tab pages to sync
-    const tabs = await chrome.tabs.query({});
-    for (const tab of tabs) {
-      if (tab.url && tab.url.includes('newtab.html')) {
-        try {
-          chrome.tabs.sendMessage(tab.id, { type: 'DOOBY_SYNC_TRIGGER' });
-        } catch (e) {
-          // Tab might not have content script
-        }
-      }
+    try {
+      chrome.runtime.sendMessage({ type: 'DOOBY_SYNC_TRIGGER' });
+    } catch (e) {
+      // No listeners available
     }
   }
 });
