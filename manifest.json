@@ -1,12 +1,11 @@
 {
   "manifest_version": 3,
   "name": "Dooby - Tab & Bookmark Manager",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A visual workspace for organizing your tabs and bookmarks into collections with cloud sync. Better than bookmarks.",
   "permissions": [
     "tabs",
     "storage",
-    "sessions",
     "alarms"
   ],
   "chrome_url_overrides": {
