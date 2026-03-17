@@ -161,7 +161,7 @@ const DonorManager = {
 
   // Wall of Fame - updated with each release
   WALL_OF_FAME: [
-    // { name: 'Early Supporter', date: '2026-03', message: 'Love this extension!' },
+    { name: 'Domain5566', date: '2026-03', message: '最愛你' },
   ],
 
   async init() {
