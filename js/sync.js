@@ -20,12 +20,18 @@ const SyncManager = {
 
   async init() {
     // Listen for changes from other devices
-    chrome.storage.onChanged.addListener((changes, area) => {
+    chrome.storage.onChanged.addListener(async (changes, area) => {
       if (area === 'sync' && !this._pushing) {
         // Only react to dooby keys to avoid spurious triggers
         const doobyKeys = Object.keys(changes).filter(k => k.startsWith('dooby_'));
         if (doobyKeys.length > 0) {
-          this._notifyListeners('data_updated');
+          // CRITICAL: Must pull sync data into local storage first,
+          // because loadApp() reads from chrome.storage.local.
+          // force=true because onChanged already confirms new data exists.
+          const pulled = await this.pullFromSync(true);
+          if (pulled) {
+            this._notifyListeners('data_updated');
+          }
         }
       }
     });
@@ -103,7 +109,9 @@ const SyncManager = {
     }
   },
 
-  async pullFromSync() {
+  // Pull data from chrome.storage.sync into chrome.storage.local
+  // force=true skips timestamp check (used when onChanged confirms new data exists)
+  async pullFromSync(force = false) {
     try {
       const syncData = await chrome.storage.sync.get(null);
 
@@ -112,10 +120,12 @@ const SyncManager = {
 
       const meta = JSON.parse(syncData['dooby_meta']);
 
-      // Check if sync data is newer than local
-      const { localUpdateTime } = await chrome.storage.local.get('localUpdateTime');
-      if (localUpdateTime && localUpdateTime >= meta.updatedAt) {
-        return false; // Local is newer, skip pull
+      // Skip timestamp check when forced (e.g. from onChanged listener)
+      if (!force) {
+        const { localUpdateTime } = await chrome.storage.local.get('localUpdateTime');
+        if (localUpdateTime && localUpdateTime >= meta.updatedAt) {
+          return false; // Local is newer, skip pull
+        }
       }
 
       // Restore spaces
