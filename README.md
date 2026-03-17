@@ -1,6 +1,6 @@
 # Dooby - Tab & Bookmark Manager
 
-> **v1.1.1** — A beautiful Chrome extension that replaces your new tab with a visual workspace for organizing tabs and bookmarks into collections. **Better than bookmarks.**
+> **v1.1.2** — A beautiful Chrome extension that replaces your new tab with a visual workspace for organizing tabs and bookmarks into collections. **Better than bookmarks.**
 
 ---
 
@@ -198,6 +198,10 @@ MIT
 ---
 
 ## Changelog
+
+### v1.1.2 (2026-03-17)
+- **Fix:** Root cause of cloud sync failure — `onChanged` listener now properly pulls sync data into local storage before refreshing UI
+- **Fix:** Added `force` flag to `pullFromSync()` to bypass timestamp check when receiving confirmed remote changes (prevents clock skew issues)
 
 ### v1.1.1 (2026-03-17)
 - **Fix:** Remove unused `sessions` permission (Chrome Web Store review rejection)
