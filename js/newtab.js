@@ -1074,6 +1074,9 @@ async function initSync() {
   if (pulled) {
     // Sync had newer data, reload UI with updated data
     await loadApp();
+  } else {
+    // Check if cloud has more data than local — prompt user to sync
+    await checkCloudDataPrompt();
   }
 
   // Listen for messages from background service worker
@@ -1091,14 +1094,56 @@ async function initSync() {
   updateStorageUsage();
 }
 
+async function checkCloudDataPrompt() {
+  try {
+    const syncData = await chrome.storage.sync.get('dooby_meta');
+    if (!syncData['dooby_meta']) return;
+
+    const meta = JSON.parse(syncData['dooby_meta']);
+    const cloudTabCount = meta.tabCount || 0;
+
+    const localCollections = await Storage.getCollections();
+    const localTabCount = localCollections.reduce((sum, c) => sum + (c.tabs ? c.tabs.length : 0), 0);
+
+    if (cloudTabCount > 0 && cloudTabCount > localTabCount) {
+      // Cloud has more data — show prompt
+      const desc = document.getElementById('cloudSyncDesc');
+      desc.textContent = `Found ${cloudTabCount} bookmarks in cloud storage (local: ${localTabCount}). Would you like to sync them to this device?`;
+      document.getElementById('cloudSyncPrompt').classList.remove('hidden');
+    }
+  } catch (e) {
+    console.error('Dooby: Cloud data check failed:', e);
+  }
+}
+
 function updateSyncUI(status, text) {
   const el = document.getElementById('syncStatus');
   const textEl = document.getElementById('syncStatusText');
+  const led = document.getElementById('syncLed');
 
   el.classList.remove('syncing', 'success', 'error');
+  led.classList.remove('led-green', 'led-red', 'led-yellow');
+
   if (status !== 'idle') {
     el.classList.add(status);
   }
+
+  // Update LED
+  switch (status) {
+    case 'syncing':
+      led.classList.add('led-yellow');
+      break;
+    case 'success':
+      led.classList.add('led-green');
+      break;
+    case 'error':
+      led.classList.add('led-red');
+      break;
+    default:
+      led.classList.add('led-green'); // idle = last sync was ok
+      break;
+  }
+
   textEl.textContent = text;
 }
 
@@ -1278,9 +1323,31 @@ function renderWallOfFame() {
 }
 
 function setupSyncEventListeners() {
-  // Manual sync button
-  document.getElementById('btnSync').addEventListener('click', () => {
+  // Manual sync button — pull from cloud first, then push local changes
+  document.getElementById('btnSync').addEventListener('click', async () => {
+    const pulled = await SyncManager.pullFromSync(true); // force pull
+    if (pulled) {
+      await loadApp();
+      updateStorageUsage();
+    }
+    // Then push any local changes
     SyncManager.pushToSync();
+  });
+
+  // Cloud sync prompt buttons
+  document.getElementById('btnCloudSyncYes').addEventListener('click', async () => {
+    document.getElementById('cloudSyncPrompt').classList.add('hidden');
+    const pulled = await SyncManager.pullFromSync(true);
+    if (pulled) {
+      await loadApp();
+      updateStorageUsage();
+      updateSyncUI('success', 'Synced from cloud');
+      setTimeout(() => updateSyncUI('idle', 'Synced'), 3000);
+    }
+  });
+
+  document.getElementById('btnCloudSyncNo').addEventListener('click', () => {
+    document.getElementById('cloudSyncPrompt').classList.add('hidden');
   });
 
   // Donate modal open/close

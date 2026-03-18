@@ -31,8 +31,9 @@
       </div>
     </div>
     <div class="top-bar-right">
-      <!-- Sync Status Indicator -->
+      <!-- Sync Status Indicator with LED -->
       <div id="syncStatus" class="sync-status" title="Cloud sync via Chrome account">
+        <span id="syncLed" class="sync-led"></span>
         <svg class="sync-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
           <path d="M2 8a6 6 0 0 1 10.5-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           <path d="M14 8a6 6 0 0 1-10.5 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -166,6 +167,18 @@
   <!-- Context Menu -->
   <div id="contextMenu" class="context-menu hidden">
     <ul></ul>
+  </div>
+
+  <!-- Cloud Sync Prompt Modal -->
+  <div id="cloudSyncPrompt" class="modal-overlay hidden">
+    <div class="modal" style="width:420px;">
+      <h3>☁️ Cloud Data Found</h3>
+      <p class="modal-desc" id="cloudSyncDesc">Found bookmarks in your Chrome cloud storage from another device. Would you like to sync them to this device?</p>
+      <div class="modal-actions" style="margin-top:16px;">
+        <button id="btnCloudSyncYes" class="btn btn-primary">Sync from Cloud</button>
+        <button id="btnCloudSyncNo" class="btn btn-secondary">Keep Local Data</button>
+      </div>
+    </div>
   </div>
 
   <!-- Duplicates Modal -->
