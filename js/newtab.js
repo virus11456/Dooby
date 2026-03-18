@@ -1323,15 +1323,24 @@ function renderWallOfFame() {
 }
 
 function setupSyncEventListeners() {
-  // Manual sync button — pull from cloud first, then push local changes
-  document.getElementById('btnSync').addEventListener('click', async () => {
-    const pulled = await SyncManager.pullFromSync(true); // force pull
+  // Upload to cloud button
+  document.getElementById('btnCloudPush').addEventListener('click', () => {
+    SyncManager.pushToSync();
+  });
+
+  // Sync from cloud button
+  document.getElementById('btnCloudPull').addEventListener('click', async () => {
+    updateSyncUI('syncing', 'Pulling from cloud...');
+    const pulled = await SyncManager.pullFromSync(true);
     if (pulled) {
       await loadApp();
       updateStorageUsage();
+      updateSyncUI('success', 'Synced from cloud');
+      setTimeout(() => updateSyncUI('idle', 'Synced'), 3000);
+    } else {
+      updateSyncUI('idle', 'No new data in cloud');
+      setTimeout(() => updateSyncUI('idle', 'Synced'), 3000);
     }
-    // Then push any local changes
-    SyncManager.pushToSync();
   });
 
   // Cloud sync prompt buttons
