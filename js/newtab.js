@@ -1058,7 +1058,7 @@ async function initSync() {
         setTimeout(() => updateSyncUI('idle', 'Synced'), 3000);
         break;
       case 'sync_error':
-        updateSyncUI('error', 'Sync failed');
+        updateSyncUI('error', data?.message || 'Sync failed');
         // Keep error visible — only clear on next successful sync
         break;
       case 'data_updated':
