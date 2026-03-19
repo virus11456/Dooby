@@ -9,11 +9,13 @@
 //
 // Strategy: chunk collections data across multiple keys to stay within limits.
 // Favicon data URIs are stripped before sync to save space.
+// Backwards compatible with old format (single dooby_collections key).
 
 const SyncManager = {
   _listeners: [],
   _syncDebounceTimer: null,
   _enabled: true,
+  _pushing: false,
 
   // ============================================
   // Initialization
@@ -23,12 +25,8 @@ const SyncManager = {
     // Listen for changes from other devices
     chrome.storage.onChanged.addListener(async (changes, area) => {
       if (area === 'sync' && !this._pushing) {
-        // Only react to dooby keys to avoid spurious triggers
         const doobyKeys = Object.keys(changes).filter(k => k.startsWith('dooby_'));
         if (doobyKeys.length > 0) {
-          // CRITICAL: Must pull sync data into local storage first,
-          // because loadApp() reads from chrome.storage.local.
-          // force=true because onChanged already confirms new data exists.
           const pulled = await this.pullFromSync(true);
           if (pulled) {
             this._notifyListeners('data_updated');
@@ -37,7 +35,7 @@ const SyncManager = {
       }
     });
 
-    // Try initial pull from sync storage, return whether data was pulled
+    // Try initial pull from sync storage
     const pulled = await this.pullFromSync();
     return pulled;
   },
@@ -46,14 +44,11 @@ const SyncManager = {
   // Data Optimization
   // ============================================
 
-  // Strip large favicon data URIs to save sync space.
-  // Keep only short URLs (http/https favicons), remove base64 data URIs.
   _optimizeForSync(collections) {
     return collections.map(col => ({
       ...col,
       tabs: col.tabs.map(tab => {
         const favicon = tab.favicon || '';
-        // Keep favicon only if it's a short URL (not a data URI)
         const optimizedFavicon = favicon.startsWith('data:') ? '' : favicon;
         return {
           id: tab.id,
@@ -67,13 +62,13 @@ const SyncManager = {
     }));
   },
 
-  // Count total tabs across all collections
   _countTabs(collections) {
+    if (!collections || !Array.isArray(collections)) return 0;
     return collections.reduce((sum, col) => sum + (col.tabs ? col.tabs.length : 0), 0);
   },
 
   // ============================================
-  // Sync Operations
+  // Push to Cloud
   // ============================================
 
   async pushToSync() {
@@ -84,69 +79,68 @@ const SyncManager = {
     try {
       const spaces = await Storage.getSpaces();
       const collections = await Storage.getCollections();
-
-      // Safety check: don't overwrite cloud data with empty local data
-      // If local has no meaningful data, check if cloud has more
       const localTabCount = this._countTabs(collections);
+
+      // Safety: don't push empty data if cloud has real data
       if (localTabCount === 0 && collections.length <= 3) {
-        const syncData = await chrome.storage.sync.get('dooby_meta');
-        if (syncData['dooby_meta']) {
-          const meta = JSON.parse(syncData['dooby_meta']);
-          if (meta.tabCount && meta.tabCount > 0) {
-            console.log('Dooby: Skipping push — local is empty but cloud has', meta.tabCount, 'tabs');
+        try {
+          const existing = await chrome.storage.sync.get(null);
+          const hasCloudData = this._cloudHasData(existing);
+          if (hasCloudData) {
+            console.log('Dooby: Skipping push — local is empty but cloud has data');
             this._notifyListeners('sync_complete', { time: Date.now(), skipped: true });
             return;
           }
+        } catch (e) {
+          // Can't check cloud, proceed with caution
         }
       }
 
-      // Optimize collections for sync (strip large favicons)
+      // Optimize (strip data URIs)
       const optimizedCollections = this._optimizeForSync(collections);
 
-      // Build sync payload with chunking
       const syncData = {};
-
-      // Spaces are small, store directly
       syncData['dooby_spaces'] = JSON.stringify(spaces);
 
-      // Chunk collections (each key max ~8KB, leave margin)
-      const MAX_CHUNK_SIZE = 7000; // bytes, conservative limit
+      // Chunk collections (each key max ~8KB)
+      const MAX_CHUNK_SIZE = 7000;
       const collectionsStr = JSON.stringify(optimizedCollections);
 
-      // Check if data will exceed quota
+      // Quota check
       const estimatedSize = collectionsStr.length + JSON.stringify(spaces).length + 200;
-      if (estimatedSize > 95000) { // Leave 5KB margin
-        console.warn('Dooby: Data too large for sync storage:', (estimatedSize / 1024).toFixed(1), 'KB');
+      if (estimatedSize > 95000) {
+        console.warn('Dooby: Data too large for sync:', (estimatedSize / 1024).toFixed(1), 'KB');
         this._notifyListeners('sync_error', {
           error: 'Data too large',
-          message: `Data size (${(estimatedSize / 1024).toFixed(1)} KB) exceeds sync limit (100 KB). Try removing some tabs or collections.`
+          message: `Data (${(estimatedSize / 1024).toFixed(1)} KB) exceeds 100 KB limit. Remove some tabs or use Export to back up.`
         });
         return;
       }
 
-      // Split into chunks
       const chunks = [];
       for (let i = 0; i < collectionsStr.length; i += MAX_CHUNK_SIZE) {
         chunks.push(collectionsStr.slice(i, i + MAX_CHUNK_SIZE));
       }
-
       for (let i = 0; i < chunks.length; i++) {
         syncData[`dooby_col_${i}`] = chunks[i];
       }
 
-      // Update meta with chunk count and tab count for safety checks
       syncData['dooby_meta'] = JSON.stringify({
         updatedAt: Date.now(),
-        version: 1,
+        version: 2,
         chunkCount: chunks.length,
         tabCount: localTabCount
       });
 
-      // Write all new data atomically first (meta + spaces + chunks)
-      // meta.chunkCount ensures readers only read the correct number of chunks
+      // Also write old format for backwards compatibility with other devices
+      // Only if it fits in the 8KB per-item limit
+      if (collectionsStr.length < 8000) {
+        syncData['dooby_collections'] = collectionsStr;
+      }
+
       await chrome.storage.sync.set(syncData);
 
-      // Then clean up any stale old chunks (safe because meta already has correct count)
+      // Clean up stale chunks
       const existing = await chrome.storage.sync.get(null);
       const staleKeys = Object.keys(existing).filter(k => {
         if (!k.startsWith('dooby_col_')) return false;
@@ -156,14 +150,13 @@ const SyncManager = {
       if (staleKeys.length > 0) {
         await chrome.storage.sync.remove(staleKeys);
       }
+
       this._notifyListeners('sync_complete', { time: Date.now() });
     } catch (err) {
-      console.error('Dooby: Sync push failed:', err);
-
-      // Provide user-friendly error message for quota exceeded
+      console.error('Dooby: Push failed:', err);
       let message = err.message;
       if (err.message && err.message.includes('QUOTA')) {
-        message = 'Storage quota exceeded. Try removing some tabs or collections to free up space.';
+        message = 'Storage quota exceeded. Remove some tabs or use Export.';
       }
       this._notifyListeners('sync_error', { error: err.message, message });
     } finally {
@@ -171,33 +164,41 @@ const SyncManager = {
     }
   },
 
-  // Pull data from chrome.storage.sync into chrome.storage.local
-  // force=true skips timestamp check (used when onChanged confirms new data exists)
+  // ============================================
+  // Pull from Cloud
+  // ============================================
+
   async pullFromSync(force = false) {
     try {
       const syncData = await chrome.storage.sync.get(null);
 
-      // Check if there's any Dooby data in sync storage
-      if (!syncData['dooby_meta']) return false;
+      // Check for ANY dooby data (new or old format)
+      const hasMeta = !!syncData['dooby_meta'];
+      const hasOldCollections = !!syncData['dooby_collections'];
+      const hasOldSpaces = !!syncData['dooby_spaces'];
 
-      const meta = JSON.parse(syncData['dooby_meta']);
+      if (!hasMeta && !hasOldCollections) {
+        console.log('Dooby: No data in cloud sync storage');
+        return false;
+      }
 
-      // Skip timestamp check when forced (e.g. from onChanged listener)
-      if (!force) {
+      let meta = null;
+      if (hasMeta) {
+        meta = JSON.parse(syncData['dooby_meta']);
+      }
+
+      // Timestamp check (skip when forced)
+      if (!force && meta) {
         const { localUpdateTime } = await chrome.storage.local.get('localUpdateTime');
         if (localUpdateTime && localUpdateTime >= meta.updatedAt) {
-          // Even if local timestamp is newer, check if cloud has more data
-          // This prevents empty local data from blocking a pull of real data
           const localCollections = await Storage.getCollections();
           const localTabCount = this._countTabs(localCollections);
           const cloudTabCount = meta.tabCount || 0;
 
-          if (cloudTabCount > localTabCount) {
-            console.log('Dooby: Cloud has more tabs (' + cloudTabCount + ') than local (' + localTabCount + '), pulling anyway');
-            // Fall through to pull
-          } else {
-            return false; // Local is newer and has same or more data, skip pull
+          if (cloudTabCount <= localTabCount) {
+            return false;
           }
+          console.log('Dooby: Cloud has more tabs (' + cloudTabCount + ' vs ' + localTabCount + '), pulling');
         }
       }
 
@@ -209,39 +210,67 @@ const SyncManager = {
         }
       }
 
-      // Reassemble chunked collections
-      if (meta.chunkCount > 0) {
+      // Restore collections — try new chunked format first, fall back to old format
+      let collections = null;
+
+      if (meta && meta.chunkCount > 0) {
+        // New chunked format (v2)
         let collectionsStr = '';
         for (let i = 0; i < meta.chunkCount; i++) {
           const chunk = syncData[`dooby_col_${i}`];
           if (chunk) collectionsStr += chunk;
         }
-
         if (collectionsStr) {
-          const collections = JSON.parse(collectionsStr);
-          await chrome.storage.local.set({ collections });
+          collections = JSON.parse(collectionsStr);
         }
       }
 
-      await chrome.storage.local.set({ localUpdateTime: meta.updatedAt });
+      if (!collections && hasOldCollections) {
+        // Old format fallback (v1 — single dooby_collections key)
+        console.log('Dooby: Using old format (dooby_collections)');
+        collections = JSON.parse(syncData['dooby_collections']);
+      }
+
+      if (collections && collections.length > 0) {
+        await chrome.storage.local.set({ collections });
+      }
+
+      const updateTime = meta ? meta.updatedAt : Date.now();
+      await chrome.storage.local.set({ localUpdateTime: updateTime });
       return true;
     } catch (err) {
-      console.error('Dooby: Sync pull failed:', err);
+      console.error('Dooby: Pull failed:', err);
       return false;
     }
   },
 
-  // Debounced sync - called after local data changes
+  // Check if cloud has any real data (either format)
+  _cloudHasData(syncData) {
+    // Check new format
+    if (syncData['dooby_meta']) {
+      try {
+        const meta = JSON.parse(syncData['dooby_meta']);
+        if (meta.tabCount > 0) return true;
+      } catch (e) {}
+    }
+    // Check old format
+    if (syncData['dooby_collections']) {
+      try {
+        const cols = JSON.parse(syncData['dooby_collections']);
+        if (cols.some(c => c.tabs && c.tabs.length > 0)) return true;
+      } catch (e) {}
+    }
+    return false;
+  },
+
+  // Debounced sync after local changes
   scheduleSyncAfterChange() {
     if (!this._enabled) return;
-
-    // Mark local update time
     chrome.storage.local.set({ localUpdateTime: Date.now() });
-
     clearTimeout(this._syncDebounceTimer);
     this._syncDebounceTimer = setTimeout(() => {
       this.pushToSync();
-    }, 2000); // Wait 2 seconds after last change
+    }, 2000);
   },
 
   // ============================================
@@ -276,19 +305,19 @@ const SyncManager = {
 
   async getUsage() {
     const bytesInUse = await chrome.storage.sync.getBytesInUse(null);
-    const quota = 102400; // chrome.storage.sync QUOTA_BYTES
+    const quota = 102400;
     return { bytesInUse, quota, percent: Math.round((bytesInUse / quota) * 100) };
   },
 
   // ============================================
-  // Export / Import (Offline backup)
+  // Export / Import (File-based backup)
   // ============================================
 
   async exportData() {
     const spaces = await Storage.getSpaces();
     const collections = await Storage.getCollections();
     return {
-      version: 1,
+      version: 2,
       exportedAt: new Date().toISOString(),
       spaces,
       collections
@@ -297,7 +326,7 @@ const SyncManager = {
 
   async importData(data) {
     if (!data || !data.spaces || !data.collections) {
-      throw new Error('Invalid import data format');
+      throw new Error('Invalid import data');
     }
     await chrome.storage.local.set({
       spaces: data.spaces,

@@ -1082,6 +1082,10 @@ async function initSync() {
   // Listen for messages from background service worker
   chrome.runtime.onMessage.addListener((message) => {
     if (message.type === 'DOOBY_SYNC_TRIGGER') {
+      // Periodic sync: pull first, then push (safety check in pushToSync prevents empty overwrites)
+      SyncManager.pullFromSync().then(pulled => {
+        if (pulled) loadApp();
+      });
       SyncManager.pushToSync();
     } else if (message.type === 'DOOBY_DATA_CHANGED') {
       // Data was changed externally (e.g. icon click save), refresh and sync
@@ -1357,6 +1361,59 @@ function setupSyncEventListeners() {
 
   document.getElementById('btnCloudSyncNo').addEventListener('click', () => {
     document.getElementById('cloudSyncPrompt').classList.add('hidden');
+  });
+
+  // Export data to JSON file
+  document.getElementById('btnExportData').addEventListener('click', async () => {
+    try {
+      const data = await SyncManager.exportData();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `dooby-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      updateSyncUI('success', 'Exported');
+      setTimeout(() => updateSyncUI('idle', 'Synced'), 3000);
+    } catch (e) {
+      console.error('Export failed:', e);
+      updateSyncUI('error', 'Export failed');
+    }
+  });
+
+  // Import data from JSON file
+  document.getElementById('btnImportData').addEventListener('click', () => {
+    document.getElementById('importFileInput').click();
+  });
+
+  document.getElementById('importFileInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+
+      const tabCount = data.collections
+        ? data.collections.reduce((sum, c) => sum + (c.tabs ? c.tabs.length : 0), 0)
+        : 0;
+
+      if (confirm(`Import ${data.collections?.length || 0} collections with ${tabCount} tabs?\nThis will replace your current data.`)) {
+        await SyncManager.importData(data);
+        await loadApp();
+        updateStorageUsage();
+        updateSyncUI('success', 'Imported');
+        setTimeout(() => updateSyncUI('idle', 'Synced'), 3000);
+      }
+    } catch (err) {
+      console.error('Import failed:', err);
+      alert('Import failed: ' + err.message);
+      updateSyncUI('error', 'Import failed');
+    }
+
+    // Reset file input
+    e.target.value = '';
   });
 
   // Donate modal open/close
