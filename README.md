@@ -1,6 +1,6 @@
 # Dooby - Tab & Bookmark Manager
 
-> **v1.1.4** — A beautiful Chrome extension that replaces your new tab with a visual workspace for organizing tabs and bookmarks into collections. **Better than bookmarks.**
+> **v1.1.5** — A beautiful Chrome extension that replaces your new tab with a visual workspace for organizing tabs and bookmarks into collections. **Better than bookmarks.**
 
 ---
 
@@ -198,6 +198,9 @@ MIT
 ---
 
 ## Changelog
+
+### v1.1.5 (2026-09-02)
+- **Fix:** Background worker logged `Uncaught (in promise) Error: Could not establish connection. Receiving end does not exist.` every 5 minutes when no Dooby new tab was open — `chrome.runtime.sendMessage` rejections are now awaited and swallowed
 
 ### v1.1.4 (2026-09-02)
 - **Fix:** Cloud sync push failing with `QUOTA_BYTES_PER_ITEM` — chunks were sized by string length, but Chrome measures key + JSON-escaped UTF-8 bytes. Non-ASCII titles (Chinese, Japanese, emoji) and escaped quotes pushed 7000-char chunks past the 8 KB limit, so every push failed once you had ~25+ tabs
