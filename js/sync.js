@@ -234,14 +234,17 @@ const SyncManager = {
     } catch (err) {
       console.error('Dooby: Push failed:', err);
       let message = err.message;
-      const msg = err.message || '';
-      if (msg.includes('QUOTA_BYTES_PER_ITEM')) {
+      // Chromium reports quota errors as e.g. "Resource::kQuotaBytesPerItem
+      // quota exceeded" (older docs say "QUOTA_BYTES_PER_ITEM"). Normalize so
+      // both spellings are recognized.
+      const norm = (err.message || '').replace(/_/g, '').toLowerCase();
+      if (norm.includes('quotabytesperitem')) {
         message = 'A sync item exceeded the 8 KB per-item limit. Please report this bug.';
-      } else if (msg.includes('QUOTA_BYTES')) {
+      } else if (norm.includes('quotabytes')) {
         message = 'Storage quota exceeded (100 KB). Remove some tabs or use Export.';
-      } else if (msg.includes('MAX_WRITE_OPERATIONS')) {
+      } else if (norm.includes('maxwriteoperations')) {
         message = 'Too many sync writes in a short time. Sync will retry automatically.';
-      } else if (msg.includes('MAX_ITEMS')) {
+      } else if (norm.includes('maxitems')) {
         message = 'Too many sync items. Remove some tabs or use Export.';
       }
       this._notifyListeners('sync_error', { error: err.message, message });
