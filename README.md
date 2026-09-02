@@ -1,6 +1,6 @@
 # Dooby - Tab & Bookmark Manager
 
-> **v1.1.6** — A beautiful Chrome extension that replaces your new tab with a visual workspace for organizing tabs and bookmarks into collections. **Better than bookmarks.**
+> **v1.1.7** — A beautiful Chrome extension that replaces your new tab with a visual workspace for organizing tabs and bookmarks into collections. **Better than bookmarks.**
 
 ---
 
@@ -198,6 +198,12 @@ MIT
 ---
 
 ## Changelog
+
+### v1.1.7 (2026-09-02)
+- **Fix:** Dropping an Open Tab onto a collection's title bar now saves it (previously only the card body accepted drops)
+- **Fix:** Dragging an Open Tab by its favicon no longer starts a native image drag that could swallow the drop
+- **Fix:** Toolbar quick-save now targets the active space instead of always the first one, prefers the "Quick Save" collection, creates one if the space is empty, and only closes the tab after a successful save
+- **Improve:** Quick-save and drag-drop log what they did (or why they skipped) to the console for troubleshooting
 
 ### v1.1.6 (2026-09-02)
 - **Fix:** Save Session, the Open Tabs sidebar and the toolbar quick-save no longer include non-web pages such as `about:blank`, new tab pages or `data:` URLs
