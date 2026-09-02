@@ -7,6 +7,11 @@
 //   - QUOTA_BYTES_PER_ITEM: 8,192 (8KB per key)
 //   - MAX_ITEMS: 512
 //
+// Chrome measures each item as key.length + UTF-8 byte length of
+// JSON.stringify(value). Because each chunk is itself a JSON string, storing it
+// escapes every quote (\" costs 2 bytes) and non-ASCII characters cost 2-4 bytes
+// each. Chunks are therefore sized by *encoded bytes*, never by string length.
+//
 // Strategy: chunk collections data across multiple keys to stay within limits.
 // Favicon data URIs are stripped before sync to save space.
 // Backwards compatible with old format (single dooby_collections key).
@@ -68,6 +73,69 @@ const SyncManager = {
   },
 
   // ============================================
+  // Quota-aware sizing
+  // ============================================
+
+  QUOTA_BYTES: 102400,
+  QUOTA_BYTES_PER_ITEM: 8192,
+  // Target size for a single item, leaving headroom under the hard 8192 limit.
+  MAX_ITEM_BYTES: 8000,
+
+  _encoder: new TextEncoder(),
+
+  // Size of one item exactly as chrome.storage.sync accounts for it.
+  _itemBytes(key, value) {
+    return key.length + this._encoder.encode(JSON.stringify(value)).length;
+  },
+
+  // Encoded byte cost of one UTF-16 code unit at index i inside a JSON string
+  // value. Mirrors JSON.stringify escaping plus UTF-8 encoding.
+  _charCost(str, i) {
+    const code = str.charCodeAt(i);
+    if (code === 0x22 || code === 0x5c) return 2;              // \" or \\
+    if (code < 0x20) return (code === 0x08 || code === 0x09 || code === 0x0a || code === 0x0c || code === 0x0d) ? 2 : 6;
+    if (code < 0x80) return 1;
+    if (code < 0x800) return 2;
+    if (code >= 0xd800 && code <= 0xdbff) return 4;              // high surrogate: whole pair costs 4, low half costs 0
+    if (code >= 0xdc00 && code <= 0xdfff) return 0;
+    return 3;
+  },
+
+  // Split a string into pieces such that each stored item (key + escaped,
+  // UTF-8 encoded value) stays under MAX_ITEM_BYTES. Never splits a surrogate pair.
+  _chunkString(str, keyPrefix) {
+    const chunks = [];
+    let start = 0;
+    while (start < str.length) {
+      const key = `${keyPrefix}${chunks.length}`;
+      const budget = this.MAX_ITEM_BYTES - key.length - 2; // 2 = surrounding quotes
+      let bytes = 0;
+      let end = start;
+      while (end < str.length) {
+        const cost = this._charCost(str, end);
+        if (bytes + cost > budget) break;
+        bytes += cost;
+        end++;
+      }
+      if (end === start) end = start + 1; // always make progress
+      // Never end a chunk on a high surrogate (would split an emoji).
+      const lastCode = str.charCodeAt(end - 1);
+      if (end < str.length && lastCode >= 0xd800 && lastCode <= 0xdbff) end--;
+      if (end === start) end = start + 2;
+
+      let piece = str.slice(start, end);
+      // Verify against the real encoder and shrink if the estimate was off.
+      while (piece.length > 1 && this._itemBytes(key, piece) > this.MAX_ITEM_BYTES) {
+        end--;
+        piece = str.slice(start, end);
+      }
+      chunks.push(piece);
+      start = end;
+    }
+    return chunks;
+  },
+
+  // ============================================
   // Push to Cloud
   // ============================================
 
@@ -100,27 +168,20 @@ const SyncManager = {
       const optimizedCollections = this._optimizeForSync(collections);
 
       const syncData = {};
-      syncData['dooby_spaces'] = JSON.stringify(spaces);
-
-      // Chunk collections (each key max ~8KB)
-      const MAX_CHUNK_SIZE = 7000;
-      const collectionsStr = JSON.stringify(optimizedCollections);
-
-      // Quota check
-      const estimatedSize = collectionsStr.length + JSON.stringify(spaces).length + 200;
-      if (estimatedSize > 95000) {
-        console.warn('Dooby: Data too large for sync:', (estimatedSize / 1024).toFixed(1), 'KB');
+      const spacesStr = JSON.stringify(spaces);
+      syncData['dooby_spaces'] = spacesStr;
+      if (this._itemBytes('dooby_spaces', spacesStr) > this.QUOTA_BYTES_PER_ITEM) {
         this._notifyListeners('sync_error', {
-          error: 'Data too large',
-          message: `Data (${(estimatedSize / 1024).toFixed(1)} KB) exceeds 100 KB limit. Remove some tabs or use Export to back up.`
+          error: 'Spaces too large',
+          message: 'Too many spaces to sync (over 8 KB). Remove or rename some spaces.'
         });
         return;
       }
 
-      const chunks = [];
-      for (let i = 0; i < collectionsStr.length; i += MAX_CHUNK_SIZE) {
-        chunks.push(collectionsStr.slice(i, i + MAX_CHUNK_SIZE));
-      }
+      // Chunk collections by *encoded bytes* so every key stays under the
+      // 8 KB per-item limit even with CJK titles or lots of escaped quotes.
+      const collectionsStr = JSON.stringify(optimizedCollections);
+      const chunks = this._chunkString(collectionsStr, 'dooby_col_');
       for (let i = 0; i < chunks.length; i++) {
         syncData[`dooby_col_${i}`] = chunks[i];
       }
@@ -132,17 +193,35 @@ const SyncManager = {
         tabCount: localTabCount
       });
 
-      // Also write old format for backwards compatibility with other devices
-      // Only if it fits in the 8KB per-item limit
-      if (collectionsStr.length < 8000) {
+      // Also write old format for backwards compatibility with other devices,
+      // but only if the whole thing fits in one item (measured in bytes).
+      const legacyFits = this._itemBytes('dooby_collections', collectionsStr) <= this.MAX_ITEM_BYTES;
+      if (legacyFits) {
         syncData['dooby_collections'] = collectionsStr;
+      }
+
+      // Total quota check, measured the way Chrome measures it.
+      let estimatedBytes = 0;
+      for (const [key, value] of Object.entries(syncData)) {
+        estimatedBytes += this._itemBytes(key, value);
+      }
+      if (estimatedBytes > this.QUOTA_BYTES) {
+        const kb = (estimatedBytes / 1024).toFixed(1);
+        console.warn('Dooby: Data too large for sync:', kb, 'KB');
+        this._notifyListeners('sync_error', {
+          error: 'Data too large',
+          message: `Data (${kb} KB) exceeds the 100 KB sync limit. Remove some tabs or use Export to back up.`
+        });
+        return;
       }
 
       await chrome.storage.sync.set(syncData);
 
-      // Clean up stale chunks
+      // Clean up stale chunks (and a stale legacy key that no longer fits, so
+      // an old device can't restore outdated data from it).
       const existing = await chrome.storage.sync.get(null);
       const staleKeys = Object.keys(existing).filter(k => {
+        if (k === 'dooby_collections') return !legacyFits;
         if (!k.startsWith('dooby_col_')) return false;
         const idx = parseInt(k.replace('dooby_col_', ''), 10);
         return idx >= chunks.length;
@@ -155,8 +234,15 @@ const SyncManager = {
     } catch (err) {
       console.error('Dooby: Push failed:', err);
       let message = err.message;
-      if (err.message && err.message.includes('QUOTA')) {
-        message = 'Storage quota exceeded. Remove some tabs or use Export.';
+      const msg = err.message || '';
+      if (msg.includes('QUOTA_BYTES_PER_ITEM')) {
+        message = 'A sync item exceeded the 8 KB per-item limit. Please report this bug.';
+      } else if (msg.includes('QUOTA_BYTES')) {
+        message = 'Storage quota exceeded (100 KB). Remove some tabs or use Export.';
+      } else if (msg.includes('MAX_WRITE_OPERATIONS')) {
+        message = 'Too many sync writes in a short time. Sync will retry automatically.';
+      } else if (msg.includes('MAX_ITEMS')) {
+        message = 'Too many sync items. Remove some tabs or use Export.';
       }
       this._notifyListeners('sync_error', { error: err.message, message });
     } finally {
@@ -305,7 +391,7 @@ const SyncManager = {
 
   async getUsage() {
     const bytesInUse = await chrome.storage.sync.getBytesInUse(null);
-    const quota = 102400;
+    const quota = this.QUOTA_BYTES;
     return { bytesInUse, quota, percent: Math.round((bytesInUse / quota) * 100) };
   },
 

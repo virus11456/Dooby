@@ -1082,11 +1082,12 @@ async function initSync() {
   // Listen for messages from background service worker
   chrome.runtime.onMessage.addListener((message) => {
     if (message.type === 'DOOBY_SYNC_TRIGGER') {
-      // Periodic sync: pull first, then push (safety check in pushToSync prevents empty overwrites)
-      SyncManager.pullFromSync().then(pulled => {
-        if (pulled) loadApp();
+      // Periodic sync: pull first, then push once the pull has finished so we
+      // never push stale local data over newer cloud data.
+      SyncManager.pullFromSync().then(async pulled => {
+        if (pulled) await loadApp();
+        await SyncManager.pushToSync();
       });
-      SyncManager.pushToSync();
     } else if (message.type === 'DOOBY_DATA_CHANGED') {
       // Data was changed externally (e.g. icon click save), refresh and sync
       loadApp();
