@@ -1,6 +1,6 @@
 # Dooby - Tab & Bookmark Manager
 
-> **v1.1.3** — A beautiful Chrome extension that replaces your new tab with a visual workspace for organizing tabs and bookmarks into collections. **Better than bookmarks.**
+> **v1.1.4** — A beautiful Chrome extension that replaces your new tab with a visual workspace for organizing tabs and bookmarks into collections. **Better than bookmarks.**
 
 ---
 
@@ -198,6 +198,13 @@ MIT
 ---
 
 ## Changelog
+
+### v1.1.4 (2026-09-02)
+- **Fix:** Cloud sync push failing with `QUOTA_BYTES_PER_ITEM` — chunks were sized by string length, but Chrome measures key + JSON-escaped UTF-8 bytes. Non-ASCII titles (Chinese, Japanese, emoji) and escaped quotes pushed 7000-char chunks past the 8 KB limit, so every push failed once you had ~25+ tabs
+- **Fix:** Legacy `dooby_collections` key was written whenever the JSON was under 8000 chars, which also exceeded 8 KB after escaping; it is now only written when it really fits and is removed otherwise
+- **Fix:** Total 100 KB quota check now measured in bytes the way Chrome does
+- **Fix:** Periodic sync now waits for the pull to finish before pushing
+- **Improve:** Clearer sync error messages (per-item vs total quota vs write-rate limits)
 
 ### v1.1.3 (2026-03-17)
 - **New:** Add Domain5566 to Wall of Fame as first donor
