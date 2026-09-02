@@ -495,6 +495,12 @@ async function addCollection() {
 // Open Tabs Sidebar
 // ============================================
 
+// Only real web pages are worth saving: skip chrome://, extension pages,
+// about:blank, new tab pages, data: URLs, etc.
+function isSavableUrl(url) {
+  return typeof url === 'string' && /^(https?|ftp|file):/i.test(url);
+}
+
 async function renderOpenTabs() {
   const list = document.getElementById('openTabsList');
   list.innerHTML = '';
@@ -508,7 +514,7 @@ async function renderOpenTabs() {
   }
 
   // Filter out chrome:// and extension pages
-  tabs = tabs.filter(t => t.url && !t.url.startsWith('chrome://') && !t.url.startsWith('chrome-extension://'));
+  tabs = tabs.filter(t => isSavableUrl(t.url));
 
   document.getElementById('openTabCount').textContent = tabs.length;
 
@@ -563,7 +569,7 @@ async function saveSession() {
     return;
   }
 
-  tabs = tabs.filter(t => t.url && !t.url.startsWith('chrome://') && !t.url.startsWith('chrome-extension://'));
+  tabs = tabs.filter(t => isSavableUrl(t.url));
 
   const collection = await Storage.addCollection(activeSpaceId, name.trim());
   const collections = await Storage.getCollections();
