@@ -372,27 +372,35 @@ function createCollectionCard(collection, colorIndex = 0) {
     }
   }
 
-  // Make body a drop target
-  DragDrop.makeDropTarget(body, {
-    type: 'collection-body',
-    onDrop: async (data, dropIndex) => {
-      if (data.type === 'open-tab') {
-        // From open tabs sidebar
-        await Storage.addTabToCollection(collection.id, {
-          title: data.title,
-          url: data.url,
-          favicon: data.favicon
-        });
-        // Close the browser tab
-        try { chrome.tabs.remove(data.chromeTabId); } catch(e) {}
-      } else if (data.type === 'collection-tab') {
-        // From another collection
-        await Storage.moveTab(data.collectionId, collection.id, data.tabId, dropIndex);
-      }
-      await renderCollections();
-      await renderOpenTabs();
+  // Shared drop handling for the body (with insertion index) and the header
+  // (append to the end), so dropping anywhere on the card works.
+  const handleDrop = async (data, dropIndex) => {
+    if (data.type === 'open-tab') {
+      // From open tabs sidebar
+      await Storage.addTabToCollection(collection.id, {
+        title: data.title,
+        url: data.url,
+        favicon: data.favicon
+      });
+      console.log('Dooby: added "' + data.title + '" to collection "' + collection.name + '"');
+      // Close the browser tab
+      try { await chrome.tabs.remove(data.chromeTabId); } catch(e) {}
+    } else if (data.type === 'collection-tab') {
+      // From another collection
+      await Storage.moveTab(data.collectionId, collection.id, data.tabId, dropIndex);
     }
+    await renderCollections();
+    await renderOpenTabs();
+  };
+
+  DragDrop.makeDropTarget(body, { type: 'collection-body', onDrop: handleDrop });
+  DragDrop.makeDropTarget(header, {
+    type: 'collection-header',
+    onDrop: (data) => handleDrop(data, collection.tabs.length)
   });
+  header.addEventListener('dragover', () => card.classList.add('drag-over'));
+  header.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+  header.addEventListener('drop', () => card.classList.remove('drag-over'));
 
   card.appendChild(body);
   return card;
@@ -413,7 +421,7 @@ function createTabElement(tab, collectionId) {
   el.innerHTML = `
     <input type="checkbox" class="tab-checkbox">
     ${tab.pinned ? '<svg class="tab-pin-icon" width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M4.146.146A.5.5 0 0 1 4.5 0h7a.5.5 0 0 1 .5.5c0 .68-.342 1.174-.646 1.479-.126.125-.25.224-.354.298v4.431l.078.048c.203.127.476.314.751.555C12.36 7.775 13 8.527 13 9.5a.5.5 0 0 1-.5.5h-4v4.5c0 .276-.224 1.5-.5 1.5s-.5-1.224-.5-1.5V10h-4a.5.5 0 0 1-.5-.5c0-.973.64-1.725 1.17-2.189a5.1 5.1 0 0 1 .752-.555l.078-.048V2.323a2 2 0 0 1-.354-.298C4.342 1.674 4 1.179 4 .5a.5.5 0 0 1 .146-.354z"/></svg>' : ''}
-    <img class="tab-favicon" src="${escapeHtml(faviconSrc)}" alt="">
+    <img class="tab-favicon" src="${escapeHtml(faviconSrc)}" alt="" draggable="false">
     <span class="tab-title" title="${escapeHtml(tab.url)}">${escapeHtml(tab.title)}</span>
     <button class="tab-remove" title="Remove">&times;</button>
   `;
@@ -525,7 +533,7 @@ async function renderOpenTabs() {
     const faviconSrc = tab.favIconUrl || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(new URL(tab.url).hostname)}&sz=32`;
 
     li.innerHTML = `
-      <img src="${escapeHtml(faviconSrc)}" alt="">
+      <img src="${escapeHtml(faviconSrc)}" alt="" draggable="false">
       <span class="open-tab-title" title="${escapeHtml(tab.url)}">${escapeHtml(tab.title || 'Untitled')}</span>
     `;
 
