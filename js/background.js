@@ -1,5 +1,16 @@
 // Background service worker for Dooby
 
+// Send a message to any open Dooby new tab pages. When none are open,
+// chrome.runtime.sendMessage rejects with "Receiving end does not exist";
+// that is expected, so swallow it instead of surfacing an uncaught rejection.
+async function notifyNewTabPages(type) {
+  try {
+    await chrome.runtime.sendMessage({ type });
+  } catch (e) {
+    // No listeners available
+  }
+}
+
 // When the extension icon is clicked, save the current tab to the default collection
 chrome.action.onClicked.addListener(async (tab) => {
   if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) {
@@ -31,11 +42,7 @@ chrome.action.onClicked.addListener(async (tab) => {
   await chrome.storage.local.set({ localUpdateTime: Date.now() });
 
   // Notify any open new tab pages to refresh and sync
-  try {
-    chrome.runtime.sendMessage({ type: 'DOOBY_DATA_CHANGED' });
-  } catch (e) {
-    // No listeners available
-  }
+  await notifyNewTabPages('DOOBY_DATA_CHANGED');
 
   // Close the saved tab
   chrome.tabs.remove(tab.id);
@@ -90,11 +97,7 @@ chrome.runtime.onInstalled.addListener(async () => {
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === 'dooby-sync') {
     // Notify any open new tab pages to sync
-    try {
-      chrome.runtime.sendMessage({ type: 'DOOBY_SYNC_TRIGGER' });
-    } catch (e) {
-      // No listeners available
-    }
+    await notifyNewTabPages('DOOBY_SYNC_TRIGGER');
   }
 });
 
