@@ -13,7 +13,8 @@ async function notifyNewTabPages(type) {
 
 // When the extension icon is clicked, save the current tab to the default collection
 chrome.action.onClicked.addListener(async (tab) => {
-  if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) {
+  // Only save real web pages (skip chrome://, extension pages, about:blank, etc.)
+  if (!tab.url || !/^(https?|ftp|file):/i.test(tab.url)) {
     return;
   }
 
