@@ -1,6 +1,6 @@
 # Dooby - Tab & Bookmark Manager
 
-> **v1.1.9** — A beautiful Chrome extension that replaces your new tab with a visual workspace for organizing tabs and bookmarks into collections. **Better than bookmarks.**
+> **v1.1.10** — A beautiful Chrome extension that replaces your new tab with a visual workspace for organizing tabs and bookmarks into collections. **Better than bookmarks.**
 
 ---
 
@@ -146,7 +146,7 @@ The code is an ECDSA P-256 signature of the normalized display name (lowercased,
 
 If you enjoy Dooby, consider buying the developer a coffee!
 
-**USDT (TRC-20):** `TATQGiRcFx14XGv2kBVmxQWwDENZwFSnap`
+**USDT (TRC-20):** `TMx7ja4r3WGFcnwKNqAVogY91XRgGaQA1q`
 
 **Just $1** gets you:
 - Your name in the **Wall of Fame**
