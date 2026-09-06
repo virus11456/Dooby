@@ -1,6 +1,6 @@
 # Dooby - Tab & Bookmark Manager
 
-> **v1.1.8** — A beautiful Chrome extension that replaces your new tab with a visual workspace for organizing tabs and bookmarks into collections. **Better than bookmarks.**
+> **v1.1.9** — A beautiful Chrome extension that replaces your new tab with a visual workspace for organizing tabs and bookmarks into collections. **Better than bookmarks.**
 
 ---
 
@@ -116,6 +116,17 @@ scripts/build-store-zip.sh          # writes dist/dooby-<version>-webstore.zip
 The script strips the `key` field (the store rejects a first upload that contains it and assigns its own ID) and leaves out repo-only files. Upload the zip in the Developer Dashboard, fill in the Privacy tab (single purpose: tab & bookmark manager; `tabs` is used to read open tab titles/URLs the user chooses to save; `storage`/`alarms` for local data and periodic sync), and point the privacy policy field at a public copy of `privacy-policy.html`. "Unlisted" visibility is enough for personal use across devices.
 
 Once installed from the store, every device shares the store's extension ID, so cross-device sync works without the manifest `key`. Store installs and unpacked installs have different IDs and do not share data: export before switching, import after.
+
+---
+
+## Issuing Donor Activation Codes
+
+```bash
+export DOOBY_ACTIVATION_KEY=~/.dooby/activation-key.pem   # developer's private key, never committed
+node scripts/gen-activation-code.js "Donor Name"
+```
+
+The code is an ECDSA P-256 signature of the normalized display name (lowercased, whitespace removed). The extension verifies it against `DonorManager.ACTIVATION_PUBLIC_KEY` in `js/donor.js`, so a code only works together with the name it was issued for and cannot be forged from the public source. To rotate keys, generate a new pair, replace the JWK in `js/donor.js`, and re-issue codes.
 
 ---
 
