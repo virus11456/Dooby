@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dooby - Tab & Bookmark Manager</title>
+  <meta name="description" content="Dooby 把 Chrome 新分頁變成視覺化的分頁與書籤工作區，支援拖曳整理、工作階段儲存、跨裝置同步。Better than bookmarks.">
+  <link rel="icon" href="/icons/icon48.png">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0b0f19;
+      --panel: #131a2a;
+      --panel-2: #1a2236;
+      --text: #e6e9f0;
+      --muted: #9aa3b5;
+      --accent: #10b981;
+      --accent-2: #6366f1;
+      --border: rgba(255,255,255,0.08);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 0;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 20px; color: var(--text); }
+    .brand img { width: 36px; height: 36px; border-radius: 8px; }
+    nav a { color: var(--muted); margin-left: 20px; font-size: 14px; }
+    nav a:hover { color: var(--text); text-decoration: none; }
+
+    .hero { padding: 72px 0 48px; text-align: center; }
+    .hero h1 { font-size: 44px; line-height: 1.2; margin-bottom: 16px; }
+    .hero h1 span { color: var(--accent); }
+    .hero p { font-size: 18px; color: var(--muted); max-width: 640px; margin: 0 auto 32px; }
+    .cta { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+    .btn {
+      display: inline-block; padding: 12px 22px; border-radius: 10px; font-weight: 600; font-size: 15px;
+      border: 1px solid var(--border); color: var(--text); background: var(--panel);
+    }
+    .btn:hover { text-decoration: none; background: var(--panel-2); }
+    .btn.primary { background: var(--accent); color: #06261b; border-color: transparent; }
+    .btn.primary:hover { background: #34d399; }
+
+    .shot {
+      margin: 24px auto 0; max-width: 900px; border-radius: 14px; overflow: hidden;
+      border: 1px solid var(--border); background: var(--panel);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.45);
+    }
+    .shot .bar { display: flex; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+    .shot .bar i { width: 12px; height: 12px; border-radius: 50%; background: #2a3247; display: block; }
+    .shot .body { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; padding: 20px; }
+    .card { border-radius: 10px; border: 1px solid var(--border); background: var(--panel-2); overflow: hidden; }
+    .card .h { padding: 10px 14px; font-weight: 600; font-size: 14px; border-left: 3px solid var(--accent); display: flex; justify-content: space-between; }
+    .card .h b { background: rgba(16,185,129,0.15); color: var(--accent); border-radius: 999px; padding: 0 8px; font-size: 12px; }
+    .card:nth-child(2) .h { border-left-color: var(--accent-2); }
+    .card:nth-child(2) .h b { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+    .card:nth-child(3) .h { border-left-color: #f59e0b; }
+    .card:nth-child(3) .h b { background: rgba(245,158,11,0.15); color: #fcd34d; }
+    .card ul { list-style: none; padding: 8px 14px 12px; }
+    .card li { font-size: 13px; color: var(--muted); padding: 5px 0; display: flex; gap: 8px; align-items: center; }
+    .card li::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: #2f3a52; }
+
+    section { padding: 56px 0; border-top: 1px solid var(--border); }
+    h2 { font-size: 28px; margin-bottom: 8px; }
+    .lead { color: var(--muted); margin-bottom: 28px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .feature { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+    .feature h3 { font-size: 16px; margin-bottom: 6px; }
+    .feature p { font-size: 14px; color: var(--muted); }
+
+    ol.steps { padding-left: 22px; }
+    ol.steps li { margin-bottom: 10px; color: var(--muted); }
+    ol.steps li strong { color: var(--text); }
+    code { background: var(--panel-2); padding: 2px 6px; border-radius: 5px; font-size: 13px; }
+
+    .privacy-box { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.3); border-radius: 12px; padding: 20px; }
+    footer { padding: 32px 0 48px; color: var(--muted); font-size: 13px; text-align: center; border-top: 1px solid var(--border); }
+    @media (max-width: 720px) {
+      .hero h1 { font-size: 32px; }
+      .shot .body { grid-template-columns: 1fr; }
+      nav a { margin-left: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="brand" href="/dooby"><img src="/icons/icon128.png" alt="Dooby"> Dooby</a>
+      <nav>
+        <a href="#features">功能</a>
+        <a href="#install">安裝</a>
+        <a href="/dooby/privacy-policy">隱私權政策</a>
+        <a href="https://github.com/virus11456/Dooby">GitHub</a>
+      </nav>
+    </header>
+
+    <div class="hero">
+      <h1>把新分頁變成你的<span>分頁與書籤工作區</span></h1>
+      <p>Dooby 是一款 Chrome 擴充功能，用視覺化的收藏卡片整理分頁與書籤，一鍵儲存工作階段，透過 Chrome 帳號跨裝置同步。Better than bookmarks.</p>
+      <div class="cta">
+        <a class="btn primary" href="#install">安裝 Dooby</a>
+        <a class="btn" href="https://github.com/virus11456/Dooby">查看原始碼</a>
+      </div>
+
+      <div class="shot" aria-hidden="true">
+        <div class="bar"><i></i><i></i><i></i></div>
+        <div class="body">
+          <div class="card"><div class="h">Quick Save <b>6</b></div><ul><li>專案規劃文件</li><li>設計參考</li><li>API 文件</li><li>週會筆記</li></ul></div>
+          <div class="card"><div class="h">Work <b>12</b></div><ul><li>報表儀表板</li><li>客戶回饋整理</li><li>行銷素材</li><li>排程工具</li></ul></div>
+          <div class="card"><div class="h">Reading List <b>4</b></div><ul><li>技術文章</li><li>產品分析</li><li>週末想讀的</li><li>影片清單</li></ul></div>
+        </div>
+      </div>
+    </div>
+
+    <section id="features">
+      <h2>功能</h2>
+      <p class="lead">所有資料都存在你的瀏覽器裡，沒有帳號、沒有伺服器。</p>
+      <div class="grid">
+        <div class="feature"><h3>Spaces 與 Collections</h3><p>用空間區分工作、個人、副業，再用收藏卡片把分頁分門別類。</p></div>
+        <div class="feature"><h3>拖曳整理</h3><p>從右側「Open Tabs」把分頁直接拖進任何收藏，或按工具列圖示一鍵快速儲存。</p></div>
+        <div class="feature"><h3>儲存工作階段</h3><p>一鍵把目前所有分頁存成一個收藏，之後隨時整組打開。</p></div>
+        <div class="feature"><h3>跨裝置同步</h3><p>透過 Chrome 帳號內建的同步機制，登入同一個 Google 帳號的電腦自動共享書籤。</p></div>
+        <div class="feature"><h3>搜尋與釘選</h3><p>Ctrl+K 全文搜尋所有已存分頁，重要的收藏或分頁可釘選置頂。</p></div>
+        <div class="feature"><h3>匯入與備份</h3><p>支援 Chrome 書籤 HTML、Toby、TabMe 匯入，完整 JSON 匯出與還原，並能找出重複網址。</p></div>
+      </div>
+    </section>
+
+    <section id="install">
+      <h2>安裝</h2>
+      <p class="lead">從 Chrome 線上應用程式商店安裝，或以開發者模式載入原始碼。</p>
+      <ol class="steps">
+        <li><strong>Chrome 線上應用程式商店：</strong>搜尋「Dooby - Tab & Bookmark Manager」並安裝，之後會自動更新。</li>
+        <li><strong>從原始碼：</strong>到 <a href="https://github.com/virus11456/Dooby">GitHub</a> 下載 ZIP 並解壓縮，開啟 <code>chrome://extensions</code>，打開「開發人員模式」，按「載入未封裝項目」選擇資料夾。</li>
+        <li><strong>啟用同步：</strong>確認 Chrome 已登入 Google 帳號並開啟同步，且「擴充功能」的同步項目為開啟。</li>
+      </ol>
+    </section>
+
+    <section id="privacy">
+      <h2>隱私</h2>
+      <div class="privacy-box">
+        <p>Dooby 不收集、不傳送、不分享任何個人資料。分頁標題與網址只儲存在你的瀏覽器本機，以及你選擇啟用的 Chrome 同步空間。沒有外部伺服器、沒有分析服務、沒有遠端程式碼。</p>
+        <p style="margin-top:10px;"><a href="/dooby/privacy-policy">閱讀完整隱私權政策（中文 / English）</a></p>
+      </div>
+    </section>
+
+    <footer>
+      &copy; 2026 Dooby - Tab & Bookmark Manager · <a href="/dooby/privacy-policy">Privacy Policy</a> · <a href="https://github.com/virus11456/Dooby">GitHub</a>
+    </footer>
+  </div>
+</body>
+</html>
