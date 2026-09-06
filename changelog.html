@@ -4,134 +4,198 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dooby 更新記錄 / Changelog</title>
-  <meta name="description" content="Dooby Chrome 擴充功能的版本更新記錄。">
+  <meta name="description" content="Release notes for the Dooby Chrome extension. Dooby Chrome 擴充功能的版本更新記錄。">
   <link rel="icon" href="/icons/icon48.png">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    :root { --bg: #0b0f19; --panel: #131a2a; --panel-2: #1a2236; --text: #e6e9f0; --muted: #9aa3b5; --accent: #10b981; --border: rgba(255,255,255,0.08); }
+    :root { --bg: #0b1020; --panel: rgba(255,255,255,0.03); --panel-2: rgba(255,255,255,0.08); --text: #eef2f7; --muted: #9aa8bd; --accent: #34d399; --border: rgba(255,255,255,0.08); }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
     a { color: var(--accent); text-decoration: none; } a:hover { text-decoration: underline; }
+    html.lang-zh .en, html.lang-en .zh { display: none !important; }
+    .lang-switch { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-left: 16px; vertical-align: middle; }
+    .lang-switch button { background: transparent; color: var(--muted); border: 0; padding: 4px 10px; font-size: 13px; cursor: pointer; }
+    .lang-switch button.on { background: #10b981; color: #06261b; }
     .wrap { max-width: 860px; margin: 0 auto; padding: 0 24px 64px; }
-    header { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; }
+    header { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; flex-wrap: wrap; gap: 10px; }
     .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 20px; color: var(--text); }
     .brand img { width: 36px; height: 36px; border-radius: 8px; }
+    nav { display: flex; align-items: center; flex-wrap: wrap; }
     nav a { color: var(--muted); margin-left: 20px; font-size: 14px; } nav a:hover { color: var(--text); text-decoration: none; }
-    h1 { font-size: 36px; margin: 40px 0 8px; }
+    h1 { font-size: 40px; font-weight: 800; letter-spacing: -0.02em; margin: 40px 0 8px; }
+    body::before { content: ""; position: fixed; z-index: -1; width: 600px; height: 600px; left: -200px; top: -160px; border-radius: 50%; filter: blur(90px); opacity: .5; background: radial-gradient(circle, #10b981 0%, transparent 65%); pointer-events: none; }
     .lead { color: var(--muted); margin-bottom: 32px; }
     .release { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; }
     .release h2 { font-size: 20px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
     .release h2 .date { font-size: 13px; font-weight: 400; color: var(--muted); }
-    .release h2 .latest { font-size: 11px; background: rgba(16,185,129,0.15); color: var(--accent); border-radius: 999px; padding: 2px 8px; }
+    .release h2 .latest { font-size: 11px; background: rgba(16,185,129,0.2); color: #34d399; border-radius: 999px; padding: 2px 8px; }
     .release ul { padding-left: 20px; } .release li { color: var(--muted); margin-bottom: 6px; font-size: 15px; }
     .release li b { color: var(--text); }
     .tag { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 4px; padding: 1px 6px; margin-right: 6px; vertical-align: 1px; }
-    .tag.fix { background: rgba(245,158,11,0.15); color: #fcd34d; } .tag.new { background: rgba(16,185,129,0.15); color: var(--accent); } .tag.improve { background: rgba(99,102,241,0.15); color: #a5b4fc; }
-    code { background: var(--panel-2); padding: 2px 6px; border-radius: 5px; font-size: 13px; }
+    .tag.fix { background: rgba(245,158,11,0.15); color: #fcd34d; } .tag.new { background: rgba(16,185,129,0.18); color: #34d399; } .tag.improve { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+    code { background: var(--panel-2); padding: 2px 6px; border-radius: 5px; font-size: 13px; word-break: break-all; }
     footer { padding-top: 24px; color: var(--muted); font-size: 13px; text-align: center; border-top: 1px solid var(--border); margin-top: 40px; }
   </style>
+  <script>
+    (function () {
+      var saved = null;
+      try { saved = localStorage.getItem('dooby-lang'); } catch (e) {}
+      var lang = saved || ((navigator.language || '').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en');
+      document.documentElement.className = 'lang-' + lang;
+      document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+    })();
+  </script>
 </head>
 <body>
   <div class="wrap">
     <header>
       <a class="brand" href="/dooby"><img src="/icons/icon128.png" alt="Dooby"> Dooby</a>
       <nav>
-        <a href="/dooby">首頁</a>
-        <a href="/dooby/changelog">更新記錄</a>
-        <a href="/dooby/privacy-policy">隱私權政策</a>
-        <a href="https://github.com/virus11456/Dooby">GitHub</a>
+        <a href="/dooby"><span class="zh">首頁</span><span class="en">Home</span></a>
+        <a href="/dooby/changelog"><span class="zh">更新記錄</span><span class="en">Changelog</span></a>
+        <a href="/dooby/privacy-policy"><span class="zh">隱私權政策</span><span class="en">Privacy</span></a>
+        <span class="lang-switch" role="group" aria-label="Language">
+          <button type="button" data-lang="zh">中文</button>
+          <button type="button" data-lang="en">EN</button>
+        </span>
       </nav>
     </header>
 
-    <h1>更新記錄</h1>
-    <p class="lead">Dooby 每個版本的修正與新功能。完整程式碼與提交記錄在 <a href="https://github.com/virus11456/Dooby">GitHub</a>。</p>
+    <h1><span class="zh">更新記錄</span><span class="en">Changelog</span></h1>
+    <p class="lead zh">Dooby 每個版本的修正與新功能。從 <a href="https://chromewebstore.google.com/detail/pjbjldjdeaiffdbehpmbndjaiehcoahg">Chrome 線上應用程式商店</a> 安裝即可自動更新。</p>
+    <p class="lead en">Fixes and new features in every Dooby release. Install from the <a href="https://chromewebstore.google.com/detail/pjbjldjdeaiffdbehpmbndjaiehcoahg">Chrome Web Store</a> to get updates automatically.</p>
 
     <div class="release">
-      <h2>v1.1.10 <span class="date">2026-09-07</span> <span class="latest">最新</span></h2>
-      <ul>
-        <li><span class="tag improve">變更</span>更新 USDT（TRC-20）贊助地址。</li>
-      </ul>
+      <h2>v1.1.10 <span class="date">2026-09-07</span> <span class="latest zh">最新</span><span class="latest en">Latest</span></h2>
+      <ul class="zh"><li><span class="tag improve">變更</span>更新 USDT（TRC-20）贊助地址。</li></ul>
+      <ul class="en"><li><span class="tag improve">Change</span>Updated the USDT (TRC-20) donation address.</li></ul>
     </div>
 
     <div class="release">
       <h2>v1.1.9 <span class="date">2026-09-07</span></h2>
-      <ul>
+      <ul class="zh">
         <li><span class="tag fix">修正</span><b>贊助者啟用碼真的會驗證了。</b>之前只檢查開頭是不是 <code>DOOBY-</code>，任何人隨便打都能解鎖。現在啟用碼是開發者用私鑰對「顯示名稱」簽出的簽章，套件用內建的公鑰驗證，名稱或代碼不對就無法啟用。舊版用假代碼解鎖的狀態會在啟動時自動撤銷。</li>
         <li><span class="tag fix">修正</span>取消啟用或啟用失效時，付費主題會退回免費的 Midnight 主題。</li>
         <li><span class="tag new">新增</span>開發者用的啟用碼產生工具 <code>scripts/gen-activation-code.js</code>。</li>
         <li><span class="tag new">新增</span>這個更新記錄頁面。</li>
       </ul>
+      <ul class="en">
+        <li><span class="tag fix">Fix</span><b>Supporter activation codes are now actually verified.</b> The old check only looked for a <code>DOOBY-</code> prefix, so anything unlocked the perks. A code is now a signature of the display name made with the developer's private key and verified in the extension with the embedded public key; a wrong name or code no longer activates. States unlocked with fake codes are revoked on startup.</li>
+        <li><span class="tag fix">Fix</span>Deactivating, or losing activation, falls back from a premium theme to the free Midnight theme.</li>
+        <li><span class="tag new">New</span>Developer tool for issuing codes: <code>scripts/gen-activation-code.js</code>.</li>
+        <li><span class="tag new">New</span>This changelog page.</li>
+      </ul>
     </div>
 
     <div class="release">
       <h2>v1.1.8 <span class="date">2026-09-06</span></h2>
-      <ul>
+      <ul class="zh">
         <li><span class="tag fix">修正</span><b>跨裝置同步永遠連不起來。</b>未封裝載入的套件 ID 是由資料夾路徑算出來的，每台電腦都不同，等於各自有一個雲端空間。manifest 加入固定的 <code>key</code>，所有安裝的 ID 都是 <code>dfoidibckihcnmakgoabkebinahggked</code>。</li>
         <li><span class="tag improve">改善</span>滑鼠停在同步狀態上會顯示套件 ID，方便比對兩台電腦是否一致。</li>
         <li><span class="tag new">新增</span>Chrome 線上應用程式商店打包腳本，以及這個網站（首頁與隱私權政策）。</li>
+      </ul>
+      <ul class="en">
+        <li><span class="tag fix">Fix</span><b>Cross-device sync could never connect.</b> An unpacked extension's ID is derived from its folder path, so every computer got a different ID and its own separate cloud storage. The manifest now carries a fixed <code>key</code>, giving every install the ID <code>dfoidibckihcnmakgoabkebinahggked</code>.</li>
+        <li><span class="tag improve">Improve</span>Hovering the sync status shows the extension ID so mismatches between devices are easy to spot.</li>
+        <li><span class="tag new">New</span>Chrome Web Store packaging script and this website (home page and privacy policy).</li>
       </ul>
     </div>
 
     <div class="release">
       <h2>v1.1.7 <span class="date">2026-09-02</span></h2>
-      <ul>
+      <ul class="zh">
         <li><span class="tag fix">修正</span>把 Open Tabs 拖到收藏卡片的<b>標題列</b>現在也會存進去，之前只有內容區接受放下。</li>
         <li><span class="tag fix">修正</span>從網站圖示開始拖曳不會再變成瀏覽器原生的圖片拖曳。</li>
         <li><span class="tag fix">修正</span>工具列快速儲存改存到目前所在的空間，優先放進 Quick Save，空間沒有收藏時自動建立，儲存成功才關閉分頁。</li>
+      </ul>
+      <ul class="en">
+        <li><span class="tag fix">Fix</span>Dropping an Open Tab onto a collection's <b>title bar</b> now saves it; previously only the card body accepted drops.</li>
+        <li><span class="tag fix">Fix</span>Dragging by the site icon no longer turns into a native image drag.</li>
+        <li><span class="tag fix">Fix</span>Toolbar quick-save targets the current space, prefers Quick Save, creates one if the space is empty, and only closes the tab after a successful save.</li>
       </ul>
     </div>
 
     <div class="release">
       <h2>v1.1.6 <span class="date">2026-09-02</span></h2>
-      <ul>
-        <li><span class="tag fix">修正</span>Save Session、Open Tabs 側欄與快速儲存不再包含 <code>about:blank</code>、新分頁等非網頁。</li>
-      </ul>
+      <ul class="zh"><li><span class="tag fix">修正</span>Save Session、Open Tabs 側欄與快速儲存不再包含 <code>about:blank</code>、新分頁等非網頁。</li></ul>
+      <ul class="en"><li><span class="tag fix">Fix</span>Save Session, the Open Tabs sidebar and quick-save no longer include non-web pages such as <code>about:blank</code> or new tab pages.</li></ul>
     </div>
 
     <div class="release">
       <h2>v1.1.5 <span class="date">2026-09-02</span></h2>
-      <ul>
-        <li><span class="tag fix">修正</span>沒有 Dooby 新分頁開著時，背景程式每 5 分鐘產生的 <code>Receiving end does not exist</code> 錯誤。</li>
-      </ul>
+      <ul class="zh"><li><span class="tag fix">修正</span>沒有 Dooby 新分頁開著時，背景程式每 5 分鐘產生的 <code>Receiving end does not exist</code> 錯誤。</li></ul>
+      <ul class="en"><li><span class="tag fix">Fix</span>The background worker no longer logs <code>Receiving end does not exist</code> every 5 minutes when no Dooby new tab is open.</li></ul>
     </div>
 
     <div class="release">
       <h2>v1.1.4 <span class="date">2026-09-02</span></h2>
-      <ul>
+      <ul class="zh">
         <li><span class="tag fix">修正</span><b>雲端同步每次上傳都失敗。</b>資料切塊原本用字元數計算，但 Chrome 的每個 key 上限 8 KB 是用位元組算，中文標題會超過。改成用位元組切塊，並修正 100 KB 總量的計算方式。</li>
         <li><span class="tag fix">修正</span>定時同步先拉再推，避免舊資料蓋掉雲端。</li>
         <li><span class="tag improve">改善</span>同步錯誤訊息區分「單一 key 超限」「總量超限」「寫入過於頻繁」。</li>
+      </ul>
+      <ul class="en">
+        <li><span class="tag fix">Fix</span><b>Every cloud sync upload failed.</b> Data was chunked by character count, but Chrome's 8 KB per-key limit is measured in bytes, which non-ASCII titles exceeded. Chunks are now sized by bytes and the 100 KB total check is measured the same way.</li>
+        <li><span class="tag fix">Fix</span>Periodic sync pulls before pushing so stale data cannot overwrite the cloud.</li>
+        <li><span class="tag improve">Improve</span>Sync errors distinguish per-key, total and write-rate limits.</li>
       </ul>
     </div>
 
     <div class="release">
       <h2>v1.1.3 <span class="date">2026-03-17</span></h2>
-      <ul><li><span class="tag new">新增</span>Wall of Fame 加入第一位贊助者 Domain5566。</li></ul>
+      <ul class="zh"><li><span class="tag new">新增</span>Wall of Fame 加入第一位贊助者 Domain5566。</li></ul>
+      <ul class="en"><li><span class="tag new">New</span>Domain5566 added to the Wall of Fame as the first supporter.</li></ul>
     </div>
 
     <div class="release">
       <h2>v1.1.2 <span class="date">2026-03-17</span></h2>
-      <ul>
-        <li><span class="tag fix">修正</span>收到其他裝置的同步變更時，正確把雲端資料寫回本機再更新畫面。</li>
-      </ul>
+      <ul class="zh"><li><span class="tag fix">修正</span>收到其他裝置的同步變更時，正確把雲端資料寫回本機再更新畫面。</li></ul>
+      <ul class="en"><li><span class="tag fix">Fix</span>Changes from another device are written to local storage before the UI refreshes.</li></ul>
     </div>
 
     <div class="release">
       <h2>v1.1.1 <span class="date">2026-03-17</span></h2>
-      <ul>
+      <ul class="zh">
         <li><span class="tag fix">修正</span>移除未使用的 <code>sessions</code> 權限（商店審核要求）。</li>
         <li><span class="tag fix">修正</span>啟動時的初始同步會正確更新畫面；同步錯誤狀態保留到下次成功為止。</li>
+      </ul>
+      <ul class="en">
+        <li><span class="tag fix">Fix</span>Removed the unused <code>sessions</code> permission (Chrome Web Store review).</li>
+        <li><span class="tag fix">Fix</span>Initial sync on startup refreshes the UI; sync errors stay visible until the next success.</li>
       </ul>
     </div>
 
     <div class="release">
       <h2>v1.1.0 <span class="date">2026-03-11</span></h2>
-      <ul>
+      <ul class="zh">
         <li><span class="tag new">新增</span>透過 Chrome 帳號的雲端同步、儲存用量指示、手動同步按鈕。</li>
         <li><span class="tag new">新增</span>JSON 匯出與匯入、贊助者系統與啟用碼、5 種配色主題、Wall of Fame、隱私權政策頁面。</li>
       </ul>
+      <ul class="en">
+        <li><span class="tag new">New</span>Cloud sync through your Chrome account, storage usage indicator, manual sync button.</li>
+        <li><span class="tag new">New</span>JSON export and import, supporter system with activation codes, 5 color themes, Wall of Fame, privacy policy page.</li>
+      </ul>
     </div>
 
-    <footer>&copy; 2026 Dooby - Tab & Bookmark Manager · <a href="/dooby/privacy-policy">Privacy Policy</a> · <a href="https://github.com/virus11456/Dooby">GitHub</a></footer>
+    <footer>&copy; 2026 Dooby - Tab & Bookmark Manager · <a href="/dooby/privacy-policy">Privacy Policy</a> · <a href="https://chromewebstore.google.com/detail/pjbjldjdeaiffdbehpmbndjaiehcoahg">Chrome Web Store</a></footer>
   </div>
+  <script>
+    (function () {
+      var buttons = document.querySelectorAll('.lang-switch button');
+      function paint() {
+        var cur = document.documentElement.className.indexOf('lang-en') >= 0 ? 'en' : 'zh';
+        buttons.forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-lang') === cur); });
+      }
+      buttons.forEach(function (b) {
+        b.addEventListener('click', function () {
+          var lang = b.getAttribute('data-lang');
+          document.documentElement.className = 'lang-' + lang;
+          document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+          try { localStorage.setItem('dooby-lang', lang); } catch (e) {}
+          paint();
+        });
+      });
+      paint();
+    })();
+  </script>
 </body>
 </html>
