@@ -1,0 +1,9 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/dooby", "destination": "/index.html" },
+    { "source": "/dooby/privacy-policy", "destination": "/privacy-policy.html" },
+    { "source": "/dooby/privacy", "destination": "/privacy-policy.html" }
+  ]
+}
