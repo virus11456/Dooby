@@ -1,13 +1,20 @@
 {
   "cleanUrls": true,
-  "trailingSlash": false,
   "rewrites": [
     {
       "source": "/dooby",
       "destination": "/"
     },
     {
+      "source": "/dooby/",
+      "destination": "/"
+    },
+    {
       "source": "/dooby/privacy-policy",
+      "destination": "/privacy-policy"
+    },
+    {
+      "source": "/dooby/privacy-policy/",
       "destination": "/privacy-policy"
     },
     {
@@ -16,6 +23,10 @@
     },
     {
       "source": "/dooby/changelog",
+      "destination": "/changelog"
+    },
+    {
+      "source": "/dooby/changelog/",
       "destination": "/changelog"
     }
   ]
