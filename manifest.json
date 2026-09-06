@@ -1,13 +1,14 @@
 {
   "manifest_version": 3,
   "name": "Dooby - Tab & Bookmark Manager",
-  "version": "1.1.10",
+  "version": "1.2.0",
   "description": "A visual workspace for organizing your tabs and bookmarks into collections with cloud sync. Better than bookmarks.",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsj9QcsyomHRaXjKkBNdgwxBlwhVbTaKdNhddXXah2xFy4F0ED72KHIRXnDmj73bvmq3swgsOIMHRqtWG7H/PRn9s3ejf4CJOZfu4CiHhsDKkSjns/vDVNpNy5J3U+iVg8JV0CrlBCbol7igXABX3oqOy0/HTWwAf0khhb/Bv7j5tPCIRVDg+/J4ybSDUzXmLXfBYqNfNIIxPLpfNX2hIntM1G5iew30REI1goLT0h3Isvm3ZhJhc0XwHkyIwPqSP0L5rgmOU9WulAIEjU1rD7e95X5UCbaoZWOswH9jL5F99eMigsn1Nq6Oifu6D5JHo6EqvXgdRCtGi7iEysKcydQIDAQAB",
   "permissions": [
     "tabs",
     "storage",
-    "alarms"
+    "alarms",
+    "identity"
   ],
   "chrome_url_overrides": {
     "newtab": "pages/newtab.html"

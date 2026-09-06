@@ -86,7 +86,7 @@
     <!-- 中文版 -->
     <div id="chinese">
       <h1>Dooby 隱私權政策</h1>
-      <p class="subtitle">最後更新日期：2026 年 9 月 6 日</p>
+      <p class="subtitle">最後更新日期：2026 年 9 月 7 日</p>
 
       <div class="highlight">
         <p><strong>簡單來說：Dooby 不會收集、傳送或分享您的任何個人資料。所有資料都儲存在您自己的瀏覽器中。</strong></p>
@@ -113,8 +113,18 @@
       <ul>
         <li><code>chrome.storage.local</code> — 您裝置上的本機儲存空間</li>
         <li><code>chrome.storage.sync</code> — Chrome 內建的同步儲存空間（選用）</li>
+        <li><strong>Dooby Cloud</strong>（選用，需以 Google 帳號登入）— 由 Supabase 代管的資料庫，見下一節</li>
       </ul>
-      <p>我們沒有外部伺服器、資料庫或分析服務。</p>
+      <p>未登入 Dooby Cloud 時，我們沒有任何外部伺服器、資料庫或分析服務。</p>
+
+      <h2>4a. Dooby Cloud（選用）</h2>
+      <p>若您按下「Sign in with Google」啟用 Dooby Cloud，會發生以下事情：</p>
+      <ul>
+        <li>Google 會提供您的電子郵件、顯示名稱和頭像網址給 Dooby，用來識別您的帳號並顯示在介面上。我們不會取得您的 Google 密碼，也不會存取 Gmail、雲端硬碟或其他 Google 服務。</li>
+        <li>您的 Spaces 與 Collections（已儲存的分頁標題與網址）會以一份 JSON 文件存放在 Supabase（supabase.com）代管的 PostgreSQL 資料庫，僅您本人登入後可讀寫（資料列層級安全性），Dooby 開發者不會查看其內容。</li>
+        <li>資料用於在您的各個裝置與 Dooby 網頁版之間同步，不做其他用途，不會出售或分享。</li>
+        <li>隨時可在同一個對話框按「Sign out」停止同步，或按「Delete cloud data」永久刪除雲端上的資料。刪除 Google 帳號授權也可在 myaccount.google.com 的「第三方應用程式」中進行。</li>
+      </ul>
 
       <h2>5. 第三方分享</h2>
       <p><strong>我們不會與任何第三方分享、販售或轉移您的資料。</strong></p>
@@ -129,6 +139,7 @@
       <ul>
         <li><strong>tabs：</strong>讀取已開啟的分頁以便在新分頁頁面上顯示和管理。</li>
         <li><strong>storage：</strong>將您的集合、設定和偏好儲存在本機及 Chrome 同步空間。</li>
+        <li><strong>identity：</strong>開啟 Google 登入視窗以啟用選用的 Dooby Cloud。不登入則不會使用。</li>
         <li><strong>alarms：</strong>每 5 分鐘排程一次同步檢查，讓多台裝置間的書籤保持一致。</li>
       </ul>
 
@@ -152,7 +163,7 @@
     <!-- English Version -->
     <div id="english">
       <h1>Dooby Privacy Policy</h1>
-      <p class="subtitle">Last updated: September 6, 2026</p>
+      <p class="subtitle">Last updated: September 7, 2026</p>
 
       <div class="highlight">
         <p><strong>In short: Dooby does not collect, transmit, or share any of your personal data. All data stays in your browser.</strong></p>
@@ -179,8 +190,18 @@
       <ul>
         <li><code>chrome.storage.local</code> — local storage on your device</li>
         <li><code>chrome.storage.sync</code> — Chrome's built-in sync storage (optional)</li>
+        <li><strong>Dooby Cloud</strong> (optional, requires Google sign-in) — a database hosted by Supabase, see the next section</li>
       </ul>
-      <p>We have no external servers, databases, or analytics services.</p>
+      <p>Unless you sign in to Dooby Cloud, we have no external servers, databases, or analytics services.</p>
+
+      <h2>4a. Dooby Cloud (optional)</h2>
+      <p>If you click "Sign in with Google" to enable Dooby Cloud:</p>
+      <ul>
+        <li>Google shares your email address, display name and avatar URL with Dooby so we can identify your account and show it in the interface. We never see your Google password and do not access Gmail, Drive or any other Google service.</li>
+        <li>Your Spaces and Collections (saved tab titles and URLs) are stored as one JSON document in a PostgreSQL database hosted by Supabase (supabase.com). Row Level Security means only you, when signed in, can read or write it; the Dooby developer does not look at its contents.</li>
+        <li>The data is used solely to sync between your devices and the Dooby web app. It is never sold or shared.</li>
+        <li>You can stop syncing at any time with "Sign out" in the same dialog, or permanently remove the cloud copy with "Delete cloud data". You can also revoke Dooby's access under "Third-party apps" at myaccount.google.com.</li>
+      </ul>
 
       <h2>5. Third-Party Sharing</h2>
       <p><strong>We do not share, sell, or transfer your data to any third party.</strong></p>
@@ -195,6 +216,7 @@
       <ul>
         <li><strong>tabs:</strong> Read open tabs to display and manage them on the new tab page.</li>
         <li><strong>storage:</strong> Save your collections, settings, and preferences locally and via Chrome sync.</li>
+        <li><strong>identity:</strong> Opens the Google sign-in window for the optional Dooby Cloud. Unused unless you sign in.</li>
         <li><strong>alarms:</strong> Schedule a sync check every 5 minutes so bookmarks stay consistent across devices.</li>
       </ul>
 

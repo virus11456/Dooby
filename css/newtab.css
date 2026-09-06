@@ -1767,3 +1767,19 @@ body::before {
 .bulk-mode .collection-header .btn-select-all {
   display: inline-flex;
 }
+
+/* ============================================
+   Dooby Cloud
+   ============================================ */
+.account-btn { position: relative; }
+.account-btn.signed-in { color: var(--accent); }
+.account-avatar { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; display: block; }
+.account-avatar.hidden { display: none; }
+.account-btn.signed-in #accountIcon { display: none; }
+.cloud-points { margin: 12px 0 16px 18px; color: var(--text-secondary); font-size: 13px; line-height: 1.7; }
+.cloud-account { display: flex; align-items: center; gap: 12px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+.cloud-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-hover); object-fit: cover; }
+.cloud-name { font-weight: 600; color: var(--text-primary); }
+.cloud-email { font-size: 12px; color: var(--text-secondary); }
+.cloud-panel.hidden { display: none; }
+.activate-error.hidden { display: none; }
