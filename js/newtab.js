@@ -1111,6 +1111,14 @@ async function initSync() {
 
   setupSyncEventListeners();
   updateStorageUsage();
+
+  // Show the extension ID in the status tooltip. chrome.storage.sync is
+  // namespaced by extension ID, so two devices only share data when this
+  // ID is identical on both.
+  const statusEl = document.getElementById('syncStatus');
+  if (statusEl) {
+    statusEl.title = 'Cloud sync via Chrome account\nExtension ID: ' + chrome.runtime.id + '\n(must be identical on every device)';
+  }
 }
 
 async function checkCloudDataPrompt() {

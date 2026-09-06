@@ -1,6 +1,6 @@
 # Dooby - Tab & Bookmark Manager
 
-> **v1.1.7** — A beautiful Chrome extension that replaces your new tab with a visual workspace for organizing tabs and bookmarks into collections. **Better than bookmarks.**
+> **v1.1.8** — A beautiful Chrome extension that replaces your new tab with a visual workspace for organizing tabs and bookmarks into collections. **Better than bookmarks.**
 
 ---
 
@@ -110,6 +110,7 @@ Dooby uses **Chrome's built-in sync storage** — no Firebase or external server
 ## Cloud Sync Details
 
 - **Storage**: Uses `chrome.storage.sync` (Chrome's native sync, tied to your Google account)
+- **Extension ID**: Sync data is namespaced by extension ID. `manifest.json` carries a fixed `key`, so every unpacked install gets the same ID (`dfoidibckihcnmakgoabkebinahggked`). Hover the sync status in the top bar to see the ID on a device — it must match on all of them
 - **Capacity**: 100 KB total (shown in the storage usage indicator in the top bar)
 - **Auto-sync**: Pushes changes 2 seconds after any edit
 - **Cross-device**: Works on any Chrome browser signed into the same Google account
@@ -198,6 +199,11 @@ MIT
 ---
 
 ## Changelog
+
+### v1.1.8 (2026-09-02)
+- **Fix:** Cross-device sync never connected for unpacked installs — Chrome derives an unpacked extension's ID from its folder path, so each computer got a different ID and therefore a separate `chrome.storage.sync` namespace. `manifest.json` now carries a fixed `key`, giving every install the same ID (`dfoidibckihcnmakgoabkebinahggked`)
+- **Improve:** Hovering the sync status shows the extension ID so mismatches between devices are easy to spot
+- **Note:** Because the ID changes once, export your data (Export button) before reloading this version, then import it afterwards
 
 ### v1.1.7 (2026-09-02)
 - **Fix:** Dropping an Open Tab onto a collection's title bar now saves it (previously only the card body accepted drops)
