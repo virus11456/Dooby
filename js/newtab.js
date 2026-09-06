@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupEventListeners();
   setupTabListeners();
   await initSync();
+  await initCloud();
   refreshDonateUI();
 });
 
@@ -1102,10 +1103,12 @@ async function initSync() {
         if (pulled) await loadApp();
         await SyncManager.pushToSync();
       });
+      if (typeof CloudManager !== 'undefined') CloudManager.poll();
     } else if (message.type === 'DOOBY_DATA_CHANGED') {
       // Data was changed externally (e.g. icon click save), refresh and sync
       loadApp();
       SyncManager.scheduleSyncAfterChange();
+      if (typeof CloudManager !== 'undefined') CloudManager.scheduleSyncAfterChange();
     }
   });
 
@@ -1559,4 +1562,122 @@ function setupSyncEventListeners() {
     e.target.value = '';
     document.getElementById('exportImportModal').classList.add('hidden');
   });
+}
+
+
+// ============================================
+// Dooby Cloud (Google sign-in + Supabase)
+// ============================================
+
+async function initCloud() {
+  if (typeof CloudManager === 'undefined') return;
+
+  CloudManager.on('*', async (event, data) => {
+    switch (event) {
+      case 'data_updated':
+        await loadApp();
+        break;
+      case 'sync_error':
+        updateSyncUI('error', data?.message || 'Cloud sync failed');
+        break;
+      case 'sync_complete':
+        if (CloudManager.isSignedIn()) {
+          updateSyncUI('success', 'Synced');
+          setTimeout(() => updateSyncUI('idle', 'Synced'), 3000);
+        }
+        break;
+    }
+    refreshCloudUI();
+  });
+
+  const pulled = await CloudManager.init();
+  if (pulled) await loadApp();
+  refreshCloudUI();
+
+  document.getElementById('btnAccount').addEventListener('click', () => {
+    refreshCloudUI();
+    document.getElementById('cloudModal').classList.remove('hidden');
+  });
+  document.getElementById('btnCloseCloud').addEventListener('click', () => {
+    document.getElementById('cloudModal').classList.add('hidden');
+  });
+  document.getElementById('cloudModal').addEventListener('click', (e) => {
+    if (e.target.id === 'cloudModal') document.getElementById('cloudModal').classList.add('hidden');
+  });
+
+  document.getElementById('btnCloudSignIn').addEventListener('click', async () => {
+    const btn = document.getElementById('btnCloudSignIn');
+    const err = document.getElementById('cloudSignInError');
+    err.classList.add('hidden');
+    btn.disabled = true;
+    try {
+      await CloudManager.signIn();
+      await loadApp();
+    } catch (e) {
+      err.textContent = e.message || 'Sign-in failed';
+      err.classList.remove('hidden');
+    } finally {
+      btn.disabled = false;
+      refreshCloudUI();
+    }
+  });
+
+  document.getElementById('btnCloudSignOut').addEventListener('click', async () => {
+    await CloudManager.signOut();
+    refreshCloudUI();
+  });
+
+  document.getElementById('btnCloudSyncNow').addEventListener('click', async () => {
+    const err = document.getElementById('cloudError');
+    err.classList.add('hidden');
+    updateSyncUI('syncing', 'Syncing...');
+    try {
+      const pulled = await CloudManager.pull(true);
+      if (pulled) await loadApp();
+      await CloudManager.push();
+    } catch (e) {
+      err.textContent = e.message; err.classList.remove('hidden');
+    }
+    refreshCloudUI();
+  });
+
+  document.getElementById('btnCloudDelete').addEventListener('click', async () => {
+    if (!confirm('Delete your bookmarks from Dooby Cloud? Data on this device stays. Other devices will stop receiving updates until you sync again.')) return;
+    const err = document.getElementById('cloudError');
+    err.classList.add('hidden');
+    try {
+      await CloudManager.deleteRemote();
+      await CloudManager.signOut();
+    } catch (e) {
+      err.textContent = e.message; err.classList.remove('hidden');
+    }
+    refreshCloudUI();
+  });
+}
+
+function refreshCloudUI() {
+  if (typeof CloudManager === 'undefined') return;
+  const st = CloudManager.getStatus();
+  const btn = document.getElementById('btnAccount');
+  const avatar = document.getElementById('accountAvatar');
+
+  document.getElementById('cloudNotConfigured').classList.toggle('hidden', st.configured);
+  document.getElementById('cloudSignedOut').classList.toggle('hidden', !st.configured || st.signedIn);
+  document.getElementById('cloudSignedIn').classList.toggle('hidden', !st.configured || !st.signedIn);
+
+  if (st.signedIn && st.user) {
+    btn.classList.add('signed-in');
+    btn.title = 'Dooby Cloud: ' + (st.user.email || st.user.name);
+    if (st.user.avatar) { avatar.src = st.user.avatar; avatar.classList.remove('hidden'); } else { avatar.classList.add('hidden'); }
+    document.getElementById('cloudAvatar').src = st.user.avatar || '';
+    document.getElementById('cloudName').textContent = st.user.name || '';
+    document.getElementById('cloudEmail').textContent = st.user.email || '';
+    const when = st.lastSyncAt ? new Date(st.lastSyncAt).toLocaleString() : 'never';
+    document.getElementById('cloudSyncInfo').textContent = st.lastError ? 'Last error: ' + st.lastError : 'Last synced: ' + when;
+    document.getElementById('cloudWebAppLink').href = (typeof DoobyConfig !== 'undefined' && DoobyConfig.webAppUrl) || '#';
+  } else {
+    btn.classList.remove('signed-in');
+    btn.title = st.configured ? 'Dooby Cloud: sign in with Google' : 'Dooby Cloud (not enabled in this build)';
+    avatar.classList.add('hidden');
+  }
 }

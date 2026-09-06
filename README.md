@@ -1,6 +1,6 @@
 # Dooby - Tab & Bookmark Manager
 
-> **v1.1.10** — A beautiful Chrome extension that replaces your new tab with a visual workspace for organizing tabs and bookmarks into collections. **Better than bookmarks.**
+> **v1.2.0** — A beautiful Chrome extension that replaces your new tab with a visual workspace for organizing tabs and bookmarks into collections. **Better than bookmarks.**
 
 ---
 
@@ -11,7 +11,8 @@
 - **Drag & Drop** — Drag open tabs from the sidebar into any collection
 - **Session Save** — Save all open tabs as a collection with one click
 - **Search** — Instantly search across all saved tabs (`Ctrl+K`)
-- **Cloud Sync** — Auto-sync via your Chrome account across devices
+- **Cloud Sync** — Auto-sync via your Chrome account across desktop Chromes
+- **Dooby Cloud** — Optional Google sign-in; bookmarks stored in Supabase so the web app can use them on iPad, iPhone and any browser (no 100 KB limit)
 - **Pin** — Pin important collections or individual tabs to the top
 - **Bulk Actions** — Select multiple tabs to move or delete at once
 - **Import** — Import from Chrome bookmarks (HTML), Toby, TabMe, or JSON
@@ -127,6 +128,28 @@ node scripts/gen-activation-code.js "Donor Name"
 ```
 
 The code is an ECDSA P-256 signature of the normalized display name (lowercased, whitespace removed). The extension verifies it against `DonorManager.ACTIVATION_PUBLIC_KEY` in `js/donor.js`, so a code only works together with the name it was issued for and cannot be forged from the public source. To rotate keys, generate a new pair, replace the JWK in `js/donor.js`, and re-issue codes.
+
+---
+
+## Dooby Cloud (Google sign-in)
+
+Dooby Cloud is optional. When enabled, the account button in the top bar lets a user sign in with Google; their spaces and collections are then stored as one JSON document per user in a Supabase table protected by Row Level Security, and kept in step with local storage (debounced push after edits, poll every minute and on tab focus, last-writer-wins by `updatedAt`, union-merge on first sign-in). `chrome.storage.sync` keeps working alongside it.
+
+The extension talks to Supabase with plain `fetch()` (no SDK, no remote code) and signs in through `chrome.identity.launchWebAuthFlow` → Google OAuth (`response_type=id_token`) → Supabase `signInWithIdToken`.
+
+### One-time setup
+
+1. **Supabase**: create a free project at supabase.com. In *SQL Editor* run `supabase/schema.sql`. Note *Project Settings → API*: the project URL and the `anon` public key.
+2. **Google OAuth client**: Google Cloud Console → *APIs & Services → Credentials → Create credentials → OAuth client ID → Web application*. Add these **Authorized redirect URIs**:
+   - `https://<your-project-ref>.supabase.co/auth/v1/callback`
+   - `https://pjbjldjdeaiffdbehpmbndjaiehcoahg.chromiumapp.org/` (store install)
+   - `https://dfoidibckihcnmakgoabkebinahggked.chromiumapp.org/` (unpacked install)
+   Add `https://toolist.cc` under **Authorized JavaScript origins** (for the web app). Note the client ID and secret.
+3. **Supabase → Authentication → Providers → Google**: enable, paste the client ID and secret.
+4. Fill `js/config.js` (`supabaseUrl`, `supabaseAnonKey`, `googleClientId`). These are public identifiers; the private data stays behind RLS.
+5. Rebuild the store zip.
+
+While `js/config.js` is empty the account button explains that Dooby Cloud is not enabled and nothing else changes.
 
 ---
 

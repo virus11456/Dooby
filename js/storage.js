@@ -368,5 +368,8 @@ const Storage = {
     if (typeof SyncManager !== 'undefined') {
       SyncManager.scheduleSyncAfterChange();
     }
+    if (typeof CloudManager !== 'undefined') {
+      CloudManager.scheduleSyncAfterChange();
+    }
   }
 };

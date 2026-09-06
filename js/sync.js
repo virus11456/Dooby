@@ -423,5 +423,6 @@ const SyncManager = {
     });
     this._notifyListeners('data_updated');
     this.scheduleSyncAfterChange();
+    if (typeof CloudManager !== 'undefined') CloudManager.scheduleSyncAfterChange();
   }
 };
