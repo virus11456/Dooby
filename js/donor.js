@@ -164,8 +164,22 @@ const DonorManager = {
     { name: 'Domain5566', date: '2026-03', message: '最愛你' },
   ],
 
+  // Public half of the ECDSA P-256 key pair used to sign activation codes.
+  // Only the developer holds the private key (see scripts/gen-activation-code.js),
+  // so a valid code cannot be forged even though this source is public.
+  ACTIVATION_PUBLIC_KEY: {"kty": "EC", "x": "axkaFUIdnH9CpZ4XYAfOVK75WG-php2t6GQTlbLX_vk", "y": "35zB3-tr-yL-tFYTkm018fxukZ-2M9xbjAM_zACwRSA", "crv": "P-256"},
+
   async init() {
     await this.loadDonorState();
+    // Re-check the stored code on every start so a state written by an older
+    // version (which accepted any "DOOBY-" prefixed string) is not trusted.
+    if (this._state.activated) {
+      const ok = await this.verifyCode(this._state.code, this._state.name);
+      if (!ok) {
+        console.warn('Dooby: stored activation code is not valid, deactivating');
+        await this.deactivate();
+      }
+    }
     await this.loadTheme();
   },
 
@@ -179,25 +193,68 @@ const DonorManager = {
   },
 
   isActivated() {
-    return this._state && this._state.activated;
+    return !!(this._state && this._state.activated);
   },
 
   getDonorName() {
     return this._state?.name || '';
   },
 
-  // Simple activation: developer gives donor a code after confirming TX
-  // Code format: DOOBY-<name_hash>-<timestamp_hash>
+  // Names are compared case-insensitively with all whitespace removed, so
+  // "Domain 5566" and "domain5566 " get the same code.
+  normalizeName(name) {
+    return String(name || '').toLowerCase().replace(/\s+/g, '');
+  },
+
+  _base64UrlToBytes(str) {
+    const b64 = str.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - str.length % 4) % 4);
+    const bin = atob(b64);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  },
+
+  // Activation code format: DOOBY-<base64url(ECDSA-P256-SHA256 signature of the
+  // normalized display name)>. Returns true only if the signature checks out.
+  async verifyCode(code, name) {
+    try {
+      const normalized = this.normalizeName(name);
+      const raw = String(code || '').trim().replace(/\s+/g, '');
+      if (!normalized || !raw.toUpperCase().startsWith('DOOBY-')) return false;
+      const sig = this._base64UrlToBytes(raw.slice('DOOBY-'.length));
+      if (sig.length !== 64) return false;
+      const key = await crypto.subtle.importKey(
+        'jwk', this.ACTIVATION_PUBLIC_KEY, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']
+      );
+      return await crypto.subtle.verify(
+        { name: 'ECDSA', hash: 'SHA-256' }, key, sig, new TextEncoder().encode(normalized)
+      );
+    } catch (e) {
+      console.warn('Dooby: activation code check failed:', e);
+      return false;
+    }
+  },
+
+  // Developer signs the donor's name after confirming the transaction and
+  // sends back the code; the code only works together with that name.
   async activate(code, name) {
-    // Basic format validation
-    if (!code || !code.startsWith('DOOBY-') || code.split('-').length < 3) {
-      return { success: false, error: 'Invalid activation code format' };
+    const displayName = String(name || '').trim();
+    if (!displayName) {
+      return { success: false, error: 'Please enter the display name your code was issued for' };
+    }
+    const raw = String(code || '').trim();
+    if (!raw.toUpperCase().startsWith('DOOBY-')) {
+      return { success: false, error: 'Activation codes start with DOOBY-' };
+    }
+    const ok = await this.verifyCode(raw, displayName);
+    if (!ok) {
+      return { success: false, error: 'This code is not valid for that name. Check both and try again.' };
     }
 
     this._state = {
       activated: true,
-      name: name || 'Anonymous Supporter',
-      code: code,
+      name: displayName,
+      code: raw,
       activatedAt: Date.now()
     };
     await this.saveDonorState();
@@ -207,12 +264,22 @@ const DonorManager = {
   async deactivate() {
     this._state = { activated: false, name: '', code: '', activatedAt: null };
     await this.saveDonorState();
+    // Premium themes are a donor perk: fall back to the free theme.
+    const { activeTheme } = await chrome.storage.local.get('activeTheme');
+    const theme = this.THEMES[activeTheme];
+    if (theme && !theme.free) {
+      await chrome.storage.local.set({ activeTheme: 'midnight' });
+      if (document.body) this.applyTheme('midnight');
+    }
   },
 
   // Theme management
   async loadTheme() {
     const { activeTheme } = await chrome.storage.local.get('activeTheme');
-    const themeId = activeTheme || 'midnight';
+    let themeId = activeTheme || 'midnight';
+    const theme = this.THEMES[themeId];
+    // A premium theme without a valid activation falls back to the free one.
+    if (!theme || (!theme.free && !this.isActivated())) themeId = 'midnight';
     this.applyTheme(themeId);
     return themeId;
   },

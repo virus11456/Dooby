@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dooby 更新記錄 / Changelog</title>
+  <meta name="description" content="Dooby Chrome 擴充功能的版本更新記錄。">
+  <link rel="icon" href="/icons/icon48.png">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --bg: #0b0f19; --panel: #131a2a; --panel-2: #1a2236; --text: #e6e9f0; --muted: #9aa3b5; --accent: #10b981; --border: rgba(255,255,255,0.08); }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; } a:hover { text-decoration: underline; }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 0 24px 64px; }
+    header { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 20px; color: var(--text); }
+    .brand img { width: 36px; height: 36px; border-radius: 8px; }
+    nav a { color: var(--muted); margin-left: 20px; font-size: 14px; } nav a:hover { color: var(--text); text-decoration: none; }
+    h1 { font-size: 36px; margin: 40px 0 8px; }
+    .lead { color: var(--muted); margin-bottom: 32px; }
+    .release { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; }
+    .release h2 { font-size: 20px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .release h2 .date { font-size: 13px; font-weight: 400; color: var(--muted); }
+    .release h2 .latest { font-size: 11px; background: rgba(16,185,129,0.15); color: var(--accent); border-radius: 999px; padding: 2px 8px; }
+    .release ul { padding-left: 20px; } .release li { color: var(--muted); margin-bottom: 6px; font-size: 15px; }
+    .release li b { color: var(--text); }
+    .tag { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 4px; padding: 1px 6px; margin-right: 6px; vertical-align: 1px; }
+    .tag.fix { background: rgba(245,158,11,0.15); color: #fcd34d; } .tag.new { background: rgba(16,185,129,0.15); color: var(--accent); } .tag.improve { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+    code { background: var(--panel-2); padding: 2px 6px; border-radius: 5px; font-size: 13px; }
+    footer { padding-top: 24px; color: var(--muted); font-size: 13px; text-align: center; border-top: 1px solid var(--border); margin-top: 40px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="brand" href="/dooby"><img src="/icons/icon128.png" alt="Dooby"> Dooby</a>
+      <nav>
+        <a href="/dooby">首頁</a>
+        <a href="/dooby/changelog">更新記錄</a>
+        <a href="/dooby/privacy-policy">隱私權政策</a>
+        <a href="https://github.com/virus11456/Dooby">GitHub</a>
+      </nav>
+    </header>
+
+    <h1>更新記錄</h1>
+    <p class="lead">Dooby 每個版本的修正與新功能。完整程式碼與提交記錄在 <a href="https://github.com/virus11456/Dooby">GitHub</a>。</p>
+
+    <div class="release">
+      <h2>v1.1.9 <span class="date">2026-09-07</span> <span class="latest">最新</span></h2>
+      <ul>
+        <li><span class="tag fix">修正</span><b>贊助者啟用碼真的會驗證了。</b>之前只檢查開頭是不是 <code>DOOBY-</code>，任何人隨便打都能解鎖。現在啟用碼是開發者用私鑰對「顯示名稱」簽出的簽章，套件用內建的公鑰驗證，名稱或代碼不對就無法啟用。舊版用假代碼解鎖的狀態會在啟動時自動撤銷。</li>
+        <li><span class="tag fix">修正</span>取消啟用或啟用失效時，付費主題會退回免費的 Midnight 主題。</li>
+        <li><span class="tag new">新增</span>開發者用的啟用碼產生工具 <code>scripts/gen-activation-code.js</code>。</li>
+        <li><span class="tag new">新增</span>這個更新記錄頁面。</li>
+      </ul>
+    </div>
+
+    <div class="release">
+      <h2>v1.1.8 <span class="date">2026-09-06</span></h2>
+      <ul>
+        <li><span class="tag fix">修正</span><b>跨裝置同步永遠連不起來。</b>未封裝載入的套件 ID 是由資料夾路徑算出來的，每台電腦都不同，等於各自有一個雲端空間。manifest 加入固定的 <code>key</code>，所有安裝的 ID 都是 <code>dfoidibckihcnmakgoabkebinahggked</code>。</li>
+        <li><span class="tag improve">改善</span>滑鼠停在同步狀態上會顯示套件 ID，方便比對兩台電腦是否一致。</li>
+        <li><span class="tag new">新增</span>Chrome 線上應用程式商店打包腳本，以及這個網站（首頁與隱私權政策）。</li>
+      </ul>
+    </div>
+
+    <div class="release">
+      <h2>v1.1.7 <span class="date">2026-09-02</span></h2>
+      <ul>
+        <li><span class="tag fix">修正</span>把 Open Tabs 拖到收藏卡片的<b>標題列</b>現在也會存進去，之前只有內容區接受放下。</li>
+        <li><span class="tag fix">修正</span>從網站圖示開始拖曳不會再變成瀏覽器原生的圖片拖曳。</li>
+        <li><span class="tag fix">修正</span>工具列快速儲存改存到目前所在的空間，優先放進 Quick Save，空間沒有收藏時自動建立，儲存成功才關閉分頁。</li>
+      </ul>
+    </div>
+
+    <div class="release">
+      <h2>v1.1.6 <span class="date">2026-09-02</span></h2>
+      <ul>
+        <li><span class="tag fix">修正</span>Save Session、Open Tabs 側欄與快速儲存不再包含 <code>about:blank</code>、新分頁等非網頁。</li>
+      </ul>
+    </div>
+
+    <div class="release">
+      <h2>v1.1.5 <span class="date">2026-09-02</span></h2>
+      <ul>
+        <li><span class="tag fix">修正</span>沒有 Dooby 新分頁開著時，背景程式每 5 分鐘產生的 <code>Receiving end does not exist</code> 錯誤。</li>
+      </ul>
+    </div>
+
+    <div class="release">
+      <h2>v1.1.4 <span class="date">2026-09-02</span></h2>
+      <ul>
+        <li><span class="tag fix">修正</span><b>雲端同步每次上傳都失敗。</b>資料切塊原本用字元數計算，但 Chrome 的每個 key 上限 8 KB 是用位元組算，中文標題會超過。改成用位元組切塊，並修正 100 KB 總量的計算方式。</li>
+        <li><span class="tag fix">修正</span>定時同步先拉再推，避免舊資料蓋掉雲端。</li>
+        <li><span class="tag improve">改善</span>同步錯誤訊息區分「單一 key 超限」「總量超限」「寫入過於頻繁」。</li>
+      </ul>
+    </div>
+
+    <div class="release">
+      <h2>v1.1.3 <span class="date">2026-03-17</span></h2>
+      <ul><li><span class="tag new">新增</span>Wall of Fame 加入第一位贊助者 Domain5566。</li></ul>
+    </div>
+
+    <div class="release">
+      <h2>v1.1.2 <span class="date">2026-03-17</span></h2>
+      <ul>
+        <li><span class="tag fix">修正</span>收到其他裝置的同步變更時，正確把雲端資料寫回本機再更新畫面。</li>
+      </ul>
+    </div>
+
+    <div class="release">
+      <h2>v1.1.1 <span class="date">2026-03-17</span></h2>
+      <ul>
+        <li><span class="tag fix">修正</span>移除未使用的 <code>sessions</code> 權限（商店審核要求）。</li>
+        <li><span class="tag fix">修正</span>啟動時的初始同步會正確更新畫面；同步錯誤狀態保留到下次成功為止。</li>
+      </ul>
+    </div>
+
+    <div class="release">
+      <h2>v1.1.0 <span class="date">2026-03-11</span></h2>
+      <ul>
+        <li><span class="tag new">新增</span>透過 Chrome 帳號的雲端同步、儲存用量指示、手動同步按鈕。</li>
+        <li><span class="tag new">新增</span>JSON 匯出與匯入、贊助者系統與啟用碼、5 種配色主題、Wall of Fame、隱私權政策頁面。</li>
+      </ul>
+    </div>
+
+    <footer>&copy; 2026 Dooby - Tab & Bookmark Manager · <a href="/dooby/privacy-policy">Privacy Policy</a> · <a href="https://github.com/virus11456/Dooby">GitHub</a></footer>
+  </div>
+</body>
+</html>
