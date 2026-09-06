@@ -107,6 +107,18 @@ Dooby uses **Chrome's built-in sync storage** — no Firebase or external server
 
 ---
 
+## Publishing to the Chrome Web Store
+
+```bash
+scripts/build-store-zip.sh          # writes dist/dooby-<version>-webstore.zip
+```
+
+The script strips the `key` field (the store rejects a first upload that contains it and assigns its own ID) and leaves out repo-only files. Upload the zip in the Developer Dashboard, fill in the Privacy tab (single purpose: tab & bookmark manager; `tabs` is used to read open tab titles/URLs the user chooses to save; `storage`/`alarms` for local data and periodic sync), and point the privacy policy field at a public copy of `privacy-policy.html`. "Unlisted" visibility is enough for personal use across devices.
+
+Once installed from the store, every device shares the store's extension ID, so cross-device sync works without the manifest `key`. Store installs and unpacked installs have different IDs and do not share data: export before switching, import after.
+
+---
+
 ## Cloud Sync Details
 
 - **Storage**: Uses `chrome.storage.sync` (Chrome's native sync, tied to your Google account)
