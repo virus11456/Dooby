@@ -31,7 +31,17 @@ function setupTabListeners() {
   });
 }
 
-async function loadApp() {
+// loadApp() can be triggered from several places at once (user action,
+// sync pull, cloud update). Serialize the calls so two overlapping renders
+// never append the same cards twice.
+let _loadAppChain = Promise.resolve();
+function loadApp() {
+  const run = _loadAppChain.then(() => _loadAppImpl());
+  _loadAppChain = run.catch(() => {});
+  return run;
+}
+
+async function _loadAppImpl() {
   const spaces = await Storage.getSpaces();
   activeSpaceId = await Storage.getActiveSpaceId();
 
