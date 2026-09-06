@@ -46,7 +46,14 @@
     <p class="lead">Dooby 每個版本的修正與新功能。完整程式碼與提交記錄在 <a href="https://github.com/virus11456/Dooby">GitHub</a>。</p>
 
     <div class="release">
-      <h2>v1.1.9 <span class="date">2026-09-07</span> <span class="latest">最新</span></h2>
+      <h2>v1.1.10 <span class="date">2026-09-07</span> <span class="latest">最新</span></h2>
+      <ul>
+        <li><span class="tag improve">變更</span>更新 USDT（TRC-20）贊助地址。</li>
+      </ul>
+    </div>
+
+    <div class="release">
+      <h2>v1.1.9 <span class="date">2026-09-07</span></h2>
       <ul>
         <li><span class="tag fix">修正</span><b>贊助者啟用碼真的會驗證了。</b>之前只檢查開頭是不是 <code>DOOBY-</code>，任何人隨便打都能解鎖。現在啟用碼是開發者用私鑰對「顯示名稱」簽出的簽章，套件用內建的公鑰驗證，名稱或代碼不對就無法啟用。舊版用假代碼解鎖的狀態會在啟動時自動撤銷。</li>
         <li><span class="tag fix">修正</span>取消啟用或啟用失效時，付費主題會退回免費的 Midnight 主題。</li>
