@@ -65,7 +65,21 @@
     <p class="lead en">Fixes and new features in every Dooby release. Install from the <a href="https://chromewebstore.google.com/detail/pjbjldjdeaiffdbehpmbndjaiehcoahg">Chrome Web Store</a> to get updates automatically.</p>
 
     <div class="release">
-      <h2>v1.5.0 <span class="date">2026-09-07</span> <span class="latest zh">最新</span><span class="latest en">Latest</span></h2>
+      <h2>v1.5.1 <span class="date">2026-09-07</span> <span class="latest zh">最新</span><span class="latest en">Latest</span></h2>
+      <ul class="zh">
+        <li><span class="tag fix">修正</span><b>從工具列的「匯入」按鈕匯入 TabMe／Toby 檔案會顯示「Import failed: Invalid import data」。</b>之前只有「匯入書籤」對話框裡的「Import JSON」會判斷格式，工具列按鈕和「匯出／匯入」對話框只吃 Dooby 自己的備份檔。現在三個入口都會自動判斷 Dooby 備份、TabMe、Toby、Chrome 書籤 JSON。</li>
+        <li><span class="tag fix">修正</span>工具列的「匯出」按鈕會一次下載兩個檔案，而「匯出／匯入」對話框裡的「匯出成 JSON」按下去沒反應（兩個按鈕用了同一個 id）。</li>
+        <li><span class="tag improve">變更</span>匯入成功改用底部提示，不再跳出視窗；檔案不是 JSON 時會明確說明。</li>
+      </ul>
+      <ul class="en">
+        <li><span class="tag fix">Fix</span><b>Importing a TabMe / Toby file from the toolbar "Import" button failed with "Import failed: Invalid import data".</b> Only the "Import JSON" button inside the Import Bookmarks dialog detected formats; the toolbar button and the Export / Import dialog accepted Dooby backups only. All three entry points now detect Dooby backups, TabMe, Toby and Chrome bookmark JSON.</li>
+        <li><span class="tag fix">Fix</span>The toolbar "Export" button downloaded two files at once, and "Export as JSON" inside the Export / Import dialog did nothing (both buttons shared one id).</li>
+        <li><span class="tag improve">Change</span>Successful imports show a toast instead of a popup; a non-JSON file gets a clear message.</li>
+      </ul>
+    </div>
+
+    <div class="release">
+      <h2>v1.5.0 <span class="date">2026-09-07</span></h2>
       <ul class="zh">
         <li><span class="tag new">新增</span><b>刪除後可以復原。</b>移除分頁、批次刪除、刪除收藏或空間之後，底部會出現提示和「復原」按鈕，六秒內按下就會把東西放回原本的位置。</li>
         <li><span class="tag new">新增</span><b>Daylight 淺色主題。</b>免費，在主題頁面就能切換，適合白天或亮的環境。</li>

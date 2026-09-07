@@ -1011,82 +1011,84 @@ function setupImportBookmarksListeners() {
   });
 
   // Import JSON bookmarks
-  document.getElementById('importBookmarkJson').addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    try {
-      const text = await file.text();
-      const data = JSON.parse(text);
+  document.getElementById('importBookmarkJson').addEventListener('change', handleImportFileChange);
+}
 
-      // Handle Dooby format
-      if (data.spaces && data.collections) {
-        if (confirm(t('import_replace_confirm', { spaces: data.spaces.length, collections: data.collections.length }))) {
-          await SyncManager.importData(data);
-          await loadApp();
-        }
-        e.target.value = '';
-        document.getElementById('importBookmarksModal').classList.add('hidden');
-        return;
-      }
+// ============================================
+// JSON import / export (shared by every entry point)
+// ============================================
 
-      // Handle TabMe format (isTabme flag + spaces[].folders[].items[])
-      if (data.isTabme && data.spaces) {
-        const folders = parseTabMeJson(data);
-        if (folders.length === 0) {
-          alert(t('no_bookmarks_tabme'));
-          e.target.value = '';
-          document.getElementById('importBookmarksModal').classList.add('hidden');
-          return;
-        }
-        const totalTabs = folders.reduce((sum, f) => sum + f.tabs.length, 0);
-        if (confirm(t('import_tabme_confirm', { folders: folders.length, tabs: totalTabs }))) {
-          const count = await Storage.importBookmarkFolders(activeSpaceId, folders);
-          alert(t('imported_result', { count, folders: folders.length }));
-          await renderCollections();
-        }
-        e.target.value = '';
-        document.getElementById('importBookmarksModal').classList.add('hidden');
-        return;
-      }
+// Detects the file format and imports it:
+//  - Dooby backup (spaces + collections)  -> replaces all data
+//  - TabMe export (isTabme + spaces[].folders[].items[])
+//  - Toby export (lists[].cards[])         -> appended as collections
+//  - Chrome bookmark JSON (children[])        in the active space
+async function importJsonFile(file) {
+  const text = await file.text();
+  let data;
+  try { data = JSON.parse(text); } catch (e) { throw new Error(t('import_not_json')); }
+  if (!data || typeof data !== 'object') throw new Error(t('import_not_json'));
 
-      // Handle Toby format (version + lists with cards)
-      if (data.lists && Array.isArray(data.lists)) {
-        const folders = parseTobyJson(data);
-        if (folders.length === 0) {
-          alert(t('no_bookmarks_toby'));
-          e.target.value = '';
-          document.getElementById('importBookmarksModal').classList.add('hidden');
-          return;
-        }
-        const totalTabs = folders.reduce((sum, f) => sum + f.tabs.length, 0);
-        if (confirm(t('import_toby_confirm', { folders: folders.length, tabs: totalTabs }))) {
-          const count = await Storage.importBookmarkFolders(activeSpaceId, folders);
-          alert(t('imported_result', { count, folders: folders.length }));
-          await renderCollections();
-        }
-        e.target.value = '';
-        document.getElementById('importBookmarksModal').classList.add('hidden');
-        return;
-      }
+  if (Array.isArray(data.spaces) && Array.isArray(data.collections)) {
+    if (!confirm(t('import_replace_confirm', { spaces: data.spaces.length, collections: data.collections.length }))) return false;
+    await SyncManager.importData(data);
+    await loadApp();
+    updateStorageUsage();
+    updateSyncUI('success', t('imported'));
+    setTimeout(() => updateSyncUI('idle', t('synced')), 3000);
+    return true;
+  }
 
-      // Handle Chrome JSON bookmark format (nested with children)
-      const folders = parseJsonBookmarks(data);
-      if (folders.length === 0) {
-        alert(t('no_bookmarks_json'));
-        return;
-      }
-      const totalTabs = folders.reduce((sum, f) => sum + f.tabs.length, 0);
-      if (confirm(t('import_folders_confirm', { folders: folders.length, tabs: totalTabs }))) {
-        const count = await Storage.importBookmarkFolders(activeSpaceId, folders);
-        alert(t('imported_result', { count, folders: folders.length }));
-        await renderCollections();
-      }
-    } catch (err) {
-      alert(t('import_failed', { error: err.message }));
-    }
-    e.target.value = '';
-    document.getElementById('importBookmarksModal').classList.add('hidden');
-  });
+  let folders, confirmKey, emptyKey;
+  if (data.isTabme && Array.isArray(data.spaces)) {
+    folders = parseTabMeJson(data); confirmKey = 'import_tabme_confirm'; emptyKey = 'no_bookmarks_tabme';
+  } else if (Array.isArray(data.lists)) {
+    folders = parseTobyJson(data); confirmKey = 'import_toby_confirm'; emptyKey = 'no_bookmarks_toby';
+  } else {
+    folders = parseJsonBookmarks(data); confirmKey = 'import_folders_confirm'; emptyKey = 'no_bookmarks_json';
+  }
+  if (folders.length === 0) { alert(t(emptyKey)); return false; }
+  const totalTabs = folders.reduce((sum, f) => sum + f.tabs.length, 0);
+  if (!confirm(t(confirmKey, { folders: folders.length, tabs: totalTabs }))) return false;
+  const count = await Storage.importBookmarkFolders(activeSpaceId, folders);
+  await renderCollections();
+  updateStorageUsage();
+  showToast(t('imported_result', { count, folders: folders.length }));
+  return true;
+}
+
+// change handler for every <input type="file"> that imports JSON
+async function handleImportFileChange(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  try {
+    await importJsonFile(file);
+  } catch (err) {
+    console.warn('Dooby: import failed:', err.message);
+    alert(t('import_failed', { error: err.message }));
+    updateSyncUI('error', t('import_failed_short'));
+  }
+  e.target.value = '';
+  document.getElementById('importBookmarksModal').classList.add('hidden');
+  document.getElementById('exportImportModal').classList.add('hidden');
+}
+
+async function exportDataToFile() {
+  try {
+    const data = await SyncManager.exportData();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `dooby-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    updateSyncUI('success', t('exported'));
+    setTimeout(() => updateSyncUI('idle', t('synced')), 3000);
+  } catch (e) {
+    console.error('Export failed:', e);
+    updateSyncUI('error', t('export_failed'));
+  }
 }
 
 function parseJsonBookmarks(data) {
@@ -1520,57 +1522,14 @@ function setupSyncEventListeners() {
   });
 
   // Export data to JSON file
-  document.getElementById('btnExportData').addEventListener('click', async () => {
-    try {
-      const data = await SyncManager.exportData();
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `dooby-backup-${new Date().toISOString().slice(0, 10)}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      updateSyncUI('success', t('exported'));
-      setTimeout(() => updateSyncUI('idle', t('synced')), 3000);
-    } catch (e) {
-      console.error('Export failed:', e);
-      updateSyncUI('error', t('export_failed'));
-    }
-  });
+  document.getElementById('btnExportData').addEventListener('click', exportDataToFile);
 
   // Import data from JSON file
   document.getElementById('btnImportData').addEventListener('click', () => {
     document.getElementById('importFileInput').click();
   });
 
-  document.getElementById('importFileInput').addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    try {
-      const text = await file.text();
-      const data = JSON.parse(text);
-
-      const tabCount = data.collections
-        ? data.collections.reduce((sum, c) => sum + (c.tabs ? c.tabs.length : 0), 0)
-        : 0;
-
-      if (confirm(t('import_replace_tabs_confirm', { collections: data.collections?.length || 0, tabs: tabCount }))) {
-        await SyncManager.importData(data);
-        await loadApp();
-        updateStorageUsage();
-        updateSyncUI('success', t('imported'));
-        setTimeout(() => updateSyncUI('idle', t('synced')), 3000);
-      }
-    } catch (err) {
-      console.error('Import failed:', err);
-      alert(t('import_failed', { error: err.message }));
-      updateSyncUI('error', t('import_failed_short'));
-    }
-
-    // Reset file input
-    e.target.value = '';
-  });
+  document.getElementById('importFileInput').addEventListener('change', handleImportFileChange);
 
   // Donate modal open/close
   document.getElementById('btnDonate').addEventListener('click', () => {
@@ -1662,36 +1621,12 @@ function setupSyncEventListeners() {
     document.getElementById('exportImportModal').classList.add('hidden');
   });
 
-  // Export
-  document.getElementById('btnExportData').addEventListener('click', async () => {
-    const data = await SyncManager.exportData();
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `dooby-backup-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+  // Export / Import (same functions as the top-bar buttons)
+  document.getElementById('btnExportDataModal').addEventListener('click', async () => {
+    await exportDataToFile();
     document.getElementById('exportImportModal').classList.add('hidden');
   });
-
-  // Import
-  document.getElementById('importFileInput').addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    try {
-      const text = await file.text();
-      const data = JSON.parse(text);
-      if (confirm(t('import_replace_confirm', { spaces: data.spaces?.length || 0, collections: data.collections?.length || 0 }))) {
-        await SyncManager.importData(data);
-        await loadApp();
-      }
-    } catch (err) {
-      alert(t('import_failed', { error: err.message }));
-    }
-    e.target.value = '';
-    document.getElementById('exportImportModal').classList.add('hidden');
-  });
+  document.getElementById('importBackupInput').addEventListener('change', handleImportFileChange);
 }
 
 

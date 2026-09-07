@@ -24,6 +24,8 @@ const used = new Set();
 const src = ['pages/newtab.html', ...fs.readdirSync(path.join(ROOT, 'js')).map(f => 'js/' + f)].map(read).join('\n').replace(/^\s*\/\/.*$/gm, ''); // ignore comment lines
 for (const m of src.matchAll(/\b(?:t|_t|I18n\.t)\(\s*'([a-zA-Z0-9_]+)'/g)) used.add(m[1]);
 for (const m of src.matchAll(/data-i18n(?:-html|-title|-placeholder)?="([a-zA-Z0-9_]+)"/g)) used.add(m[1]);
+// keys chosen at runtime: `confirmKey = 'x'` / `emptyKey = 'x'`
+for (const m of src.matchAll(/(?:confirmKey|emptyKey)\s*=\s*'([a-zA-Z0-9_]+)'/g)) used.add(m[1]);
 const missing = [...used].filter(k => !en[k]);
 check(`all ${used.size} keys used in source exist in en`, missing.length === 0, missing);
 const unused = enKeys.filter(k => !used.has(k) && !['ext_name', 'ext_description'].includes(k));

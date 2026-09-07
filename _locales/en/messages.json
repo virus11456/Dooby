@@ -446,9 +446,6 @@
   "import_replace_confirm": {
     "message": "Import {spaces} spaces and {collections} collections? This will replace your current data."
   },
-  "import_replace_tabs_confirm": {
-    "message": "Import {collections} collections with {tabs} tabs?\nThis will replace your current data."
-  },
   "export_import_data": {
     "message": "Export / Import Data"
   },
@@ -643,5 +640,8 @@
   },
   "toast_space_deleted": {
     "message": "Deleted space \"{name}\""
+  },
+  "import_not_json": {
+    "message": "This file is not valid JSON."
   }
 }
