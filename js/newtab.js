@@ -4,6 +4,7 @@ let activeSpaceId = null;
 let allCollections = [];
 let bulkMode = false;
 let selectedTabs = new Map(); // tabId -> { collectionId, url, title }
+let appSettings = { ...DEFAULT_SETTINGS };
 
 // ============================================
 // Initialization
@@ -14,6 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   DragDrop.init();
   await loadApp();
   setupEventListeners();
+  setupSettingsListeners();
   setupTabListeners();
   await initSync();
   await initCloud();
@@ -42,6 +44,7 @@ function loadApp() {
 }
 
 async function _loadAppImpl() {
+  appSettings = await Storage.getSettings();
   const spaces = await Storage.getSpaces();
   activeSpaceId = await Storage.getActiveSpaceId();
 
@@ -245,15 +248,42 @@ async function renderCollections() {
   const space = spaces.find(s => s.id === activeSpaceId);
   document.getElementById('spaceTitle').textContent = space ? space.name : 'Untitled';
 
-  // Sort: pinned collections first, then original order
-  const pinned = allCollections.filter(c => c.pinned);
-  const unpinned = allCollections.filter(c => !c.pinned);
+  // Sort: pinned collections first, then by the chosen order (Settings)
+  const pinned = sortCollections(allCollections.filter(c => c.pinned));
+  const unpinned = sortCollections(allCollections.filter(c => !c.pinned));
   const sorted = [...pinned, ...unpinned];
 
   for (let i = 0; i < sorted.length; i++) {
     const card = createCollectionCard(sorted[i], i);
     grid.appendChild(card);
   }
+}
+
+// Stable sorts driven by Settings. "manual" keeps the stored order.
+function sortCollections(list) {
+  const by = appSettings.collectionSort;
+  if (!by || by === 'manual') return list;
+  const arr = [...list];
+  const cmp = {
+    name: (a, b) => (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' }),
+    newest: (a, b) => (b.createdAt || 0) - (a.createdAt || 0),
+    oldest: (a, b) => (a.createdAt || 0) - (b.createdAt || 0),
+    count: (a, b) => (b.tabs || []).length - (a.tabs || []).length
+  }[by];
+  return cmp ? arr.sort(cmp) : list;
+}
+
+function sortTabs(tabs) {
+  const by = appSettings.tabSort;
+  const pinned = tabs.filter(t => t.pinned);
+  const rest = tabs.filter(t => !t.pinned);
+  if (!by || by === 'manual') return [...pinned, ...rest];
+  const cmp = {
+    newest: (a, b) => (b.addedAt || 0) - (a.addedAt || 0),
+    oldest: (a, b) => (a.addedAt || 0) - (b.addedAt || 0),
+    title: (a, b) => (a.title || '').localeCompare(b.title || '', undefined, { sensitivity: 'base' })
+  }[by];
+  return cmp ? [...pinned.sort(cmp), ...rest.sort(cmp)] : [...pinned, ...rest];
 }
 
 function createCollectionCard(collection, colorIndex = 0) {
@@ -361,7 +391,7 @@ function createCollectionCard(collection, colorIndex = 0) {
     if (collection.tabs.length > MAX_VISIBLE) {
       body.classList.add('collapsed');
     }
-    for (const tab of collection.tabs) {
+    for (const tab of sortTabs(collection.tabs)) {
       const tabEl = createTabElement(tab, collection.id);
       body.appendChild(tabEl);
     }
@@ -394,11 +424,15 @@ function createCollectionCard(collection, colorIndex = 0) {
         favicon: data.favicon
       });
       console.log('Dooby: added "' + data.title + '" to collection "' + collection.name + '"');
-      // Close the browser tab
-      try { await chrome.tabs.remove(data.chromeTabId); } catch(e) {}
+      // Close the browser tab (unless turned off in Settings)
+      if (appSettings.closeTabAfterSave !== false) {
+        try { await chrome.tabs.remove(data.chromeTabId); } catch(e) {}
+      }
     } else if (data.type === 'collection-tab') {
-      // From another collection
-      await Storage.moveTab(data.collectionId, collection.id, data.tabId, dropIndex);
+      // From another collection (or reordering). A visual index only means
+      // something in manual order; in sorted views append to the end.
+      const index = appSettings.tabSort && appSettings.tabSort !== 'manual' ? collection.tabs.length : dropIndex;
+      await Storage.moveTab(data.collectionId, collection.id, data.tabId, index);
     }
     await renderCollections();
     await renderOpenTabs();
@@ -1578,6 +1612,57 @@ function setupSyncEventListeners() {
 // ============================================
 // Dooby Cloud (Google sign-in + Supabase)
 // ============================================
+
+// ============================================
+// Settings
+// ============================================
+
+async function openSettingsModal() {
+  appSettings = await Storage.getSettings();
+  document.getElementById('settingCloseTab').checked = appSettings.closeTabAfterSave !== false;
+  document.getElementById('settingCollectionSort').value = appSettings.collectionSort || 'manual';
+  document.getElementById('settingTabSort').value = appSettings.tabSort || 'manual';
+
+  // Quick-save target: every collection, grouped by space.
+  const select = document.getElementById('settingQuickSave');
+  select.innerHTML = '';
+  const auto = document.createElement('option');
+  auto.value = '';
+  auto.textContent = 'Auto (current space)';
+  select.appendChild(auto);
+  const spaces = await Storage.getSpaces();
+  const collections = await Storage.getCollections();
+  for (const space of spaces) {
+    const group = document.createElement('optgroup');
+    group.label = space.name;
+    for (const c of collections.filter(c => c.spaceId === space.id)) {
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = c.name;
+      group.appendChild(opt);
+    }
+    if (group.children.length) select.appendChild(group);
+  }
+  const wanted = appSettings.quickSaveCollectionId || '';
+  select.value = collections.some(c => c.id === wanted) ? wanted : '';
+  document.getElementById('settingsModal').classList.remove('hidden');
+}
+
+function setupSettingsListeners() {
+  document.getElementById('btnSettings').addEventListener('click', openSettingsModal);
+  const modal = document.getElementById('settingsModal');
+  document.getElementById('btnCloseSettings').addEventListener('click', () => modal.classList.add('hidden'));
+  modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
+
+  const apply = async (patch, rerender) => {
+    appSettings = await Storage.saveSettings(patch);
+    if (rerender) await renderCollections();
+  };
+  document.getElementById('settingCloseTab').addEventListener('change', (e) => apply({ closeTabAfterSave: e.target.checked }, false));
+  document.getElementById('settingQuickSave').addEventListener('change', (e) => apply({ quickSaveCollectionId: e.target.value }, false));
+  document.getElementById('settingCollectionSort').addEventListener('change', (e) => apply({ collectionSort: e.target.value }, true));
+  document.getElementById('settingTabSort').addEventListener('change', (e) => apply({ tabSort: e.target.value }, true));
+}
 
 async function initCloud() {
   if (typeof CloudManager === 'undefined') return;

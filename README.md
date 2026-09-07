@@ -14,6 +14,7 @@
 - **Cloud Sync** — Auto-sync via your Chrome account across desktop Chromes
 - **Dooby Cloud** — Optional Google sign-in; bookmarks stored in Supabase so the web app can use them on iPad, iPhone and any browser (no 100 KB limit)
 - **Pin** — Pin important collections or individual tabs to the top
+- **Settings** — Close tab after saving on/off, quick-save target collection, collection and tab sort order
 - **Bulk Actions** — Select multiple tabs to move or delete at once
 - **Import** — Import from Chrome bookmarks (HTML), Toby, TabMe, or JSON
 - **Export / Import** — Full JSON backup & restore
@@ -278,6 +279,10 @@ MIT
 ---
 
 ## Changelog
+
+### v1.3.0 (2026-09-07)
+- **New:** Settings modal (gear button in the top bar): close tab after saving on/off, quick-save target collection, collection sort (name / newest / oldest / tab count) and tab sort (newest / oldest / title). Pinned items always stay first; settings are per device (`chrome.storage.local`)
+- **Improve:** Test suite in `tests/` runs on every push through GitHub Actions
 
 ### v1.1.8 (2026-09-02)
 - **Fix:** Cross-device sync never connected for unpacked installs — Chrome derives an unpacked extension's ID from its folder path, so each computer got a different ID and therefore a separate `chrome.storage.sync` namespace. `manifest.json` now carries a fixed `key`, giving every install the same ID (`dfoidibckihcnmakgoabkebinahggked`)
