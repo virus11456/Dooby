@@ -15,7 +15,7 @@ STAGE="$(mktemp -d)"
 trap 'rm -rf "$STAGE"' EXIT
 
 mkdir -p "$STAGE/dooby" "$OUT_DIR"
-for entry in css icons js pages privacy-policy.html; do
+for entry in _locales css icons js pages privacy-policy.html; do
   cp -R "$ROOT/$entry" "$STAGE/dooby/"
 done
 rm -f "$STAGE/dooby/icons/generate_icons.html"

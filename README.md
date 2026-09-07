@@ -15,6 +15,7 @@
 - **Dooby Cloud** — Optional Google sign-in; bookmarks stored in Supabase so the web app can use them on iPad, iPhone and any browser (no 100 KB limit)
 - **Pin** — Pin important collections or individual tabs to the top
 - **Settings** — Close tab after saving on/off, quick-save target collection, collection and tab sort order
+- **Languages** — English and 繁體中文 (auto-detected, or pick one in Settings)
 - **Bulk Actions** — Select multiple tabs to move or delete at once
 - **Import** — Import from Chrome bookmarks (HTML), Toby, TabMe, or JSON
 - **Export / Import** — Full JSON backup & restore
@@ -215,8 +216,10 @@ Dooby/
 ├── manifest.json           # Chrome Extension Manifest V3
 ├── css/
 │   └── newtab.css          # All styles (themes, layout, components)
+├── _locales/               # UI strings: en, zh_TW (Chrome i18n format)
 ├── js/
 │   ├── background.js       # Service worker (click-to-save, init)
+│   ├── i18n.js             # Loads _locales, t('key'), data-i18n attributes
 │   ├── config.js           # Dooby Cloud endpoints (Supabase URL, Google client ID)
 │   ├── storage.js          # Local storage abstraction layer
 │   ├── sync.js             # Chrome sync with chunking
@@ -279,6 +282,9 @@ MIT
 ---
 
 ## Changelog
+
+### v1.4.0 (2026-09-07)
+- **New:** Traditional Chinese (zh_TW) UI. Follows the browser language by default; pick English / 繁體中文 in Settings. Messages live in `_locales/` (Chrome i18n format, so the store listing name/description localize too); `js/i18n.js` applies them via `data-i18n` attributes and `t('key')`
 
 ### v1.3.0 (2026-09-07)
 - **New:** Settings modal (gear button in the top bar): close tab after saving on/off, quick-save target collection, collection sort (name / newest / oldest / tab count) and tab sort (newest / oldest / title). Pinned items always stay first; settings are per device (`chrome.storage.local`)
