@@ -103,6 +103,43 @@ const Storage = {
     }
   },
 
+  // ---- Undo helpers: put deleted items back where they were ----
+  async restoreTabs(collectionId, entries) {
+    // entries: [{ tab, index }] in ascending index order
+    const collections = await this.getCollections();
+    const col = collections.find(c => c.id === collectionId);
+    if (!col) return false;
+    const existing = new Set(col.tabs.map(t => t.id));
+    for (const { tab, index } of [...entries].sort((a, b) => a.index - b.index)) {
+      if (existing.has(tab.id)) continue;
+      col.tabs.splice(Math.min(index, col.tabs.length), 0, tab);
+      existing.add(tab.id);
+    }
+    await chrome.storage.local.set({ collections });
+    this._onDataChanged();
+    return true;
+  },
+
+  async restoreCollection(collection, index) {
+    const collections = await this.getCollections();
+    if (collections.some(c => c.id === collection.id)) return false;
+    collections.splice(Math.min(index, collections.length), 0, collection);
+    await chrome.storage.local.set({ collections });
+    this._onDataChanged();
+    return true;
+  },
+
+  async restoreSpace(space, index, spaceCollections) {
+    const spaces = await this.getSpaces();
+    if (!spaces.some(s => s.id === space.id)) spaces.splice(Math.min(index, spaces.length), 0, space);
+    const collections = await this.getCollections();
+    const ids = new Set(collections.map(c => c.id));
+    for (const c of spaceCollections) if (!ids.has(c.id)) collections.push(c);
+    await chrome.storage.local.set({ spaces, collections });
+    this._onDataChanged();
+    return true;
+  },
+
   async deleteCollection(collectionId) {
     let collections = await this.getCollections();
     collections = collections.filter(c => c.id !== collectionId);

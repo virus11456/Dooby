@@ -628,5 +628,20 @@
   },
   "sync_err_too_many_items": {
     "message": "Too many sync items. Remove some tabs or use Export."
+  },
+  "undo": {
+    "message": "Undo"
+  },
+  "toast_tab_removed": {
+    "message": "Removed \"{title}\""
+  },
+  "toast_tabs_removed": {
+    "message": "Removed {n} tabs"
+  },
+  "toast_collection_deleted": {
+    "message": "Deleted collection \"{name}\""
+  },
+  "toast_space_deleted": {
+    "message": "Deleted space \"{name}\""
   }
 }
