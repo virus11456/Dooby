@@ -1,6 +1,6 @@
 // Settings modal: close-tab-after-save, quick-save target collection,
 // collection sort and tab sort, all persisted per device.
-const { launchExtension, openNewTab, collectErrors, startPageServer, suite } = require('../helpers');
+const { launchExtension, openNewTab, collectErrors, startPageServer, suite, waitFor } = require('../helpers');
 
 suite('e2e: settings (close after save, quick-save target, sorting)', async (check) => {
   const server = await startPageServer();
@@ -9,6 +9,11 @@ suite('e2e: settings (close after save, quick-save target, sorting)', async (che
     for (const n of ['a', 'b', 'c']) { const p = await ext.ctx.newPage(); await p.goto(`${server.base}/${n}`); }
     const page = await ext.ctx.newPage();
     const errors = collectErrors(page);
+    // openSettingsModal() populates the selects asynchronously; wait until it is really open.
+    const openSettings = async () => {
+      await page.click('#btnSettings');
+      await waitFor(page, () => !document.getElementById('settingsModal').classList.contains('hidden') && document.querySelectorAll('#settingQuickSave option').length > 0, { label: 'settings modal to open' });
+    };
     await openNewTab(ext, page, { settle: 1500 });
 
     const tabCount = () => page.evaluate(async () => (await chrome.tabs.query({})).length);
@@ -18,7 +23,7 @@ suite('e2e: settings (close after save, quick-save target, sorting)', async (che
     const modalVisible = () => page.evaluate(() => !document.getElementById('settingsModal').classList.contains('hidden'));
 
     // Open the modal, check defaults
-    await page.click('#btnSettings');
+    await openSettings();
     check('settings modal opens from the top bar', await modalVisible());
     check('default: close tab after save is on', await page.evaluate(() => document.getElementById('settingCloseTab').checked));
     check('default: quick-save target is Auto', (await page.evaluate(() => document.getElementById('settingQuickSave').value)) === '');
@@ -44,7 +49,7 @@ suite('e2e: settings (close after save, quick-save target, sorting)', async (che
     check('drag-save leaves the tab open when closing is off', (await tabCount()) === before);
 
     // 2. Close-after-save back ON + quick-save target = Work
-    await page.click('#btnSettings');
+    await openSettings();
     await page.click('label.switch');
     const workId = await page.evaluate(async () => (await Storage.getCollections()).find(c => c.name === 'Work').id);
     await page.selectOption('#settingQuickSave', workId);
@@ -58,7 +63,7 @@ suite('e2e: settings (close after save, quick-save target, sorting)', async (che
     check('toolbar quick-save closes the tab when closing is on', (await tabCount()) === before - 1);
 
     // 3. Collection sort
-    await page.click('#btnSettings');
+    await openSettings();
     await page.selectOption('#settingCollectionSort', 'name');
     await page.waitForTimeout(400);
     check('sort collections by name', JSON.stringify(await cardOrder()) === JSON.stringify(['Quick Save', 'Reading List', 'Work']), await cardOrder());
@@ -89,7 +94,7 @@ suite('e2e: settings (close after save, quick-save target, sorting)', async (che
     // 5. Persist across reload
     await openNewTab(ext, page, { settle: 1000 });
     check('tab sort persists after reload', JSON.stringify(await workTitles()) === JSON.stringify(['Zebra', 'Mango', 'apple']), await workTitles());
-    await page.click('#btnSettings');
+    await openSettings();
     check('modal reflects saved values after reload', (await page.evaluate(() => [document.getElementById('settingTabSort').value, document.getElementById('settingQuickSave').value === document.getElementById('settingQuickSave').value && document.getElementById('settingQuickSave').selectedOptions[0].textContent])).join('|') === 'newest|Work');
     check('no page errors', errors.length === 0, errors);
   } finally { await ext.close(); server.close(); }
