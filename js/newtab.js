@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadApp();
   setupEventListeners();
   setupSettingsListeners();
+  setupToastListeners();
   setupTabListeners();
   await initSync();
   await initCloud();
@@ -196,12 +197,25 @@ function renderSpaces(spaces) {
         return;
       }
       if (confirm(t('delete_space_confirm', { name: space.name }))) {
+        const allSpaces = await Storage.getSpaces();
+        const index = allSpaces.findIndex(s => s.id === space.id);
+        const snapshot = index >= 0 ? allSpaces[index] : space;
+        const spaceCollections = await Storage.getCollectionsBySpace(space.id);
+        const wasActive = activeSpaceId === space.id;
         await Storage.deleteSpace(space.id);
         const remaining = await Storage.getSpaces();
         activeSpaceId = remaining[0]?.id || null;
         await Storage.setActiveSpaceId(activeSpaceId);
         renderSpaces(remaining);
         await renderCollections();
+        showToast(t('toast_space_deleted', { name: snapshot.name }), {
+          actionLabel: t('undo'),
+          onAction: async () => {
+            await Storage.restoreSpace(snapshot, Math.max(index, 0), spaceCollections);
+            if (wasActive) { activeSpaceId = snapshot.id; await Storage.setActiveSpaceId(snapshot.id); }
+            await loadApp();
+          }
+        });
       }
     });
 
@@ -373,10 +387,19 @@ function createCollectionCard(collection, colorIndex = 0) {
       { label: bulkMode ? t('exit_select_mode') : t('select_tabs'), action: () => toggleBulkMode() },
       { type: 'separator' },
       { label: t('delete_collection'), danger: true, action: async () => {
-        if (confirm(t('delete_collection_confirm', { name: collection.name }))) {
-          await Storage.deleteCollection(collection.id);
-          await renderCollections();
-        }
+        if (!confirm(t('delete_collection_confirm', { name: collection.name }))) return;
+        const all = await Storage.getCollections();
+        const index = all.findIndex(c => c.id === collection.id);
+        const snapshot = index >= 0 ? all[index] : collection;
+        await Storage.deleteCollection(collection.id);
+        await renderCollections();
+        showToast(t('toast_collection_deleted', { name: snapshot.name }), {
+          actionLabel: t('undo'),
+          onAction: async () => {
+            await Storage.restoreCollection(snapshot, Math.max(index, 0));
+            await renderCollections();
+          }
+        });
       }}
     ]);
   });
@@ -454,6 +477,23 @@ function createCollectionCard(collection, colorIndex = 0) {
   return card;
 }
 
+// Remove a tab and offer Undo (restores it at its original position).
+async function removeTabWithUndo(collectionId, tab) {
+  const cols = await Storage.getCollections();
+  const col = cols.find(c => c.id === collectionId);
+  const index = col ? col.tabs.findIndex(x => x.id === tab.id) : -1;
+  const snapshot = index >= 0 ? col.tabs[index] : tab;
+  await Storage.removeTabFromCollection(collectionId, tab.id);
+  await renderCollections();
+  showToast(t('toast_tab_removed', { title: snapshot.title || snapshot.url }), {
+    actionLabel: t('undo'),
+    onAction: async () => {
+      await Storage.restoreTabs(collectionId, [{ tab: snapshot, index: Math.max(index, 0) }]);
+      await renderCollections();
+    }
+  });
+}
+
 function createTabElement(tab, collectionId) {
   const el = document.createElement('div');
   el.className = 'tab-item' + (tab.pinned ? ' pinned' : '');
@@ -502,8 +542,7 @@ function createTabElement(tab, collectionId) {
   // Remove tab
   el.querySelector('.tab-remove').addEventListener('click', async (e) => {
     e.stopPropagation();
-    await Storage.removeTabFromCollection(collectionId, tab.id);
-    await renderCollections();
+    await removeTabWithUndo(collectionId, tab);
   });
 
   // Make draggable
@@ -529,10 +568,7 @@ function createTabElement(tab, collectionId) {
       { label: t('open_in_new_window'), action: () => chrome.windows.create({ url: tab.url }) },
       { label: t('copy_url'), action: () => navigator.clipboard.writeText(tab.url) },
       { type: 'separator' },
-      { label: t('remove'), danger: true, action: async () => {
-        await Storage.removeTabFromCollection(collectionId, tab.id);
-        await renderCollections();
-      }}
+      { label: t('remove'), danger: true, action: () => removeTabWithUndo(collectionId, tab) }
     ]);
   });
 
@@ -689,6 +725,40 @@ async function handleSearch(query) {
 }
 
 // ============================================
+// Toast with optional action (used for Undo)
+// ============================================
+
+let _toastTimer = null;
+let _toastOnAction = null;
+
+function showToast(message, opts = {}) {
+  const el = document.getElementById('toast');
+  const action = document.getElementById('toastAction');
+  document.getElementById('toastText').textContent = message;
+  _toastOnAction = opts.onAction || null;
+  action.textContent = opts.actionLabel || '';
+  action.classList.toggle('hidden', !opts.onAction);
+  el.classList.remove('hidden');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(hideToast, opts.duration || 6000);
+}
+
+function hideToast() {
+  clearTimeout(_toastTimer);
+  _toastOnAction = null;
+  document.getElementById('toast').classList.add('hidden');
+}
+
+function setupToastListeners() {
+  document.getElementById('toastAction').addEventListener('click', async () => {
+    const fn = _toastOnAction;
+    hideToast();
+    if (fn) await fn();
+  });
+  document.getElementById('toastClose').addEventListener('click', hideToast);
+}
+
+// ============================================
 // Context Menu
 // ============================================
 
@@ -785,12 +855,25 @@ function setupBulkEventListeners() {
       byCollection[data.collectionId].push(tabId);
     }
 
+    const all = await Storage.getCollections();
+    const removed = {}; // colId -> [{ tab, index }]
     for (const [colId, tabIds] of Object.entries(byCollection)) {
+      const col = all.find(c => c.id === colId);
+      const ids = new Set(tabIds);
+      removed[colId] = col ? col.tabs.map((tab, index) => ({ tab, index })).filter(e => ids.has(e.tab.id)) : [];
       await Storage.removeTabsFromCollection(colId, tabIds);
     }
+    const total = Object.values(removed).reduce((a, e) => a + e.length, 0);
 
     toggleBulkMode();
     await renderCollections();
+    showToast(t('toast_tabs_removed', { n: total }), {
+      actionLabel: t('undo'),
+      onAction: async () => {
+        for (const [colId, entries] of Object.entries(removed)) await Storage.restoreTabs(colId, entries);
+        await renderCollections();
+      }
+    });
   });
 
   document.getElementById('btnBulkMove').addEventListener('click', async (e) => {

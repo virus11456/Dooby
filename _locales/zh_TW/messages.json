@@ -628,5 +628,20 @@
   },
   "sync_err_too_many_items": {
     "message": "同步項目太多，請移除一些分頁或用匯出。"
+  },
+  "undo": {
+    "message": "復原"
+  },
+  "toast_tab_removed": {
+    "message": "已移除「{title}」"
+  },
+  "toast_tabs_removed": {
+    "message": "已移除 {n} 個分頁"
+  },
+  "toast_collection_deleted": {
+    "message": "已刪除收藏「{name}」"
+  },
+  "toast_space_deleted": {
+    "message": "已刪除空間「{name}」"
   }
 }

@@ -16,11 +16,12 @@
 - **Pin** — Pin important collections or individual tabs to the top
 - **Settings** — Close tab after saving on/off, quick-save target collection, collection and tab sort order
 - **Languages** — English and 繁體中文 (auto-detected, or pick one in Settings)
+- **Undo** — Deleted tabs, collections and spaces can be restored from a toast
 - **Bulk Actions** — Select multiple tabs to move or delete at once
 - **Import** — Import from Chrome bookmarks (HTML), Toby, TabMe, or JSON
 - **Export / Import** — Full JSON backup & restore
 - **Duplicate Finder** — Detect and remove duplicate URLs
-- **Themes** — 5 color themes (1 free + 4 premium for supporters)
+- **Themes** — 6 color themes (Midnight + Daylight light theme free, 4 premium for supporters)
 - **Donation System** — Support development & unlock premium themes
 
 ---
@@ -282,6 +283,10 @@ MIT
 ---
 
 ## Changelog
+
+### v1.5.0 (2026-09-07)
+- **New:** Undo toast after removing a tab, bulk-deleting, or deleting a collection or space (restores at the original position)
+- **New:** Free "Daylight" light theme
 
 ### v1.4.0 (2026-09-07)
 - **New:** Traditional Chinese (zh_TW) UI. Follows the browser language by default; pick English / 繁體中文 in Settings. Messages live in `_locales/` (Chrome i18n format, so the store listing name/description localize too); `js/i18n.js` applies them via `data-i18n` attributes and `t('key')`
