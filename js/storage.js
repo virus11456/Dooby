@@ -1,6 +1,26 @@
 // Storage layer for Dooby
 
+// Per-device preferences. Stored in chrome.storage.local only (not synced).
+const DEFAULT_SETTINGS = {
+  closeTabAfterSave: true,      // close the browser tab after quick-save / drag-save
+  quickSaveCollectionId: '',    // '' = auto (the "Quick Save" collection of the active space)
+  collectionSort: 'manual',     // manual | name | newest | oldest | count
+  tabSort: 'manual'             // manual | newest | oldest | title
+};
+
 const Storage = {
+  async getSettings() {
+    const { settings } = await chrome.storage.local.get('settings');
+    return { ...DEFAULT_SETTINGS, ...(settings || {}) };
+  },
+
+  async saveSettings(patch) {
+    const current = await this.getSettings();
+    const settings = { ...current, ...patch };
+    await chrome.storage.local.set({ settings });
+    return settings;
+  },
+
   async getSpaces() {
     const { spaces } = await chrome.storage.local.get('spaces');
     return spaces || [];

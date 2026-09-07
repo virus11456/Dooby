@@ -65,7 +65,19 @@
     <p class="lead en">Fixes and new features in every Dooby release. Install from the <a href="https://chromewebstore.google.com/detail/pjbjldjdeaiffdbehpmbndjaiehcoahg">Chrome Web Store</a> to get updates automatically.</p>
 
     <div class="release">
-      <h2>v1.2.0 <span class="date">2026-09-07</span> <span class="latest zh">最新</span><span class="latest en">Latest</span></h2>
+      <h2>v1.3.0 <span class="date">2026-09-07</span> <span class="latest zh">最新</span><span class="latest en">Latest</span></h2>
+      <ul class="zh">
+        <li><span class="tag new">新增</span><b>設定頁面。</b>工具列多了齒輪按鈕，可以調整：儲存後是否關閉分頁（工具列一鍵儲存和拖曳儲存都適用）、工具列一鍵儲存要存到哪個收藏（預設是目前空間的 Quick Save）、收藏的排序（名稱、最新、最舊、分頁數）、收藏內分頁的排序（最新、最舊、標題）。釘選的收藏和分頁永遠在最上面。設定只存在這台裝置上。</li>
+        <li><span class="tag improve">變更</span>每次推送都會自動跑完整測試（真實 Chromium 裡載入套件測試同步、儲存、啟用碼、Dooby Cloud），減少壞版本上架的機會。</li>
+      </ul>
+      <ul class="en">
+        <li><span class="tag new">New</span><b>Settings page.</b> A gear button in the top bar lets you choose whether a tab is closed after saving (toolbar quick save and drag-save alike), which collection the toolbar icon saves into (default: the Quick Save collection of the current space), how collections are sorted (name, newest, oldest, tab count) and how tabs inside a collection are sorted (newest, oldest, title). Pinned collections and tabs always stay on top. Settings are per device.</li>
+        <li><span class="tag improve">Change</span>Every push now runs the full automated test suite (the extension loaded into a real Chromium: sync, saving, activation codes, Dooby Cloud), so broken builds are caught before release.</li>
+      </ul>
+    </div>
+
+    <div class="release">
+      <h2>v1.2.0 <span class="date">2026-09-07</span></h2>
       <ul class="zh">
         <li><span class="tag new">新增</span><b>Dooby Cloud：用 Google 帳號登入。</b>工具列多了帳號按鈕，登入後書籤會存到 Dooby 自己的雲端（Supabase），不再受 Chrome 同步 100 KB 的限制，也是之後在 iPad、iPhone 使用的基礎。第一次登入會把本機和雲端的書籤合併，不會遺失任何資料；之後的修改自動上傳，其他裝置一分鐘內更新。</li>
         <li><span class="tag new">新增</span>同一個對話框可以登出，或永久刪除雲端上的資料。</li>
