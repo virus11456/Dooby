@@ -167,6 +167,8 @@ const DonorManager = {
   // Public half of the ECDSA P-256 key pair used to sign activation codes.
   // Only the developer holds the private key (see scripts/gen-activation-code.js),
   // so a valid code cannot be forged even though this source is public.
+  _t(key, fallback, subs) { return typeof I18n !== 'undefined' ? I18n.t(key, subs) : fallback; },
+
   ACTIVATION_PUBLIC_KEY: {"kty": "EC", "x": "axkaFUIdnH9CpZ4XYAfOVK75WG-php2t6GQTlbLX_vk", "y": "35zB3-tr-yL-tFYTkm018fxukZ-2M9xbjAM_zACwRSA", "crv": "P-256"},
 
   async init() {
@@ -240,15 +242,15 @@ const DonorManager = {
   async activate(code, name) {
     const displayName = String(name || '').trim();
     if (!displayName) {
-      return { success: false, error: 'Please enter the display name your code was issued for' };
+      return { success: false, error: this._t('err_name_required', 'Please enter the display name your code was issued for') };
     }
     const raw = String(code || '').trim();
     if (!raw.toUpperCase().startsWith('DOOBY-')) {
-      return { success: false, error: 'Activation codes start with DOOBY-' };
+      return { success: false, error: this._t('err_code_prefix', 'Activation codes start with DOOBY-') };
     }
     const ok = await this.verifyCode(raw, displayName);
     if (!ok) {
-      return { success: false, error: 'This code is not valid for that name. Check both and try again.' };
+      return { success: false, error: this._t('err_code_invalid', 'This code is not valid for that name. Check both and try again.') };
     }
 
     this._state = {

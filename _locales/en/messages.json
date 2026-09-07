@@ -1,0 +1,632 @@
+{
+  "ext_name": {
+    "message": "Dooby - Tab & Bookmark Manager"
+  },
+  "ext_description": {
+    "message": "A visual workspace for organizing your tabs and bookmarks into collections with cloud sync. Better than bookmarks."
+  },
+  "page_title": {
+    "message": "Dooby - New Tab"
+  },
+  "search_placeholder": {
+    "message": "Search tabs and collections... (Ctrl+K)"
+  },
+  "sync_status_title": {
+    "message": "Cloud sync via Chrome account"
+  },
+  "synced": {
+    "message": "Synced"
+  },
+  "syncing": {
+    "message": "Syncing..."
+  },
+  "sync_failed": {
+    "message": "Sync failed"
+  },
+  "cloud_sync_failed": {
+    "message": "Cloud sync failed"
+  },
+  "pulling_from_cloud": {
+    "message": "Pulling from cloud..."
+  },
+  "synced_from_cloud": {
+    "message": "Synced from cloud"
+  },
+  "no_new_cloud_data": {
+    "message": "No new data in cloud"
+  },
+  "exported": {
+    "message": "Exported"
+  },
+  "export_failed": {
+    "message": "Export failed"
+  },
+  "imported": {
+    "message": "Imported"
+  },
+  "import_failed_short": {
+    "message": "Import failed"
+  },
+  "storage_usage_title": {
+    "message": "Chrome Sync storage usage"
+  },
+  "storage_almost_full": {
+    "message": "Storage almost full! {percent}% used"
+  },
+  "storage_used": {
+    "message": "Storage {percent}% used"
+  },
+  "storage_sync_used": {
+    "message": "Chrome Sync storage: {percent}% used"
+  },
+  "upload_to_cloud": {
+    "message": "Upload to cloud"
+  },
+  "sync_from_cloud_title": {
+    "message": "Sync from cloud to this device"
+  },
+  "export_backup_title": {
+    "message": "Export data to file (backup)"
+  },
+  "import_file_title": {
+    "message": "Import data from file"
+  },
+  "save_session": {
+    "message": "Save Session"
+  },
+  "save_session_title": {
+    "message": "Save all open tabs as a session"
+  },
+  "save_session_as": {
+    "message": "Save session as:"
+  },
+  "session_default_name": {
+    "message": "Session {date}"
+  },
+  "account_title": {
+    "message": "Dooby Cloud: sign in with Google"
+  },
+  "account_title_signed_in": {
+    "message": "Dooby Cloud: {user}"
+  },
+  "account_title_disabled": {
+    "message": "Dooby Cloud (not enabled in this build)"
+  },
+  "settings": {
+    "message": "Settings"
+  },
+  "change_theme": {
+    "message": "Change theme"
+  },
+  "vip_badge": {
+    "message": "大乾爹"
+  },
+  "vip_badge_title": {
+    "message": "VIP 大乾爹"
+  },
+  "support_developer": {
+    "message": "Support the developer ❤"
+  },
+  "dooby_supporter": {
+    "message": "Dooby Supporter ✨"
+  },
+  "export_import_title": {
+    "message": "Export / Import data"
+  },
+  "spaces": {
+    "message": "Spaces"
+  },
+  "add_space_title": {
+    "message": "Add new space"
+  },
+  "enter_space_name": {
+    "message": "Enter space name:"
+  },
+  "at_least_one_space": {
+    "message": "You must have at least one space."
+  },
+  "delete_space_confirm": {
+    "message": "Delete space \"{name}\" and all its collections?"
+  },
+  "rename": {
+    "message": "Rename"
+  },
+  "delete": {
+    "message": "Delete"
+  },
+  "add_collection": {
+    "message": "Add Collection"
+  },
+  "enter_collection_name": {
+    "message": "Enter collection name:"
+  },
+  "import_bookmarks": {
+    "message": "Import Bookmarks"
+  },
+  "import_chrome_bookmarks_title": {
+    "message": "Import Chrome bookmarks"
+  },
+  "duplicates": {
+    "message": "Duplicates"
+  },
+  "find_duplicates_title": {
+    "message": "Find duplicate URLs"
+  },
+  "open_tabs": {
+    "message": "Open Tabs"
+  },
+  "untitled": {
+    "message": "Untitled"
+  },
+  "bulk_selected": {
+    "message": "{n} selected"
+  },
+  "open_all": {
+    "message": "Open All"
+  },
+  "move_to": {
+    "message": "Move to..."
+  },
+  "cancel": {
+    "message": "Cancel"
+  },
+  "close": {
+    "message": "Close"
+  },
+  "done": {
+    "message": "Done"
+  },
+  "delete_selected_confirm": {
+    "message": "Delete {n} selected tabs?"
+  },
+  "open_all_tabs_title": {
+    "message": "Open all tabs"
+  },
+  "more_actions": {
+    "message": "More actions"
+  },
+  "pin_card": {
+    "message": "Pin card to top"
+  },
+  "unpin_card": {
+    "message": "Unpin card"
+  },
+  "open_all_new_window": {
+    "message": "Open all in new window"
+  },
+  "select_tabs": {
+    "message": "Select tabs"
+  },
+  "exit_select_mode": {
+    "message": "Exit select mode"
+  },
+  "delete_collection": {
+    "message": "Delete collection"
+  },
+  "delete_collection_confirm": {
+    "message": "Delete \"{name}\" and all its tabs?"
+  },
+  "drag_tabs_here": {
+    "message": "Drag tabs here"
+  },
+  "show_more": {
+    "message": "Show {n} more"
+  },
+  "show_less": {
+    "message": "Show less"
+  },
+  "remove": {
+    "message": "Remove"
+  },
+  "pin_tab": {
+    "message": "Pin to top"
+  },
+  "unpin_tab": {
+    "message": "Unpin"
+  },
+  "open_in_new_tab": {
+    "message": "Open in new tab"
+  },
+  "open_in_new_window": {
+    "message": "Open in new window"
+  },
+  "copy_url": {
+    "message": "Copy URL"
+  },
+  "no_results": {
+    "message": "No results found"
+  },
+  "cloud_data_found": {
+    "message": "☁️ Cloud Data Found"
+  },
+  "cloud_data_found_desc": {
+    "message": "Found bookmarks in your Chrome cloud storage from another device. Would you like to sync them to this device?"
+  },
+  "cloud_data_found_counts": {
+    "message": "Found {cloud} bookmarks in cloud storage (local: {local}). Would you like to sync them to this device?"
+  },
+  "sync_from_cloud": {
+    "message": "Sync from Cloud"
+  },
+  "keep_local_data": {
+    "message": "Keep Local Data"
+  },
+  "dooby_cloud": {
+    "message": "☁️ Dooby Cloud"
+  },
+  "cloud_not_configured": {
+    "message": "Dooby Cloud is not enabled in this build. Chrome's own sync still keeps your bookmarks in step across desktop Chromes."
+  },
+  "cloud_signed_out_desc": {
+    "message": "Sign in with Google to keep your bookmarks in Dooby Cloud and use them on iPad, iPhone and any browser through the Dooby web app."
+  },
+  "cloud_point_1": {
+    "message": "Same Spaces and Collections on every device"
+  },
+  "cloud_point_2": {
+    "message": "No 100 KB limit"
+  },
+  "cloud_point_3": {
+    "message": "Your current bookmarks are merged into the cloud on first sign-in, nothing is lost"
+  },
+  "sign_in_with_google": {
+    "message": "Sign in with Google"
+  },
+  "sign_in_failed": {
+    "message": "Sign-in failed"
+  },
+  "open_webapp_prefix": {
+    "message": "Open "
+  },
+  "open_webapp_link": {
+    "message": "the Dooby web app"
+  },
+  "open_webapp_suffix": {
+    "message": " on iPad or iPhone and sign in with the same Google account."
+  },
+  "sync_now": {
+    "message": "Sync now"
+  },
+  "sign_out": {
+    "message": "Sign out"
+  },
+  "delete_cloud_data": {
+    "message": "Delete cloud data"
+  },
+  "delete_cloud_confirm": {
+    "message": "Delete your bookmarks from Dooby Cloud? Data on this device stays. Other devices will stop receiving updates until you sync again."
+  },
+  "last_synced": {
+    "message": "Last synced: {when}"
+  },
+  "last_error": {
+    "message": "Last error: {error}"
+  },
+  "never": {
+    "message": "never"
+  },
+  "cloud_err_cancelled": {
+    "message": "Sign-in was cancelled"
+  },
+  "cloud_err_not_signed_in": {
+    "message": "Not signed in"
+  },
+  "cloud_err_session_expired": {
+    "message": "Session expired, please sign in again"
+  },
+  "cloud_err_read": {
+    "message": "Cloud read failed ({status})"
+  },
+  "cloud_err_write": {
+    "message": "Cloud write failed ({status}) {detail}"
+  },
+  "cloud_err_delete": {
+    "message": "Cloud delete failed ({status})"
+  },
+  "settings_desc": {
+    "message": "Preferences for this device. Bookmarks themselves still sync as usual."
+  },
+  "setting_language": {
+    "message": "Language"
+  },
+  "setting_language_hint": {
+    "message": "Auto follows your browser language."
+  },
+  "lang_auto": {
+    "message": "Auto"
+  },
+  "setting_close_tab": {
+    "message": "Close tab after saving"
+  },
+  "setting_close_tab_hint": {
+    "message": "When you quick-save from the toolbar icon or drag an open tab into a collection."
+  },
+  "setting_quick_save": {
+    "message": "Quick-save collection"
+  },
+  "setting_quick_save_hint": {
+    "message": "Where the toolbar icon saves pages. \"Auto\" uses the Quick Save collection of the space you are viewing."
+  },
+  "quick_save_auto": {
+    "message": "Auto (current space)"
+  },
+  "setting_collection_sort": {
+    "message": "Sort collections"
+  },
+  "setting_collection_sort_hint": {
+    "message": "Pinned collections always stay on top."
+  },
+  "sort_manual_created": {
+    "message": "Manual (creation order)"
+  },
+  "sort_name": {
+    "message": "Name A → Z"
+  },
+  "sort_newest": {
+    "message": "Newest first"
+  },
+  "sort_oldest": {
+    "message": "Oldest first"
+  },
+  "sort_count": {
+    "message": "Most tabs first"
+  },
+  "setting_tab_sort": {
+    "message": "Sort tabs in a collection"
+  },
+  "setting_tab_sort_hint": {
+    "message": "Pinned tabs always stay on top. Drag-to-reorder works in Manual mode."
+  },
+  "sort_manual_drag": {
+    "message": "Manual (drag to reorder)"
+  },
+  "sort_title": {
+    "message": "Title A → Z"
+  },
+  "duplicate_urls": {
+    "message": "Duplicate URLs"
+  },
+  "remove_all_duplicates": {
+    "message": "Remove All Duplicates"
+  },
+  "no_duplicates": {
+    "message": "No duplicate URLs found. Your collections are clean!"
+  },
+  "duplicates_found": {
+    "message": "Found {urls} URLs with duplicates ({extra} extra copies)."
+  },
+  "keep_label": {
+    "message": "KEEP"
+  },
+  "remove_label": {
+    "message": "REMOVE"
+  },
+  "remove_duplicates_confirm": {
+    "message": "Remove {n} duplicate tabs? The first copy of each will be kept."
+  },
+  "removed_duplicates": {
+    "message": "Removed {n} duplicate tabs."
+  },
+  "import_bookmarks_desc": {
+    "message": "Import bookmarks from Chrome HTML, Toby, TabMe, or other JSON formats. Each folder becomes a collection."
+  },
+  "import_html": {
+    "message": "Import HTML (Chrome Bookmarks)"
+  },
+  "import_json": {
+    "message": "Import JSON (Dooby / Toby / TabMe)"
+  },
+  "no_bookmarks_in_file": {
+    "message": "No bookmarks found in the file."
+  },
+  "no_bookmarks_tabme": {
+    "message": "No bookmarks found in the TabMe JSON file."
+  },
+  "no_bookmarks_toby": {
+    "message": "No bookmarks found in the Toby JSON file."
+  },
+  "no_bookmarks_json": {
+    "message": "No bookmarks found in the JSON file."
+  },
+  "import_folders_confirm": {
+    "message": "Import {folders} folders with {tabs} bookmarks?"
+  },
+  "import_tabme_confirm": {
+    "message": "Import {folders} collections with {tabs} bookmarks from TabMe?"
+  },
+  "import_toby_confirm": {
+    "message": "Import {folders} collections with {tabs} bookmarks from Toby?"
+  },
+  "imported_result": {
+    "message": "Imported {count} bookmarks into {folders} collections."
+  },
+  "import_failed": {
+    "message": "Import failed: {error}"
+  },
+  "import_replace_confirm": {
+    "message": "Import {spaces} spaces and {collections} collections? This will replace your current data."
+  },
+  "import_replace_tabs_confirm": {
+    "message": "Import {collections} collections with {tabs} tabs?\nThis will replace your current data."
+  },
+  "export_import_data": {
+    "message": "Export / Import Data"
+  },
+  "export_import_desc": {
+    "message": "Backup your data or transfer to another device."
+  },
+  "export_json": {
+    "message": "Export as JSON"
+  },
+  "import_from_json": {
+    "message": "Import from JSON"
+  },
+  "tab_support": {
+    "message": "Support"
+  },
+  "tab_themes": {
+    "message": "Themes"
+  },
+  "tab_wall_of_fame": {
+    "message": "Wall of Fame"
+  },
+  "tab_activate": {
+    "message": "Activate"
+  },
+  "donate_title": {
+    "message": "Buy the Developer a Coffee"
+  },
+  "donate_pitch": {
+    "message": "Enjoy using Dooby? For just <strong>1 USDT</strong>, you can support development and unlock <span class=\"accent-text\">exclusive perks</span>!"
+  },
+  "perk_wof_desc": {
+    "message": "Your name permanently in the contributor credits"
+  },
+  "perk_themes": {
+    "message": "4 Premium Themes"
+  },
+  "perk_themes_desc": {
+    "message": "Aurora, Sunset, Ocean, Sakura"
+  },
+  "perk_early": {
+    "message": "Early Access"
+  },
+  "perk_early_desc": {
+    "message": "New features before everyone else"
+  },
+  "perk_priority": {
+    "message": "Priority Features"
+  },
+  "perk_priority_desc": {
+    "message": "Vote on what gets built next"
+  },
+  "donate_address_label": {
+    "message": "USDT (TRC-20) — Just 1 USDT"
+  },
+  "copy": {
+    "message": "Copy"
+  },
+  "copy_address": {
+    "message": "Copy address"
+  },
+  "copied": {
+    "message": "✓ Copied!"
+  },
+  "step_1": {
+    "message": "Send 1 USDT or more to the address above"
+  },
+  "step_2": {
+    "message": "DM the developer with your <strong>name + TX hash</strong>"
+  },
+  "step_3": {
+    "message": "Receive your activation code & get listed!"
+  },
+  "color_themes": {
+    "message": "Color Themes"
+  },
+  "themes_desc": {
+    "message": "Personalize your Dooby workspace. Premium themes unlock with a donation."
+  },
+  "theme_free": {
+    "message": "Free"
+  },
+  "theme_premium": {
+    "message": "Premium"
+  },
+  "theme_unlocked": {
+    "message": "Unlocked"
+  },
+  "wof_desc": {
+    "message": "Thank you to everyone who supports Dooby's development!"
+  },
+  "wof_empty": {
+    "message": "Be the first supporter!<br>Your name will appear here."
+  },
+  "wof_you": {
+    "message": "You!"
+  },
+  "wof_cta": {
+    "message": "Want your name here?"
+  },
+  "wof_join": {
+    "message": "Donate 1 USDT & Join"
+  },
+  "activate_title": {
+    "message": "Activate Donor Perks"
+  },
+  "activate_desc": {
+    "message": "Enter the display name you gave the developer and the activation code you received. The code only works with that exact name."
+  },
+  "activate_name_placeholder": {
+    "message": "Your display name"
+  },
+  "activate_code_placeholder": {
+    "message": "DOOBY-… (paste the full code)"
+  },
+  "no_code_yet": {
+    "message": "Don't have a code yet? "
+  },
+  "donate_to_get_one": {
+    "message": "Donate to get one"
+  },
+  "welcome_back_prefix": {
+    "message": "Welcome back, "
+  },
+  "welcome_back_suffix": {
+    "message": "!"
+  },
+  "donor_verified": {
+    "message": "You're a verified Dooby supporter. All premium features are unlocked!"
+  },
+  "badge_themes": {
+    "message": "🎨 Themes"
+  },
+  "badge_wof": {
+    "message": "⭐ Wall of Fame"
+  },
+  "badge_early": {
+    "message": "🚀 Early Access"
+  },
+  "badge_priority": {
+    "message": "💬 Priority"
+  },
+  "deactivate": {
+    "message": "Deactivate"
+  },
+  "deactivate_confirm": {
+    "message": "This will deactivate your donor perks. You can re-activate anytime with your code."
+  },
+  "enter_display_name": {
+    "message": "Please enter your display name"
+  },
+  "enter_activation_code": {
+    "message": "Please enter your activation code"
+  },
+  "err_name_required": {
+    "message": "Please enter the display name your code was issued for"
+  },
+  "err_code_prefix": {
+    "message": "Activation codes start with DOOBY-"
+  },
+  "err_code_invalid": {
+    "message": "This code is not valid for that name. Check both and try again."
+  },
+  "sync_err_spaces_too_large": {
+    "message": "Too many spaces to sync (over 8 KB). Remove or rename some spaces."
+  },
+  "sync_err_data_too_large": {
+    "message": "Data ({kb} KB) exceeds the 100 KB sync limit. Remove some tabs or use Export to back up."
+  },
+  "sync_err_item_too_large": {
+    "message": "A sync item exceeded the 8 KB per-item limit. Please report this bug."
+  },
+  "sync_err_quota": {
+    "message": "Storage quota exceeded (100 KB). Remove some tabs or use Export."
+  },
+  "sync_err_too_many_writes": {
+    "message": "Too many sync writes in a short time. Sync will retry automatically."
+  },
+  "sync_err_too_many_items": {
+    "message": "Too many sync items. Remove some tabs or use Export."
+  }
+}

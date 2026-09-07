@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dooby - New Tab</title>
+  <title data-i18n="page_title">Dooby - New Tab</title>
   <link rel="stylesheet" href="../css/newtab.css">
 </head>
 <body>
@@ -26,13 +26,13 @@
           <circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" stroke-width="1.5"/>
           <line x1="10.5" y1="10.5" x2="15" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
-        <input type="text" id="searchInput" placeholder="Search tabs and collections... (Ctrl+K)" autocomplete="off">
+        <input type="text" id="searchInput" placeholder="Search tabs and collections... (Ctrl+K)" data-i18n-placeholder="search_placeholder" autocomplete="off">
         <div id="searchResults" class="search-results hidden"></div>
       </div>
     </div>
     <div class="top-bar-right">
       <!-- Sync Status Indicator with LED -->
-      <div id="syncStatus" class="sync-status" title="Cloud sync via Chrome account">
+      <div id="syncStatus" class="sync-status" title="Cloud sync via Chrome account" data-i18n-title="sync_status_title">
         <span id="syncLed" class="sync-led"></span>
         <svg class="sync-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
           <path d="M2 8a6 6 0 0 1 10.5-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -40,11 +40,11 @@
           <polyline points="12,1 13,4 10,5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           <polyline points="4,15 3,12 6,11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <span id="syncStatusText" class="sync-status-text">Synced</span>
+        <span id="syncStatusText" class="sync-status-text" data-i18n="synced">Synced</span>
       </div>
 
       <!-- Storage Usage Indicator -->
-      <div id="storageUsage" class="storage-usage" title="Chrome Sync storage usage">
+      <div id="storageUsage" class="storage-usage" title="Chrome Sync storage usage" data-i18n-title="storage_usage_title">
         <div class="storage-usage-bar">
           <div id="storageUsageFill" class="storage-usage-fill"></div>
         </div>
@@ -52,28 +52,28 @@
       </div>
 
       <!-- Cloud Sync Buttons -->
-      <button id="btnCloudPush" class="btn-icon" title="Upload to cloud">
+      <button id="btnCloudPush" class="btn-icon" title="Upload to cloud" data-i18n-title="upload_to_cloud">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
           <path d="M4 10c-1.7 0-3-1.3-3-3 0-1.5 1-2.7 2.4-2.9C4 2.3 5.8 1 8 1c2.8 0 5 2 5 4.5 0 .2 0 .3 0 .5 1.2.4 2 1.5 2 2.8 0 1.7-1.3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M8 8v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           <path d="M5.5 10.5L8 8l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
-      <button id="btnCloudPull" class="btn-icon" title="Sync from cloud to this device">
+      <button id="btnCloudPull" class="btn-icon" title="Sync from cloud to this device" data-i18n-title="sync_from_cloud_title">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
           <path d="M4 10c-1.7 0-3-1.3-3-3 0-1.5 1-2.7 2.4-2.9C4 2.3 5.8 1 8 1c2.8 0 5 2 5 4.5 0 .2 0 .3 0 .5 1.2.4 2 1.5 2 2.8 0 1.7-1.3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M8 8v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           <path d="M5.5 11.5L8 14l2.5-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
-      <button id="btnExportData" class="btn-icon" title="Export data to file (backup)">
+      <button id="btnExportData" class="btn-icon" title="Export data to file (backup)" data-i18n-title="export_backup_title">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
           <path d="M14 10v3a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M8 2v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           <path d="M5 9l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
-      <button id="btnImportData" class="btn-icon" title="Import data from file">
+      <button id="btnImportData" class="btn-icon" title="Import data from file" data-i18n-title="import_file_title">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
           <path d="M14 10v3a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M8 12V4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -82,17 +82,17 @@
       </button>
       <input type="file" id="importFileInput" accept=".json" style="display:none">
 
-      <button id="btnSaveSession" class="btn btn-primary" title="Save all open tabs as a session">
+      <button id="btnSaveSession" class="btn btn-primary" title="Save all open tabs as a session" data-i18n-title="save_session_title">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
           <path d="M2 2h8l4 4v8H2V2z" stroke="currentColor" stroke-width="1.5" fill="none"/>
           <rect x="5" y="2" width="4" height="4" stroke="currentColor" stroke-width="1"/>
           <rect x="4" y="9" width="6" height="5" stroke="currentColor" stroke-width="1"/>
         </svg>
-        Save Session
+        <span data-i18n="save_session">Save Session</span>
       </button>
 
       <!-- Dooby Cloud account -->
-      <button id="btnAccount" class="btn-icon account-btn" title="Dooby Cloud: sign in with Google">
+      <button id="btnAccount" class="btn-icon account-btn" title="Dooby Cloud: sign in with Google" data-i18n-title="account_title">
         <svg id="accountIcon" width="16" height="16" viewBox="0 0 16 16" fill="none">
           <circle cx="8" cy="5.5" r="3" stroke="currentColor" stroke-width="1.5"/>
           <path d="M2.5 14c.6-2.9 2.8-4.5 5.5-4.5s4.9 1.6 5.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -101,7 +101,7 @@
       </button>
 
       <!-- Settings -->
-      <button id="btnSettings" class="btn-icon" title="Settings">
+      <button id="btnSettings" class="btn-icon" title="Settings" data-i18n-title="settings">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
           <circle cx="8" cy="8" r="2.2" stroke="currentColor" stroke-width="1.5"/>
           <path d="M8 1.5v1.8M8 12.7v1.8M1.5 8h1.8M12.7 8h1.8M3.4 3.4l1.3 1.3M11.3 11.3l1.3 1.3M3.4 12.6l1.3-1.3M11.3 4.7l1.3-1.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -110,7 +110,7 @@
       </button>
 
       <!-- Theme Switcher -->
-      <button id="btnTheme" class="btn-icon" title="Change theme">
+      <button id="btnTheme" class="btn-icon" title="Change theme" data-i18n-title="change_theme">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
           <circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5"/>
           <path d="M8 2.5a5.5 5.5 0 0 0 0 11V2.5z" fill="currentColor"/>
@@ -118,17 +118,17 @@
       </button>
 
       <!-- VIP Badge (shown after donation) -->
-      <span id="vipBadge" class="vip-badge hidden" title="VIP 大乾爹">大乾爹</span>
+      <span id="vipBadge" class="vip-badge hidden" title="VIP 大乾爹" data-i18n-title="vip_badge_title" data-i18n="vip_badge">大乾爹</span>
 
       <!-- Donate -->
-      <button id="btnDonate" class="btn-icon btn-donate" title="Support the developer ❤">
+      <button id="btnDonate" class="btn-icon btn-donate" title="Support the developer ❤" data-i18n-title="support_developer">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
           <path d="M8 14s-5.5-3.5-5.5-7A3 3 0 0 1 8 4.5 3 3 0 0 1 13.5 7C13.5 10.5 8 14 8 14z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
         </svg>
       </button>
 
       <!-- Export/Import -->
-      <button id="btnExportImport" class="btn-icon" title="Export / Import data">
+      <button id="btnExportImport" class="btn-icon" title="Export / Import data" data-i18n-title="export_import_title">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
           <path d="M4 10l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           <line x1="8" y1="2" x2="8" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -141,8 +141,8 @@
     <!-- Spaces Sidebar -->
     <aside class="spaces-sidebar">
       <div class="sidebar-header">
-        <h3>Spaces</h3>
-        <button id="btnAddSpace" class="btn-icon" title="Add new space">
+        <h3 data-i18n="spaces">Spaces</h3>
+        <button id="btnAddSpace" class="btn-icon" title="Add new space" data-i18n-title="add_space_title">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <line x1="8" y1="2" x2="8" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             <line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -162,22 +162,22 @@
               <line x1="8" y1="2" x2="8" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
               <line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             </svg>
-            Add Collection
+            <span data-i18n="add_collection">Add Collection</span>
           </button>
-          <button id="btnImportBookmarks" class="btn btn-secondary" title="Import Chrome bookmarks">
+          <button id="btnImportBookmarks" class="btn btn-secondary" title="Import Chrome bookmarks" data-i18n-title="import_chrome_bookmarks_title">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
               <path d="M4 6l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
               <line x1="8" y1="2" x2="8" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
               <path d="M2 12v2h12v-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            Import Bookmarks
+            <span data-i18n="import_bookmarks">Import Bookmarks</span>
           </button>
-          <button id="btnFindDuplicates" class="btn btn-secondary" title="Find duplicate URLs">
+          <button id="btnFindDuplicates" class="btn btn-secondary" title="Find duplicate URLs" data-i18n-title="find_duplicates_title">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
               <rect x="1" y="1" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
               <rect x="6" y="6" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
             </svg>
-            Duplicates
+            <span data-i18n="duplicates">Duplicates</span>
           </button>
         </div>
       </div>
@@ -187,7 +187,7 @@
     <!-- Open Tabs Sidebar -->
     <aside class="tabs-sidebar">
       <div class="sidebar-header">
-        <h3>Open Tabs</h3>
+        <h3 data-i18n="open_tabs">Open Tabs</h3>
         <span id="openTabCount" class="badge">0</span>
       </div>
       <ul id="openTabsList" class="open-tabs-list"></ul>
@@ -197,10 +197,10 @@
   <!-- Bulk Action Bar -->
   <div id="bulkActionBar" class="bulk-action-bar hidden">
     <span id="bulkSelectedCount">0 selected</span>
-    <button id="btnBulkOpen" class="btn btn-secondary btn-sm">Open All</button>
-    <button id="btnBulkMove" class="btn btn-secondary btn-sm">Move to...</button>
-    <button id="btnBulkDelete" class="btn btn-secondary btn-sm danger-text">Delete</button>
-    <button id="btnBulkCancel" class="btn btn-secondary btn-sm">Cancel</button>
+    <button id="btnBulkOpen" class="btn btn-secondary btn-sm" data-i18n="open_all">Open All</button>
+    <button id="btnBulkMove" class="btn btn-secondary btn-sm" data-i18n="move_to">Move to...</button>
+    <button id="btnBulkDelete" class="btn btn-secondary btn-sm danger-text" data-i18n="delete">Delete</button>
+    <button id="btnBulkCancel" class="btn btn-secondary btn-sm" data-i18n="cancel">Cancel</button>
   </div>
 
   <!-- Context Menu -->
@@ -211,11 +211,11 @@
   <!-- Cloud Sync Prompt Modal -->
   <div id="cloudSyncPrompt" class="modal-overlay hidden">
     <div class="modal" style="width:420px;">
-      <h3>☁️ Cloud Data Found</h3>
-      <p class="modal-desc" id="cloudSyncDesc">Found bookmarks in your Chrome cloud storage from another device. Would you like to sync them to this device?</p>
+      <h3 data-i18n="cloud_data_found">☁️ Cloud Data Found</h3>
+      <p class="modal-desc" id="cloudSyncDesc" data-i18n="cloud_data_found_desc">Found bookmarks in your Chrome cloud storage from another device. Would you like to sync them to this device?</p>
       <div class="modal-actions" style="margin-top:16px;">
-        <button id="btnCloudSyncYes" class="btn btn-primary">Sync from Cloud</button>
-        <button id="btnCloudSyncNo" class="btn btn-secondary">Keep Local Data</button>
+        <button id="btnCloudSyncYes" class="btn btn-primary" data-i18n="sync_from_cloud">Sync from Cloud</button>
+        <button id="btnCloudSyncNo" class="btn btn-secondary" data-i18n="keep_local_data">Keep Local Data</button>
       </div>
     </div>
   </div>
@@ -224,22 +224,22 @@
   <!-- Dooby Cloud modal -->
   <div id="cloudModal" class="modal-overlay hidden">
     <div class="modal" style="width:460px;">
-      <h3 style="margin-bottom:6px;">☁️ Dooby Cloud</h3>
+      <h3 style="margin-bottom:6px;" data-i18n="dooby_cloud">☁️ Dooby Cloud</h3>
 
       <div id="cloudNotConfigured" class="cloud-panel hidden">
-        <p class="modal-desc">Dooby Cloud is not enabled in this build. Chrome's own sync still keeps your bookmarks in step across desktop Chromes.</p>
+        <p class="modal-desc" data-i18n="cloud_not_configured">Dooby Cloud is not enabled in this build. Chrome's own sync still keeps your bookmarks in step across desktop Chromes.</p>
       </div>
 
       <div id="cloudSignedOut" class="cloud-panel hidden">
-        <p class="modal-desc">Sign in with Google to keep your bookmarks in Dooby Cloud and use them on iPad, iPhone and any browser through the Dooby web app.</p>
+        <p class="modal-desc" data-i18n="cloud_signed_out_desc">Sign in with Google to keep your bookmarks in Dooby Cloud and use them on iPad, iPhone and any browser through the Dooby web app.</p>
         <ul class="cloud-points">
-          <li>Same Spaces and Collections on every device</li>
-          <li>No 100 KB limit</li>
-          <li>Your current bookmarks are merged into the cloud on first sign-in, nothing is lost</li>
+          <li data-i18n="cloud_point_1">Same Spaces and Collections on every device</li>
+          <li data-i18n="cloud_point_2">No 100 KB limit</li>
+          <li data-i18n="cloud_point_3">Your current bookmarks are merged into the cloud on first sign-in, nothing is lost</li>
         </ul>
         <button id="btnCloudSignIn" class="btn btn-primary" style="width:100%;">
           <svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true"><path fill="#EA4335" d="M9 3.5c1.5 0 2.6.6 3.3 1.2l2.4-2.4C13.2.9 11.3 0 9 0 5.5 0 2.5 2 1 4.9l2.8 2.2C4.5 5 6.5 3.5 9 3.5z"/><path fill="#4285F4" d="M17.6 9.2c0-.7-.1-1.2-.2-1.7H9v3.3h4.9c-.1.9-.7 2.1-1.9 2.9l2.8 2.2c1.7-1.6 2.8-3.9 2.8-6.7z"/><path fill="#FBBC05" d="M3.8 10.9c-.2-.6-.3-1.2-.3-1.9s.1-1.3.3-1.9L1 4.9C.4 6.1 0 7.5 0 9s.4 2.9 1 4.1l2.8-2.2z"/><path fill="#34A853" d="M9 18c2.4 0 4.5-.8 6-2.2l-2.8-2.2c-.8.5-1.8.9-3.2.9-2.5 0-4.5-1.6-5.2-3.9L1 12.8C2.5 15.9 5.5 18 9 18z"/></svg>
-          Sign in with Google
+          <span data-i18n="sign_in_with_google">Sign in with Google</span>
         </button>
         <p id="cloudSignInError" class="activate-error hidden" style="margin-top:10px;"></p>
       </div>
@@ -253,17 +253,17 @@
           </div>
         </div>
         <p class="modal-desc" id="cloudSyncInfo" style="margin-top:12px;"></p>
-        <p class="modal-desc">Open <a id="cloudWebAppLink" href="#" target="_blank" rel="noopener">the Dooby web app</a> on iPad or iPhone and sign in with the same Google account.</p>
+        <p class="modal-desc"><span data-i18n="open_webapp_prefix">Open </span><a id="cloudWebAppLink" href="#" target="_blank" rel="noopener" data-i18n="open_webapp_link">the Dooby web app</a><span data-i18n="open_webapp_suffix"> on iPad or iPhone and sign in with the same Google account.</span></p>
         <div class="modal-actions" style="margin-top:14px; gap:8px; flex-wrap:wrap;">
-          <button id="btnCloudSyncNow" class="btn btn-primary btn-sm">Sync now</button>
-          <button id="btnCloudSignOut" class="btn btn-secondary btn-sm">Sign out</button>
-          <button id="btnCloudDelete" class="btn btn-secondary btn-sm" style="opacity:.7;">Delete cloud data</button>
+          <button id="btnCloudSyncNow" class="btn btn-primary btn-sm" data-i18n="sync_now">Sync now</button>
+          <button id="btnCloudSignOut" class="btn btn-secondary btn-sm" data-i18n="sign_out">Sign out</button>
+          <button id="btnCloudDelete" class="btn btn-secondary btn-sm" style="opacity:.7;" data-i18n="delete_cloud_data">Delete cloud data</button>
         </div>
         <p id="cloudError" class="activate-error hidden" style="margin-top:10px;"></p>
       </div>
 
       <div class="modal-actions" style="justify-content:center; margin-top:18px;">
-        <button id="btnCloseCloud" class="btn btn-secondary">Close</button>
+        <button id="btnCloseCloud" class="btn btn-secondary" data-i18n="close">Close</button>
       </div>
     </div>
   </div>
@@ -271,66 +271,78 @@
   <!-- Settings Modal -->
   <div id="settingsModal" class="modal-overlay hidden">
     <div class="modal settings-modal" style="width:480px;">
-      <h3>Settings</h3>
-      <p class="modal-desc">Preferences for this device. Bookmarks themselves still sync as usual.</p>
+      <h3 data-i18n="settings">Settings</h3>
+      <p class="modal-desc" data-i18n="settings_desc">Preferences for this device. Bookmarks themselves still sync as usual.</p>
 
       <div class="setting-row">
         <div class="setting-text">
-          <div class="setting-label">Close tab after saving</div>
-          <div class="setting-hint">When you quick-save from the toolbar icon or drag an open tab into a collection.</div>
+          <div class="setting-label" data-i18n="setting_language">Language</div>
+          <div class="setting-hint" data-i18n="setting_language_hint">Auto follows your browser language.</div>
+        </div>
+        <select id="settingLanguage" class="setting-select">
+          <option value="auto" data-i18n="lang_auto">Auto</option>
+          <option value="en">English</option>
+          <option value="zh_TW">繁體中文</option>
+        </select>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-text">
+          <div class="setting-label" data-i18n="setting_close_tab">Close tab after saving</div>
+          <div class="setting-hint" data-i18n="setting_close_tab_hint">When you quick-save from the toolbar icon or drag an open tab into a collection.</div>
         </div>
         <label class="switch"><input type="checkbox" id="settingCloseTab"><span class="slider"></span></label>
       </div>
 
       <div class="setting-row">
         <div class="setting-text">
-          <div class="setting-label">Quick-save collection</div>
-          <div class="setting-hint">Where the toolbar icon saves pages. "Auto" uses the Quick Save collection of the space you are viewing.</div>
+          <div class="setting-label" data-i18n="setting_quick_save">Quick-save collection</div>
+          <div class="setting-hint" data-i18n="setting_quick_save_hint">Where the toolbar icon saves pages. "Auto" uses the Quick Save collection of the space you are viewing.</div>
         </div>
         <select id="settingQuickSave" class="setting-select"></select>
       </div>
 
       <div class="setting-row">
         <div class="setting-text">
-          <div class="setting-label">Sort collections</div>
-          <div class="setting-hint">Pinned collections always stay on top.</div>
+          <div class="setting-label" data-i18n="setting_collection_sort">Sort collections</div>
+          <div class="setting-hint" data-i18n="setting_collection_sort_hint">Pinned collections always stay on top.</div>
         </div>
         <select id="settingCollectionSort" class="setting-select">
-          <option value="manual">Manual (creation order)</option>
-          <option value="name">Name A → Z</option>
-          <option value="newest">Newest first</option>
-          <option value="oldest">Oldest first</option>
-          <option value="count">Most tabs first</option>
+          <option value="manual" data-i18n="sort_manual_created">Manual (creation order)</option>
+          <option value="name" data-i18n="sort_name">Name A → Z</option>
+          <option value="newest" data-i18n="sort_newest">Newest first</option>
+          <option value="oldest" data-i18n="sort_oldest">Oldest first</option>
+          <option value="count" data-i18n="sort_count">Most tabs first</option>
         </select>
       </div>
 
       <div class="setting-row">
         <div class="setting-text">
-          <div class="setting-label">Sort tabs in a collection</div>
-          <div class="setting-hint">Pinned tabs always stay on top. Drag-to-reorder works in Manual mode.</div>
+          <div class="setting-label" data-i18n="setting_tab_sort">Sort tabs in a collection</div>
+          <div class="setting-hint" data-i18n="setting_tab_sort_hint">Pinned tabs always stay on top. Drag-to-reorder works in Manual mode.</div>
         </div>
         <select id="settingTabSort" class="setting-select">
-          <option value="manual">Manual (drag to reorder)</option>
-          <option value="newest">Newest first</option>
-          <option value="oldest">Oldest first</option>
-          <option value="title">Title A → Z</option>
+          <option value="manual" data-i18n="sort_manual_drag">Manual (drag to reorder)</option>
+          <option value="newest" data-i18n="sort_newest">Newest first</option>
+          <option value="oldest" data-i18n="sort_oldest">Oldest first</option>
+          <option value="title" data-i18n="sort_title">Title A → Z</option>
         </select>
       </div>
 
       <div class="modal-actions" style="margin-top:20px;">
-        <button id="btnCloseSettings" class="btn btn-primary">Done</button>
+        <button id="btnCloseSettings" class="btn btn-primary" data-i18n="done">Done</button>
       </div>
     </div>
   </div>
 
   <div id="duplicatesModal" class="modal-overlay hidden">
     <div class="modal" style="width:550px;">
-      <h3>Duplicate URLs</h3>
+      <h3 data-i18n="duplicate_urls">Duplicate URLs</h3>
       <p class="modal-desc" id="duplicatesDesc"></p>
       <div id="duplicatesList" class="duplicates-list"></div>
       <div class="modal-actions" style="margin-top:16px;">
-        <button id="btnRemoveAllDuplicates" class="btn btn-primary">Remove All Duplicates</button>
-        <button id="btnCloseDuplicates" class="btn btn-secondary">Close</button>
+        <button id="btnRemoveAllDuplicates" class="btn btn-primary" data-i18n="remove_all_duplicates">Remove All Duplicates</button>
+        <button id="btnCloseDuplicates" class="btn btn-secondary" data-i18n="close">Close</button>
       </div>
     </div>
   </div>
@@ -338,15 +350,15 @@
   <!-- Import Bookmarks Modal -->
   <div id="importBookmarksModal" class="modal-overlay hidden">
     <div class="modal" style="width:450px;">
-      <h3>Import Bookmarks</h3>
-      <p class="modal-desc">Import bookmarks from Chrome HTML, Toby, TabMe, or other JSON formats. Each folder becomes a collection.</p>
+      <h3 data-i18n="import_bookmarks">Import Bookmarks</h3>
+      <p class="modal-desc" data-i18n="import_bookmarks_desc">Import bookmarks from Chrome HTML, Toby, TabMe, or other JSON formats. Each folder becomes a collection.</p>
       <div class="modal-actions" style="flex-direction:column;gap:12px;align-items:stretch;">
         <label class="btn btn-primary" style="justify-content:center;cursor:pointer;">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
             <path d="M4 6l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             <line x1="8" y1="2" x2="8" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
-          Import HTML (Chrome Bookmarks)
+          <span data-i18n="import_html">Import HTML (Chrome Bookmarks)</span>
           <input type="file" id="importBookmarkHtml" accept=".html,.htm" style="display:none;">
         </label>
         <label class="btn btn-secondary" style="justify-content:center;cursor:pointer;">
@@ -354,10 +366,10 @@
             <path d="M4 6l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             <line x1="8" y1="2" x2="8" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
-          Import JSON (Dooby / Toby / TabMe)
+          <span data-i18n="import_json">Import JSON (Dooby / Toby / TabMe)</span>
           <input type="file" id="importBookmarkJson" accept=".json" style="display:none;">
         </label>
-        <button id="btnCloseImportBookmarks" class="btn btn-secondary" style="justify-content:center;">Cancel</button>
+        <button id="btnCloseImportBookmarks" class="btn btn-secondary" style="justify-content:center;" data-i18n="cancel">Cancel</button>
       </div>
     </div>
   </div>
@@ -365,25 +377,25 @@
   <!-- Export/Import Modal -->
   <div id="exportImportModal" class="modal-overlay hidden">
     <div class="modal">
-      <h3>Export / Import Data</h3>
-      <p class="modal-desc">Backup your data or transfer to another device.</p>
+      <h3 data-i18n="export_import_data">Export / Import Data</h3>
+      <p class="modal-desc" data-i18n="export_import_desc">Backup your data or transfer to another device.</p>
       <div class="modal-actions" style="flex-direction: column; gap: 12px; align-items: stretch;">
         <button id="btnExportData" class="btn btn-primary" style="justify-content: center;">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
             <path d="M4 10l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             <line x1="8" y1="2" x2="8" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
-          Export as JSON
+          <span data-i18n="export_json">Export as JSON</span>
         </button>
         <label class="btn btn-secondary" style="justify-content: center; cursor: pointer;">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
             <path d="M4 6l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             <line x1="8" y1="2" x2="8" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
-          Import from JSON
+          <span data-i18n="import_from_json">Import from JSON</span>
           <input type="file" id="importFileInput" accept=".json" style="display: none;">
         </label>
-        <button id="btnCloseExportImport" class="btn btn-secondary" style="justify-content: center;">Cancel</button>
+        <button id="btnCloseExportImport" class="btn btn-secondary" style="justify-content: center;" data-i18n="cancel">Cancel</button>
       </div>
     </div>
   </div>
@@ -394,75 +406,75 @@
 
       <!-- Tab Navigation -->
       <div class="donate-tabs">
-        <button class="donate-tab active" data-tab="support">Support</button>
-        <button class="donate-tab" data-tab="themes">Themes</button>
-        <button class="donate-tab" data-tab="wall-of-fame">Wall of Fame</button>
-        <button class="donate-tab" data-tab="activate">Activate</button>
+        <button class="donate-tab active" data-tab="support" data-i18n="tab_support">Support</button>
+        <button class="donate-tab" data-tab="themes" data-i18n="tab_themes">Themes</button>
+        <button class="donate-tab" data-tab="wall-of-fame" data-i18n="tab_wall_of_fame">Wall of Fame</button>
+        <button class="donate-tab" data-tab="activate" data-i18n="tab_activate">Activate</button>
       </div>
 
       <!-- ===== Tab: Support ===== -->
       <div class="donate-tab-content active" data-tab="support">
         <div class="donate-header">
           <div class="donate-coffee-icon">☕</div>
-          <h3>Buy the Developer a Coffee</h3>
-          <p class="modal-desc">Enjoy using Dooby? For just <strong>$1 USDT</strong>, you can support development and unlock <span class="accent-text">exclusive perks</span>!</p>
+          <h3 data-i18n="donate_title">Buy the Developer a Coffee</h3>
+          <p class="modal-desc" data-i18n-html="donate_pitch">Enjoy using Dooby? For just <strong>1 USDT</strong>, you can support development and unlock <span class="accent-text">exclusive perks</span>!</p>
         </div>
 
         <div class="donate-perks">
           <div class="donate-perk">
             <span class="perk-icon">⭐</span>
             <div>
-              <strong>Wall of Fame</strong>
-              <p>Your name permanently in the contributor credits</p>
+              <strong data-i18n="tab_wall_of_fame">Wall of Fame</strong>
+              <p data-i18n="perk_wof_desc">Your name permanently in the contributor credits</p>
             </div>
           </div>
           <div class="donate-perk">
             <span class="perk-icon">🎨</span>
             <div>
-              <strong>4 Premium Themes</strong>
-              <p>Aurora, Sunset, Ocean, Sakura</p>
+              <strong data-i18n="perk_themes">4 Premium Themes</strong>
+              <p data-i18n="perk_themes_desc">Aurora, Sunset, Ocean, Sakura</p>
             </div>
           </div>
           <div class="donate-perk">
             <span class="perk-icon">🚀</span>
             <div>
-              <strong>Early Access</strong>
-              <p>New features before everyone else</p>
+              <strong data-i18n="perk_early">Early Access</strong>
+              <p data-i18n="perk_early_desc">New features before everyone else</p>
             </div>
           </div>
           <div class="donate-perk">
             <span class="perk-icon">💬</span>
             <div>
-              <strong>Priority Features</strong>
-              <p>Vote on what gets built next</p>
+              <strong data-i18n="perk_priority">Priority Features</strong>
+              <p data-i18n="perk_priority_desc">Vote on what gets built next</p>
             </div>
           </div>
         </div>
 
         <div class="donate-address-section">
-          <label class="donate-label">USDT (TRC-20) — Just $1</label>
+          <label class="donate-label" data-i18n="donate_address_label">USDT (TRC-20) — Just 1 USDT</label>
           <div class="donate-address-row">
             <code id="donateAddress" class="donate-address">TMx7ja4r3WGFcnwKNqAVogY91XRgGaQA1q</code>
-            <button id="btnCopyAddress" class="btn btn-secondary btn-sm" title="Copy address">
+            <button id="btnCopyAddress" class="btn btn-secondary btn-sm" title="Copy address" data-i18n-title="copy_address">
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                 <rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
                 <path d="M3 11V3a1 1 0 0 1 1-1h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
               </svg>
-              Copy
+              <span data-i18n="copy">Copy</span>
             </button>
           </div>
           <div class="donate-steps">
-            <div class="donate-step"><span class="step-num">1</span> Send $1+ USDT to the address above</div>
-            <div class="donate-step"><span class="step-num">2</span> DM the developer with your <strong>name + TX hash</strong></div>
-            <div class="donate-step"><span class="step-num">3</span> Receive your activation code & get listed!</div>
+            <div class="donate-step"><span class="step-num">1</span> <span data-i18n="step_1">Send 1 USDT or more to the address above</span></div>
+            <div class="donate-step"><span class="step-num">2</span> <span data-i18n-html="step_2">DM the developer with your <strong>name + TX hash</strong></span></div>
+            <div class="donate-step"><span class="step-num">3</span> <span data-i18n="step_3">Receive your activation code &amp; get listed!</span></div>
           </div>
         </div>
       </div>
 
       <!-- ===== Tab: Themes ===== -->
       <div class="donate-tab-content" data-tab="themes">
-        <h3 style="margin-bottom: 6px;">Color Themes</h3>
-        <p class="modal-desc" style="margin-bottom: 20px;">Personalize your Dooby workspace. Premium themes unlock with a donation.</p>
+        <h3 style="margin-bottom: 6px;" data-i18n="color_themes">Color Themes</h3>
+        <p class="modal-desc" style="margin-bottom: 20px;" data-i18n="themes_desc">Personalize your Dooby workspace. Premium themes unlock with a donation.</p>
         <div id="themeGrid" class="theme-grid">
           <!-- Populated by JS -->
         </div>
@@ -470,54 +482,55 @@
 
       <!-- ===== Tab: Wall of Fame ===== -->
       <div class="donate-tab-content" data-tab="wall-of-fame">
-        <h3 style="margin-bottom: 6px;">Wall of Fame</h3>
-        <p class="modal-desc" style="margin-bottom: 20px;">Thank you to everyone who supports Dooby's development!</p>
+        <h3 style="margin-bottom: 6px;" data-i18n="tab_wall_of_fame">Wall of Fame</h3>
+        <p class="modal-desc" style="margin-bottom: 20px;" data-i18n="wof_desc">Thank you to everyone who supports Dooby's development!</p>
         <div id="wallOfFame" class="wall-of-fame">
           <!-- Populated by JS -->
         </div>
         <div class="wof-cta">
-          <p>Want your name here?</p>
-          <button class="btn btn-primary btn-sm" data-switch-tab="support">Donate $1 & Join</button>
+          <p data-i18n="wof_cta">Want your name here?</p>
+          <button class="btn btn-primary btn-sm" data-switch-tab="support" data-i18n="wof_join">Donate 1 USDT &amp; Join</button>
         </div>
       </div>
 
       <!-- ===== Tab: Activate ===== -->
       <div class="donate-tab-content" data-tab="activate">
         <div id="activateNotDonor">
-          <h3 style="margin-bottom: 6px;">Activate Donor Perks</h3>
-          <p class="modal-desc" style="margin-bottom: 20px;">Enter the display name you gave the developer and the activation code you received. The code only works with that exact name.</p>
+          <h3 style="margin-bottom: 6px;" data-i18n="activate_title">Activate Donor Perks</h3>
+          <p class="modal-desc" style="margin-bottom: 20px;" data-i18n="activate_desc">Enter the display name you gave the developer and the activation code you received. The code only works with that exact name.</p>
           <div class="activate-form">
-            <input type="text" id="activateName" class="activate-input" placeholder="Your display name">
-            <input type="text" id="activateCode" class="activate-input" placeholder="DOOBY-… (paste the full code)">
-            <button id="btnActivate" class="btn btn-primary" style="width:100%;">Activate</button>
+            <input type="text" id="activateName" class="activate-input" placeholder="Your display name" data-i18n-placeholder="activate_name_placeholder">
+            <input type="text" id="activateCode" class="activate-input" placeholder="DOOBY-… (paste the full code)" data-i18n-placeholder="activate_code_placeholder">
+            <button id="btnActivate" class="btn btn-primary" style="width:100%;" data-i18n="tab_activate">Activate</button>
             <p id="activateError" class="activate-error hidden"></p>
           </div>
-          <p class="donate-note" style="margin-top: 16px; text-align:center;">Don't have a code yet? <button class="link-btn" data-switch-tab="support">Donate to get one</button></p>
+          <p class="donate-note" style="margin-top: 16px; text-align:center;"><span data-i18n="no_code_yet">Don't have a code yet? </span><button class="link-btn" data-switch-tab="support" data-i18n="donate_to_get_one">Donate to get one</button></p>
         </div>
 
         <div id="activateIsDonor" class="hidden">
           <div class="donor-status-card">
             <div class="donor-badge-large">✨</div>
-            <h3>Welcome back, <span id="donorDisplayName"></span>!</h3>
-            <p class="modal-desc">You're a verified Dooby supporter. All premium features are unlocked!</p>
+            <h3><span data-i18n="welcome_back_prefix">Welcome back, </span><span id="donorDisplayName"></span><span data-i18n="welcome_back_suffix">!</span></h3>
+            <p class="modal-desc" data-i18n="donor_verified">You're a verified Dooby supporter. All premium features are unlocked!</p>
             <div class="donor-perks-unlocked">
-              <span class="perk-badge unlocked">🎨 Themes</span>
-              <span class="perk-badge unlocked">⭐ Wall of Fame</span>
-              <span class="perk-badge unlocked">🚀 Early Access</span>
-              <span class="perk-badge unlocked">💬 Priority</span>
+              <span class="perk-badge unlocked" data-i18n="badge_themes">🎨 Themes</span>
+              <span class="perk-badge unlocked" data-i18n="badge_wof">⭐ Wall of Fame</span>
+              <span class="perk-badge unlocked" data-i18n="badge_early">🚀 Early Access</span>
+              <span class="perk-badge unlocked" data-i18n="badge_priority">💬 Priority</span>
             </div>
-            <button id="btnDeactivate" class="btn btn-secondary btn-sm" style="margin-top:16px; opacity: 0.6;">Deactivate</button>
+            <button id="btnDeactivate" class="btn btn-secondary btn-sm" style="margin-top:16px; opacity: 0.6;" data-i18n="deactivate">Deactivate</button>
           </div>
         </div>
       </div>
 
       <div class="modal-actions" style="justify-content:center; margin-top: 20px;">
-        <button id="btnCloseDonate" class="btn btn-secondary">Close</button>
+        <button id="btnCloseDonate" class="btn btn-secondary" data-i18n="close">Close</button>
       </div>
     </div>
   </div>
 
   <script src="../js/config.js"></script>
+  <script src="../js/i18n.js"></script>
   <script src="../js/storage.js"></script>
   <script src="../js/sync.js"></script>
   <script src="../js/cloud.js"></script>

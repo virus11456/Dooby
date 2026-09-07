@@ -1,0 +1,632 @@
+{
+  "ext_name": {
+    "message": "Dooby - 分頁與書籤管理"
+  },
+  "ext_description": {
+    "message": "把分頁和書籤整理成收藏的視覺化工作區，支援雲端同步。比書籤更好用。"
+  },
+  "page_title": {
+    "message": "Dooby - 新分頁"
+  },
+  "search_placeholder": {
+    "message": "搜尋分頁和收藏…（Ctrl+K）"
+  },
+  "sync_status_title": {
+    "message": "透過 Chrome 帳號雲端同步"
+  },
+  "synced": {
+    "message": "已同步"
+  },
+  "syncing": {
+    "message": "同步中…"
+  },
+  "sync_failed": {
+    "message": "同步失敗"
+  },
+  "cloud_sync_failed": {
+    "message": "雲端同步失敗"
+  },
+  "pulling_from_cloud": {
+    "message": "從雲端下載中…"
+  },
+  "synced_from_cloud": {
+    "message": "已從雲端同步"
+  },
+  "no_new_cloud_data": {
+    "message": "雲端沒有新資料"
+  },
+  "exported": {
+    "message": "已匯出"
+  },
+  "export_failed": {
+    "message": "匯出失敗"
+  },
+  "imported": {
+    "message": "已匯入"
+  },
+  "import_failed_short": {
+    "message": "匯入失敗"
+  },
+  "storage_usage_title": {
+    "message": "Chrome 同步儲存空間用量"
+  },
+  "storage_almost_full": {
+    "message": "儲存空間快滿了！已使用 {percent}%"
+  },
+  "storage_used": {
+    "message": "已使用 {percent}% 儲存空間"
+  },
+  "storage_sync_used": {
+    "message": "Chrome 同步儲存空間：已使用 {percent}%"
+  },
+  "upload_to_cloud": {
+    "message": "上傳到雲端"
+  },
+  "sync_from_cloud_title": {
+    "message": "從雲端同步到這台裝置"
+  },
+  "export_backup_title": {
+    "message": "匯出資料到檔案（備份）"
+  },
+  "import_file_title": {
+    "message": "從檔案匯入資料"
+  },
+  "save_session": {
+    "message": "儲存工作階段"
+  },
+  "save_session_title": {
+    "message": "把所有開啟中的分頁存成一個工作階段"
+  },
+  "save_session_as": {
+    "message": "工作階段名稱："
+  },
+  "session_default_name": {
+    "message": "工作階段 {date}"
+  },
+  "account_title": {
+    "message": "Dooby Cloud：用 Google 登入"
+  },
+  "account_title_signed_in": {
+    "message": "Dooby Cloud：{user}"
+  },
+  "account_title_disabled": {
+    "message": "Dooby Cloud（此版本未啟用）"
+  },
+  "settings": {
+    "message": "設定"
+  },
+  "change_theme": {
+    "message": "切換主題"
+  },
+  "vip_badge": {
+    "message": "大乾爹"
+  },
+  "vip_badge_title": {
+    "message": "VIP 大乾爹"
+  },
+  "support_developer": {
+    "message": "支持開發者 ❤"
+  },
+  "dooby_supporter": {
+    "message": "Dooby 贊助者 ✨"
+  },
+  "export_import_title": {
+    "message": "匯出／匯入資料"
+  },
+  "spaces": {
+    "message": "空間"
+  },
+  "add_space_title": {
+    "message": "新增空間"
+  },
+  "enter_space_name": {
+    "message": "輸入空間名稱："
+  },
+  "at_least_one_space": {
+    "message": "至少要保留一個空間。"
+  },
+  "delete_space_confirm": {
+    "message": "要刪除空間「{name}」和裡面所有的收藏嗎？"
+  },
+  "rename": {
+    "message": "重新命名"
+  },
+  "delete": {
+    "message": "刪除"
+  },
+  "add_collection": {
+    "message": "新增收藏"
+  },
+  "enter_collection_name": {
+    "message": "輸入收藏名稱："
+  },
+  "import_bookmarks": {
+    "message": "匯入書籤"
+  },
+  "import_chrome_bookmarks_title": {
+    "message": "匯入 Chrome 書籤"
+  },
+  "duplicates": {
+    "message": "重複項目"
+  },
+  "find_duplicates_title": {
+    "message": "找出重複的網址"
+  },
+  "open_tabs": {
+    "message": "開啟中的分頁"
+  },
+  "untitled": {
+    "message": "未命名"
+  },
+  "bulk_selected": {
+    "message": "已選取 {n} 個"
+  },
+  "open_all": {
+    "message": "全部開啟"
+  },
+  "move_to": {
+    "message": "移到…"
+  },
+  "cancel": {
+    "message": "取消"
+  },
+  "close": {
+    "message": "關閉"
+  },
+  "done": {
+    "message": "完成"
+  },
+  "delete_selected_confirm": {
+    "message": "要刪除選取的 {n} 個分頁嗎？"
+  },
+  "open_all_tabs_title": {
+    "message": "開啟所有分頁"
+  },
+  "more_actions": {
+    "message": "更多動作"
+  },
+  "pin_card": {
+    "message": "釘選到最上面"
+  },
+  "unpin_card": {
+    "message": "取消釘選"
+  },
+  "open_all_new_window": {
+    "message": "在新視窗開啟全部"
+  },
+  "select_tabs": {
+    "message": "選取分頁"
+  },
+  "exit_select_mode": {
+    "message": "結束選取模式"
+  },
+  "delete_collection": {
+    "message": "刪除收藏"
+  },
+  "delete_collection_confirm": {
+    "message": "要刪除「{name}」和裡面所有的分頁嗎？"
+  },
+  "drag_tabs_here": {
+    "message": "把分頁拖到這裡"
+  },
+  "show_more": {
+    "message": "再顯示 {n} 個"
+  },
+  "show_less": {
+    "message": "收起"
+  },
+  "remove": {
+    "message": "移除"
+  },
+  "pin_tab": {
+    "message": "釘選到最上面"
+  },
+  "unpin_tab": {
+    "message": "取消釘選"
+  },
+  "open_in_new_tab": {
+    "message": "在新分頁開啟"
+  },
+  "open_in_new_window": {
+    "message": "在新視窗開啟"
+  },
+  "copy_url": {
+    "message": "複製網址"
+  },
+  "no_results": {
+    "message": "沒有符合的結果"
+  },
+  "cloud_data_found": {
+    "message": "☁️ 發現雲端資料"
+  },
+  "cloud_data_found_desc": {
+    "message": "在 Chrome 雲端儲存空間發現來自其他裝置的書籤，要同步到這台裝置嗎？"
+  },
+  "cloud_data_found_counts": {
+    "message": "雲端儲存空間有 {cloud} 個書籤（本機 {local} 個），要同步到這台裝置嗎？"
+  },
+  "sync_from_cloud": {
+    "message": "從雲端同步"
+  },
+  "keep_local_data": {
+    "message": "保留本機資料"
+  },
+  "dooby_cloud": {
+    "message": "☁️ Dooby Cloud"
+  },
+  "cloud_not_configured": {
+    "message": "此版本尚未啟用 Dooby Cloud。Chrome 內建的同步仍會讓桌面版 Chrome 之間的書籤保持一致。"
+  },
+  "cloud_signed_out_desc": {
+    "message": "用 Google 登入後，書籤會存到 Dooby Cloud，可以在 iPad、iPhone 和任何瀏覽器透過 Dooby 網頁版使用。"
+  },
+  "cloud_point_1": {
+    "message": "每台裝置都有一樣的空間和收藏"
+  },
+  "cloud_point_2": {
+    "message": "沒有 100 KB 的限制"
+  },
+  "cloud_point_3": {
+    "message": "第一次登入會把目前的書籤合併到雲端，不會遺失任何資料"
+  },
+  "sign_in_with_google": {
+    "message": "用 Google 登入"
+  },
+  "sign_in_failed": {
+    "message": "登入失敗"
+  },
+  "open_webapp_prefix": {
+    "message": "在 iPad 或 iPhone 上開啟 "
+  },
+  "open_webapp_link": {
+    "message": "Dooby 網頁版"
+  },
+  "open_webapp_suffix": {
+    "message": "，並用同一個 Google 帳號登入。"
+  },
+  "sync_now": {
+    "message": "立即同步"
+  },
+  "sign_out": {
+    "message": "登出"
+  },
+  "delete_cloud_data": {
+    "message": "刪除雲端資料"
+  },
+  "delete_cloud_confirm": {
+    "message": "要刪除 Dooby Cloud 上的書籤嗎？這台裝置的資料會保留，其他裝置在你再次同步前不會收到更新。"
+  },
+  "last_synced": {
+    "message": "上次同步：{when}"
+  },
+  "last_error": {
+    "message": "上次錯誤：{error}"
+  },
+  "never": {
+    "message": "從未"
+  },
+  "cloud_err_cancelled": {
+    "message": "已取消登入"
+  },
+  "cloud_err_not_signed_in": {
+    "message": "尚未登入"
+  },
+  "cloud_err_session_expired": {
+    "message": "登入已過期，請重新登入"
+  },
+  "cloud_err_read": {
+    "message": "讀取雲端失敗（{status}）"
+  },
+  "cloud_err_write": {
+    "message": "寫入雲端失敗（{status}）{detail}"
+  },
+  "cloud_err_delete": {
+    "message": "刪除雲端資料失敗（{status}）"
+  },
+  "settings_desc": {
+    "message": "這台裝置的偏好設定。書籤本身照常同步。"
+  },
+  "setting_language": {
+    "message": "語言"
+  },
+  "setting_language_hint": {
+    "message": "「自動」會跟著瀏覽器的語言。"
+  },
+  "lang_auto": {
+    "message": "自動"
+  },
+  "setting_close_tab": {
+    "message": "儲存後關閉分頁"
+  },
+  "setting_close_tab_hint": {
+    "message": "按工具列圖示快速儲存，或把開啟中的分頁拖進收藏時。"
+  },
+  "setting_quick_save": {
+    "message": "快速儲存的收藏"
+  },
+  "setting_quick_save_hint": {
+    "message": "工具列圖示要把網頁存到哪裡。「自動」會用目前空間的 Quick Save 收藏。"
+  },
+  "quick_save_auto": {
+    "message": "自動（目前空間）"
+  },
+  "setting_collection_sort": {
+    "message": "收藏排序"
+  },
+  "setting_collection_sort_hint": {
+    "message": "釘選的收藏永遠在最上面。"
+  },
+  "sort_manual_created": {
+    "message": "手動（建立順序）"
+  },
+  "sort_name": {
+    "message": "名稱 A → Z"
+  },
+  "sort_newest": {
+    "message": "最新的在前"
+  },
+  "sort_oldest": {
+    "message": "最舊的在前"
+  },
+  "sort_count": {
+    "message": "分頁最多的在前"
+  },
+  "setting_tab_sort": {
+    "message": "收藏內分頁排序"
+  },
+  "setting_tab_sort_hint": {
+    "message": "釘選的分頁永遠在最上面。手動模式下可以拖曳調整順序。"
+  },
+  "sort_manual_drag": {
+    "message": "手動（拖曳排序）"
+  },
+  "sort_title": {
+    "message": "標題 A → Z"
+  },
+  "duplicate_urls": {
+    "message": "重複的網址"
+  },
+  "remove_all_duplicates": {
+    "message": "移除所有重複項目"
+  },
+  "no_duplicates": {
+    "message": "沒有重複的網址，你的收藏很乾淨！"
+  },
+  "duplicates_found": {
+    "message": "找到 {urls} 個重複的網址（多出 {extra} 份）。"
+  },
+  "keep_label": {
+    "message": "保留"
+  },
+  "remove_label": {
+    "message": "移除"
+  },
+  "remove_duplicates_confirm": {
+    "message": "要移除 {n} 個重複的分頁嗎？每個網址會保留第一份。"
+  },
+  "removed_duplicates": {
+    "message": "已移除 {n} 個重複的分頁。"
+  },
+  "import_bookmarks_desc": {
+    "message": "從 Chrome HTML、Toby、TabMe 或其他 JSON 格式匯入書籤，每個資料夾會變成一個收藏。"
+  },
+  "import_html": {
+    "message": "匯入 HTML（Chrome 書籤）"
+  },
+  "import_json": {
+    "message": "匯入 JSON（Dooby／Toby／TabMe）"
+  },
+  "no_bookmarks_in_file": {
+    "message": "檔案裡沒有書籤。"
+  },
+  "no_bookmarks_tabme": {
+    "message": "TabMe 的 JSON 檔裡沒有書籤。"
+  },
+  "no_bookmarks_toby": {
+    "message": "Toby 的 JSON 檔裡沒有書籤。"
+  },
+  "no_bookmarks_json": {
+    "message": "JSON 檔裡沒有書籤。"
+  },
+  "import_folders_confirm": {
+    "message": "要匯入 {folders} 個資料夾、共 {tabs} 個書籤嗎？"
+  },
+  "import_tabme_confirm": {
+    "message": "要從 TabMe 匯入 {folders} 個收藏、共 {tabs} 個書籤嗎？"
+  },
+  "import_toby_confirm": {
+    "message": "要從 Toby 匯入 {folders} 個收藏、共 {tabs} 個書籤嗎？"
+  },
+  "imported_result": {
+    "message": "已匯入 {count} 個書籤到 {folders} 個收藏。"
+  },
+  "import_failed": {
+    "message": "匯入失敗：{error}"
+  },
+  "import_replace_confirm": {
+    "message": "要匯入 {spaces} 個空間、{collections} 個收藏嗎？這會取代目前的資料。"
+  },
+  "import_replace_tabs_confirm": {
+    "message": "要匯入 {collections} 個收藏、共 {tabs} 個分頁嗎？\n這會取代目前的資料。"
+  },
+  "export_import_data": {
+    "message": "匯出／匯入資料"
+  },
+  "export_import_desc": {
+    "message": "備份資料，或搬到另一台裝置。"
+  },
+  "export_json": {
+    "message": "匯出成 JSON"
+  },
+  "import_from_json": {
+    "message": "從 JSON 匯入"
+  },
+  "tab_support": {
+    "message": "贊助"
+  },
+  "tab_themes": {
+    "message": "主題"
+  },
+  "tab_wall_of_fame": {
+    "message": "名人堂"
+  },
+  "tab_activate": {
+    "message": "啟用"
+  },
+  "donate_title": {
+    "message": "請開發者喝杯咖啡"
+  },
+  "donate_pitch": {
+    "message": "喜歡 Dooby 嗎？只要 <strong>1 USDT</strong>，就能支持開發並解鎖<span class=\"accent-text\">專屬福利</span>！"
+  },
+  "perk_wof_desc": {
+    "message": "你的名字永久列在貢獻者名單"
+  },
+  "perk_themes": {
+    "message": "4 個進階主題"
+  },
+  "perk_themes_desc": {
+    "message": "Aurora、Sunset、Ocean、Sakura"
+  },
+  "perk_early": {
+    "message": "搶先體驗"
+  },
+  "perk_early_desc": {
+    "message": "比所有人更早用到新功能"
+  },
+  "perk_priority": {
+    "message": "優先功能"
+  },
+  "perk_priority_desc": {
+    "message": "投票決定下一個要做的功能"
+  },
+  "donate_address_label": {
+    "message": "USDT（TRC-20）— 只要 1 USDT"
+  },
+  "copy": {
+    "message": "複製"
+  },
+  "copy_address": {
+    "message": "複製地址"
+  },
+  "copied": {
+    "message": "✓ 已複製！"
+  },
+  "step_1": {
+    "message": "把 1 USDT 以上轉到上面的地址"
+  },
+  "step_2": {
+    "message": "私訊開發者你的<strong>名稱 + 交易雜湊（TX hash）</strong>"
+  },
+  "step_3": {
+    "message": "收到啟用碼並列入名人堂！"
+  },
+  "color_themes": {
+    "message": "配色主題"
+  },
+  "themes_desc": {
+    "message": "打造你自己的 Dooby 工作區。進階主題在贊助後解鎖。"
+  },
+  "theme_free": {
+    "message": "免費"
+  },
+  "theme_premium": {
+    "message": "進階"
+  },
+  "theme_unlocked": {
+    "message": "已解鎖"
+  },
+  "wof_desc": {
+    "message": "感謝每一位支持 Dooby 開發的人！"
+  },
+  "wof_empty": {
+    "message": "成為第一位贊助者！<br>你的名字會出現在這裡。"
+  },
+  "wof_you": {
+    "message": "你！"
+  },
+  "wof_cta": {
+    "message": "想讓你的名字出現在這裡嗎？"
+  },
+  "wof_join": {
+    "message": "贊助 1 USDT 加入"
+  },
+  "activate_title": {
+    "message": "啟用贊助者福利"
+  },
+  "activate_desc": {
+    "message": "輸入你給開發者的顯示名稱和收到的啟用碼。啟用碼只對那個名稱有效。"
+  },
+  "activate_name_placeholder": {
+    "message": "你的顯示名稱"
+  },
+  "activate_code_placeholder": {
+    "message": "DOOBY-…（貼上完整代碼）"
+  },
+  "no_code_yet": {
+    "message": "還沒有啟用碼？"
+  },
+  "donate_to_get_one": {
+    "message": "贊助取得"
+  },
+  "welcome_back_prefix": {
+    "message": "歡迎回來，"
+  },
+  "welcome_back_suffix": {
+    "message": "！"
+  },
+  "donor_verified": {
+    "message": "你是通過驗證的 Dooby 贊助者，所有進階功能都已解鎖！"
+  },
+  "badge_themes": {
+    "message": "🎨 主題"
+  },
+  "badge_wof": {
+    "message": "⭐ 名人堂"
+  },
+  "badge_early": {
+    "message": "🚀 搶先體驗"
+  },
+  "badge_priority": {
+    "message": "💬 優先"
+  },
+  "deactivate": {
+    "message": "停用"
+  },
+  "deactivate_confirm": {
+    "message": "這會停用你的贊助者福利，之後隨時可以用啟用碼重新啟用。"
+  },
+  "enter_display_name": {
+    "message": "請輸入你的顯示名稱"
+  },
+  "enter_activation_code": {
+    "message": "請輸入你的啟用碼"
+  },
+  "err_name_required": {
+    "message": "請輸入啟用碼對應的顯示名稱"
+  },
+  "err_code_prefix": {
+    "message": "啟用碼是以 DOOBY- 開頭"
+  },
+  "err_code_invalid": {
+    "message": "這個啟用碼和名稱不符，請檢查後再試一次。"
+  },
+  "sync_err_spaces_too_large": {
+    "message": "空間太多無法同步（超過 8 KB），請刪除或改短一些空間名稱。"
+  },
+  "sync_err_data_too_large": {
+    "message": "資料（{kb} KB）超過 100 KB 的同步上限，請移除一些分頁或用匯出備份。"
+  },
+  "sync_err_item_too_large": {
+    "message": "有一筆同步項目超過 8 KB 的單筆上限，請回報這個問題。"
+  },
+  "sync_err_quota": {
+    "message": "儲存空間超過 100 KB 的上限，請移除一些分頁或用匯出。"
+  },
+  "sync_err_too_many_writes": {
+    "message": "短時間內同步寫入太多次，稍後會自動重試。"
+  },
+  "sync_err_too_many_items": {
+    "message": "同步項目太多，請移除一些分頁或用匯出。"
+  }
+}

@@ -11,6 +11,9 @@ let appSettings = { ...DEFAULT_SETTINGS };
 // ============================================
 
 document.addEventListener('DOMContentLoaded', async () => {
+  appSettings = await Storage.getSettings();
+  await I18n.load(appSettings.language);
+  I18n.applyToDom();
   await DonorManager.init();
   DragDrop.init();
   await loadApp();
@@ -138,12 +141,12 @@ function renderSpaces(spaces) {
       <span class="space-icon"></span>
       <span class="space-name">${escapeHtml(space.name)}</span>
       <span class="space-actions">
-        <button class="btn-icon btn-edit-space" title="Rename">
+        <button class="btn-icon btn-edit-space" title="${t('rename')}">
           <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
             <path d="M11.5 1.5l3 3L5 14H2v-3L11.5 1.5z" stroke="currentColor" stroke-width="1.5"/>
           </svg>
         </button>
-        <button class="btn-icon btn-delete-space" title="Delete">
+        <button class="btn-icon btn-delete-space" title="${t('delete')}">
           <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
             <line x1="4" y1="4" x2="12" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             <line x1="12" y1="4" x2="4" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -189,10 +192,10 @@ function renderSpaces(spaces) {
       e.stopPropagation();
       const spaces = await Storage.getSpaces();
       if (spaces.length <= 1) {
-        alert('You must have at least one space.');
+        alert(t('at_least_one_space'));
         return;
       }
-      if (confirm(`Delete space "${space.name}" and all its collections?`)) {
+      if (confirm(t('delete_space_confirm', { name: space.name }))) {
         await Storage.deleteSpace(space.id);
         const remaining = await Storage.getSpaces();
         activeSpaceId = remaining[0]?.id || null;
@@ -207,7 +210,7 @@ function renderSpaces(spaces) {
 }
 
 async function addSpace() {
-  const name = prompt('Enter space name:');
+  const name = prompt(t('enter_space_name'));
   if (!name || !name.trim()) return;
   const space = await Storage.addSpace(name.trim());
   activeSpaceId = space.id;
@@ -309,7 +312,7 @@ function createCollectionCard(collection, colorIndex = 0) {
     <span class="collection-title" contenteditable="false">${escapeHtml(collection.name)}</span>
     <span class="collection-count">${collection.tabs.length}</span>
     <div class="collection-actions">
-      <button class="btn-icon btn-open-all" title="Open all tabs">
+      <button class="btn-icon btn-open-all" title="${t('open_all_tabs_title')}">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
           <rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
           <rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
@@ -317,7 +320,7 @@ function createCollectionCard(collection, colorIndex = 0) {
           <rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
         </svg>
       </button>
-      <button class="btn-icon btn-more" title="More actions">
+      <button class="btn-icon btn-more" title="${t('more_actions')}">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
           <circle cx="8" cy="3" r="1.5" fill="currentColor"/>
           <circle cx="8" cy="8" r="1.5" fill="currentColor"/>
@@ -356,21 +359,21 @@ function createCollectionCard(collection, colorIndex = 0) {
   header.querySelector('.btn-more').addEventListener('click', (e) => {
     e.stopPropagation();
     showContextMenu(e, [
-      { label: collection.pinned ? 'Unpin card' : 'Pin card to top', action: async () => {
+      { label: collection.pinned ? t('unpin_card') : t('pin_card'), action: async () => {
         await Storage.togglePinCollection(collection.id);
         await renderCollections();
       }},
       { type: 'separator' },
-      { label: 'Rename', action: () => { titleEl.contentEditable = 'true'; titleEl.focus(); document.execCommand('selectAll'); } },
-      { label: 'Open all in new window', action: () => {
+      { label: t('rename'), action: () => { titleEl.contentEditable = 'true'; titleEl.focus(); document.execCommand('selectAll'); } },
+      { label: t('open_all_new_window'), action: () => {
         if (collection.tabs.length > 0) {
           chrome.windows.create({ url: collection.tabs.map(t => t.url) });
         }
       }},
-      { label: bulkMode ? 'Exit select mode' : 'Select tabs', action: () => toggleBulkMode() },
+      { label: bulkMode ? t('exit_select_mode') : t('select_tabs'), action: () => toggleBulkMode() },
       { type: 'separator' },
-      { label: 'Delete collection', danger: true, action: async () => {
-        if (confirm(`Delete "${collection.name}" and all its tabs?`)) {
+      { label: t('delete_collection'), danger: true, action: async () => {
+        if (confirm(t('delete_collection_confirm', { name: collection.name }))) {
           await Storage.deleteCollection(collection.id);
           await renderCollections();
         }
@@ -386,7 +389,7 @@ function createCollectionCard(collection, colorIndex = 0) {
 
   const MAX_VISIBLE = 5;
   if (collection.tabs.length === 0) {
-    body.innerHTML = '<div class="collection-body-empty">Drag tabs here</div>';
+    body.innerHTML = `<div class="collection-body-empty">${t('drag_tabs_here')}</div>`;
   } else {
     if (collection.tabs.length > MAX_VISIBLE) {
       body.classList.add('collapsed');
@@ -399,14 +402,14 @@ function createCollectionCard(collection, colorIndex = 0) {
       const showMoreBtn = document.createElement('button');
       showMoreBtn.className = 'btn-show-more';
       const hiddenCount = collection.tabs.length - MAX_VISIBLE;
-      showMoreBtn.innerHTML = `<span>Show ${hiddenCount} more</span><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+      showMoreBtn.innerHTML = `<span>${t('show_more', { n: hiddenCount })}</span><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
       showMoreBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         const isCollapsed = body.classList.toggle('collapsed');
         if (isCollapsed) {
-          showMoreBtn.innerHTML = `<span>Show ${hiddenCount} more</span><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+          showMoreBtn.innerHTML = `<span>${t('show_more', { n: hiddenCount })}</span><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
         } else {
-          showMoreBtn.innerHTML = `<span>Show less</span><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 10l4-4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+          showMoreBtn.innerHTML = `<span>${t('show_less')}</span><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 10l4-4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
         }
       });
       body.appendChild(showMoreBtn);
@@ -468,7 +471,7 @@ function createTabElement(tab, collectionId) {
     ${tab.pinned ? '<svg class="tab-pin-icon" width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M4.146.146A.5.5 0 0 1 4.5 0h7a.5.5 0 0 1 .5.5c0 .68-.342 1.174-.646 1.479-.126.125-.25.224-.354.298v4.431l.078.048c.203.127.476.314.751.555C12.36 7.775 13 8.527 13 9.5a.5.5 0 0 1-.5.5h-4v4.5c0 .276-.224 1.5-.5 1.5s-.5-1.224-.5-1.5V10h-4a.5.5 0 0 1-.5-.5c0-.973.64-1.725 1.17-2.189a5.1 5.1 0 0 1 .752-.555l.078-.048V2.323a2 2 0 0 1-.354-.298C4.342 1.674 4 1.179 4 .5a.5.5 0 0 1 .146-.354z"/></svg>' : ''}
     <img class="tab-favicon" src="${escapeHtml(faviconSrc)}" alt="" draggable="false">
     <span class="tab-title" title="${escapeHtml(tab.url)}">${escapeHtml(tab.title)}</span>
-    <button class="tab-remove" title="Remove">&times;</button>
+    <button class="tab-remove" title="${t('remove')}">&times;</button>
   `;
 
   // Handle favicon load error via JS (CSP does not allow inline handlers)
@@ -517,16 +520,16 @@ function createTabElement(tab, collectionId) {
   el.addEventListener('contextmenu', (e) => {
     e.preventDefault();
     showContextMenu(e, [
-      { label: tab.pinned ? 'Unpin' : 'Pin to top', action: async () => {
+      { label: tab.pinned ? t('unpin_tab') : t('pin_tab'), action: async () => {
         await Storage.togglePinTab(collectionId, tab.id);
         await renderCollections();
       }},
       { type: 'separator' },
-      { label: 'Open in new tab', action: () => chrome.tabs.create({ url: tab.url }) },
-      { label: 'Open in new window', action: () => chrome.windows.create({ url: tab.url }) },
-      { label: 'Copy URL', action: () => navigator.clipboard.writeText(tab.url) },
+      { label: t('open_in_new_tab'), action: () => chrome.tabs.create({ url: tab.url }) },
+      { label: t('open_in_new_window'), action: () => chrome.windows.create({ url: tab.url }) },
+      { label: t('copy_url'), action: () => navigator.clipboard.writeText(tab.url) },
       { type: 'separator' },
-      { label: 'Remove', danger: true, action: async () => {
+      { label: t('remove'), danger: true, action: async () => {
         await Storage.removeTabFromCollection(collectionId, tab.id);
         await renderCollections();
       }}
@@ -538,7 +541,7 @@ function createTabElement(tab, collectionId) {
 
 async function addCollection() {
   if (!activeSpaceId) return;
-  const name = prompt('Enter collection name:');
+  const name = prompt(t('enter_collection_name'));
   if (!name || !name.trim()) return;
   await Storage.addCollection(activeSpaceId, name.trim());
   await renderCollections();
@@ -579,7 +582,7 @@ async function renderOpenTabs() {
 
     li.innerHTML = `
       <img src="${escapeHtml(faviconSrc)}" alt="" draggable="false">
-      <span class="open-tab-title" title="${escapeHtml(tab.url)}">${escapeHtml(tab.title || 'Untitled')}</span>
+      <span class="open-tab-title" title="${escapeHtml(tab.url)}">${escapeHtml(tab.title || t('untitled'))}</span>
     `;
 
     li.querySelector('img').addEventListener('error', function() {
@@ -590,7 +593,7 @@ async function renderOpenTabs() {
     DragDrop.makeDraggable(li, {
       type: 'open-tab',
       chromeTabId: tab.id,
-      title: tab.title || 'Untitled',
+      title: tab.title || t('untitled'),
       url: tab.url,
       favicon: tab.favIconUrl || ''
     });
@@ -612,7 +615,7 @@ async function renderOpenTabs() {
 async function saveSession() {
   if (!activeSpaceId) return;
 
-  const name = prompt('Save session as:', `Session ${new Date().toLocaleDateString()}`);
+  const name = prompt(t('save_session_as'), t('session_default_name', { date: new Date().toLocaleDateString() }));
   if (!name || !name.trim()) return;
 
   let tabs = [];
@@ -658,7 +661,7 @@ async function handleSearch(query) {
   resultsEl.innerHTML = '';
 
   if (results.length === 0) {
-    resultsEl.innerHTML = '<div class="search-result-item"><span class="search-result-info"><span class="search-result-title">No results found</span></span></div>';
+    resultsEl.innerHTML = `<div class="search-result-item"><span class="search-result-info"><span class="search-result-title">${t('no_results')}</span></span></div>`;
   } else {
     for (const result of results.slice(0, 20)) {
       const item = document.createElement('div');
@@ -756,7 +759,7 @@ function toggleBulkMode() {
 
 function updateBulkBar() {
   const count = selectedTabs.size;
-  document.getElementById('bulkSelectedCount').textContent = `${count} selected`;
+  document.getElementById('bulkSelectedCount').textContent = t('bulk_selected', { n: count });
 }
 
 function setupBulkEventListeners() {
@@ -773,7 +776,7 @@ function setupBulkEventListeners() {
 
   document.getElementById('btnBulkDelete').addEventListener('click', async () => {
     if (selectedTabs.size === 0) return;
-    if (!confirm(`Delete ${selectedTabs.size} selected tabs?`)) return;
+    if (!confirm(t('delete_selected_confirm', { n: selectedTabs.size }))) return;
 
     // Group by collection
     const byCollection = {};
@@ -828,11 +831,11 @@ async function showDuplicatesModal() {
   list.innerHTML = '';
 
   if (duplicates.length === 0) {
-    desc.textContent = 'No duplicate URLs found. Your collections are clean!';
+    desc.textContent = t('no_duplicates');
     document.getElementById('btnRemoveAllDuplicates').style.display = 'none';
   } else {
     const totalDups = duplicates.reduce((sum, d) => sum + d.entries.length - 1, 0);
-    desc.textContent = `Found ${duplicates.length} URLs with duplicates (${totalDups} extra copies).`;
+    desc.textContent = t('duplicates_found', { urls: duplicates.length, extra: totalDups });
     document.getElementById('btnRemoveAllDuplicates').style.display = '';
 
     for (const dup of duplicates) {
@@ -850,7 +853,7 @@ async function showDuplicatesModal() {
         entryEl.innerHTML = `
           <span>${escapeHtml(entry.tab.title)}</span>
           <span class="dup-collection">${escapeHtml(entry.collectionName)}</span>
-          <span class="${i === 0 ? 'dup-keep' : 'dup-remove'}">${i === 0 ? 'KEEP' : 'REMOVE'}</span>
+          <span class="${i === 0 ? 'dup-keep' : 'dup-remove'}">${i === 0 ? t('keep_label') : t('remove_label')}</span>
         `;
         group.appendChild(entryEl);
       });
@@ -878,10 +881,10 @@ function setupDuplicatesListeners() {
     if (!duplicates || duplicates.length === 0) return;
 
     const totalDups = duplicates.reduce((sum, d) => sum + d.entries.length - 1, 0);
-    if (!confirm(`Remove ${totalDups} duplicate tabs? The first copy of each will be kept.`)) return;
+    if (!confirm(t('remove_duplicates_confirm', { n: totalDups }))) return;
 
     const removed = await Storage.removeDuplicates(duplicates);
-    alert(`Removed ${removed} duplicate tabs.`);
+    alert(t('removed_duplicates', { n: removed }));
     modal.classList.add('hidden');
     await renderCollections();
   });
@@ -908,17 +911,17 @@ function setupImportBookmarksListeners() {
       const html = await file.text();
       const folders = Storage.parseBookmarksHtml(html);
       if (folders.length === 0) {
-        alert('No bookmarks found in the file.');
+        alert(t('no_bookmarks_in_file'));
         return;
       }
       const totalTabs = folders.reduce((sum, f) => sum + f.tabs.length, 0);
-      if (confirm(`Import ${folders.length} folders with ${totalTabs} bookmarks?`)) {
+      if (confirm(t('import_folders_confirm', { folders: folders.length, tabs: totalTabs }))) {
         const count = await Storage.importBookmarkFolders(activeSpaceId, folders);
-        alert(`Imported ${count} bookmarks into ${folders.length} collections.`);
+        alert(t('imported_result', { count, folders: folders.length }));
         await renderCollections();
       }
     } catch (err) {
-      alert('Import failed: ' + err.message);
+      alert(t('import_failed', { error: err.message }));
     }
     e.target.value = '';
     document.getElementById('importBookmarksModal').classList.add('hidden');
@@ -934,7 +937,7 @@ function setupImportBookmarksListeners() {
 
       // Handle Dooby format
       if (data.spaces && data.collections) {
-        if (confirm(`Import ${data.spaces.length} spaces and ${data.collections.length} collections? This will replace your current data.`)) {
+        if (confirm(t('import_replace_confirm', { spaces: data.spaces.length, collections: data.collections.length }))) {
           await SyncManager.importData(data);
           await loadApp();
         }
@@ -947,15 +950,15 @@ function setupImportBookmarksListeners() {
       if (data.isTabme && data.spaces) {
         const folders = parseTabMeJson(data);
         if (folders.length === 0) {
-          alert('No bookmarks found in the TabMe JSON file.');
+          alert(t('no_bookmarks_tabme'));
           e.target.value = '';
           document.getElementById('importBookmarksModal').classList.add('hidden');
           return;
         }
         const totalTabs = folders.reduce((sum, f) => sum + f.tabs.length, 0);
-        if (confirm(`Import ${folders.length} collections with ${totalTabs} bookmarks from TabMe?`)) {
+        if (confirm(t('import_tabme_confirm', { folders: folders.length, tabs: totalTabs }))) {
           const count = await Storage.importBookmarkFolders(activeSpaceId, folders);
-          alert(`Imported ${count} bookmarks into ${folders.length} collections.`);
+          alert(t('imported_result', { count, folders: folders.length }));
           await renderCollections();
         }
         e.target.value = '';
@@ -967,15 +970,15 @@ function setupImportBookmarksListeners() {
       if (data.lists && Array.isArray(data.lists)) {
         const folders = parseTobyJson(data);
         if (folders.length === 0) {
-          alert('No bookmarks found in the Toby JSON file.');
+          alert(t('no_bookmarks_toby'));
           e.target.value = '';
           document.getElementById('importBookmarksModal').classList.add('hidden');
           return;
         }
         const totalTabs = folders.reduce((sum, f) => sum + f.tabs.length, 0);
-        if (confirm(`Import ${folders.length} collections with ${totalTabs} bookmarks from Toby?`)) {
+        if (confirm(t('import_toby_confirm', { folders: folders.length, tabs: totalTabs }))) {
           const count = await Storage.importBookmarkFolders(activeSpaceId, folders);
-          alert(`Imported ${count} bookmarks into ${folders.length} collections.`);
+          alert(t('imported_result', { count, folders: folders.length }));
           await renderCollections();
         }
         e.target.value = '';
@@ -986,17 +989,17 @@ function setupImportBookmarksListeners() {
       // Handle Chrome JSON bookmark format (nested with children)
       const folders = parseJsonBookmarks(data);
       if (folders.length === 0) {
-        alert('No bookmarks found in the JSON file.');
+        alert(t('no_bookmarks_json'));
         return;
       }
       const totalTabs = folders.reduce((sum, f) => sum + f.tabs.length, 0);
-      if (confirm(`Import ${folders.length} folders with ${totalTabs} bookmarks?`)) {
+      if (confirm(t('import_folders_confirm', { folders: folders.length, tabs: totalTabs }))) {
         const count = await Storage.importBookmarkFolders(activeSpaceId, folders);
-        alert(`Imported ${count} bookmarks into ${folders.length} collections.`);
+        alert(t('imported_result', { count, folders: folders.length }));
         await renderCollections();
       }
     } catch (err) {
-      alert('Import failed: ' + err.message);
+      alert(t('import_failed', { error: err.message }));
     }
     e.target.value = '';
     document.getElementById('importBookmarksModal').classList.add('hidden');
@@ -1109,15 +1112,15 @@ async function initSync() {
   SyncManager.on('*', (event, data) => {
     switch (event) {
       case 'sync_start':
-        updateSyncUI('syncing', 'Syncing...');
+        updateSyncUI('syncing', t('syncing'));
         break;
       case 'sync_complete':
-        updateSyncUI('success', 'Synced');
+        updateSyncUI('success', t('synced'));
         updateStorageUsage();
-        setTimeout(() => updateSyncUI('idle', 'Synced'), 3000);
+        setTimeout(() => updateSyncUI('idle', t('synced')), 3000);
         break;
       case 'sync_error':
-        updateSyncUI('error', data?.message || 'Sync failed');
+        updateSyncUI('error', data?.message || t('sync_failed'));
         // Keep error visible — only clear on next successful sync
         break;
       case 'data_updated':
@@ -1182,7 +1185,7 @@ async function checkCloudDataPrompt() {
     if (cloudTabCount > 0 && cloudTabCount > localTabCount) {
       // Cloud has more data — show prompt
       const desc = document.getElementById('cloudSyncDesc');
-      desc.textContent = `Found ${cloudTabCount} bookmarks in cloud storage (local: ${localTabCount}). Would you like to sync them to this device?`;
+      desc.textContent = t('cloud_data_found_counts', { cloud: cloudTabCount, local: localTabCount });
       document.getElementById('cloudSyncPrompt').classList.remove('hidden');
     }
   } catch (e) {
@@ -1237,12 +1240,12 @@ async function updateStorageUsage() {
     container.classList.remove('usage-warning', 'usage-critical');
     if (percent >= 90) {
       container.classList.add('usage-critical');
-      container.title = `Storage almost full! ${percent}% used`;
+      container.title = t('storage_almost_full', { percent });
     } else if (percent >= 70) {
       container.classList.add('usage-warning');
-      container.title = `Storage ${percent}% used`;
+      container.title = t('storage_used', { percent });
     } else {
-      container.title = `Chrome Sync storage: ${percent}% used`;
+      container.title = t('storage_sync_used', { percent });
     }
   } catch (e) {
     console.error('Dooby: Failed to get storage usage:', e);
@@ -1286,11 +1289,11 @@ function refreshDonateUI() {
   const vipBadge = document.getElementById('vipBadge');
   if (isActivated) {
     heartBtn.classList.add('donor-active');
-    heartBtn.title = 'Dooby Supporter ✨';
+    heartBtn.title = t('dooby_supporter');
     vipBadge.classList.remove('hidden');
   } else {
     heartBtn.classList.remove('donor-active');
-    heartBtn.title = 'Support the developer ❤';
+    heartBtn.title = t('support_developer');
     vipBadge.classList.add('hidden');
   }
 }
@@ -1311,11 +1314,11 @@ function renderThemeGrid() {
 
     let badgeHtml = '';
     if (t.free) {
-      badgeHtml = '<span class="theme-card-badge free">Free</span>';
+      badgeHtml = `<span class="theme-card-badge free">${I18n.t('theme_free')}</span>`;
     } else if (t.locked) {
-      badgeHtml = '<span class="theme-card-badge premium">Premium</span>';
+      badgeHtml = `<span class="theme-card-badge premium">${I18n.t('theme_premium')}</span>`;
     } else {
-      badgeHtml = '<span class="theme-card-badge unlocked">Unlocked</span>';
+      badgeHtml = `<span class="theme-card-badge unlocked">${I18n.t('theme_unlocked')}</span>`;
     }
 
     let statusIcon = '';
@@ -1368,7 +1371,7 @@ function renderWallOfFame() {
   if (DonorManager.isActivated()) {
     const donorName = DonorManager.getDonorName();
     if (!allDonors.find(d => d.name === donorName)) {
-      allDonors.push({ name: donorName, date: 'You!', message: '' });
+      allDonors.push({ name: donorName, date: t('wof_you'), message: '' });
     }
   }
 
@@ -1376,7 +1379,7 @@ function renderWallOfFame() {
     container.innerHTML = `
       <div class="wof-empty">
         <div class="wof-empty-icon">🏆</div>
-        <p>Be the first supporter!<br>Your name will appear here.</p>
+        <p>${t('wof_empty')}</p>
       </div>
     `;
     return;
@@ -1404,16 +1407,16 @@ function setupSyncEventListeners() {
 
   // Sync from cloud button
   document.getElementById('btnCloudPull').addEventListener('click', async () => {
-    updateSyncUI('syncing', 'Pulling from cloud...');
+    updateSyncUI('syncing', t('pulling_from_cloud'));
     const pulled = await SyncManager.pullFromSync(true);
     if (pulled) {
       await loadApp();
       updateStorageUsage();
-      updateSyncUI('success', 'Synced from cloud');
-      setTimeout(() => updateSyncUI('idle', 'Synced'), 3000);
+      updateSyncUI('success', t('synced_from_cloud'));
+      setTimeout(() => updateSyncUI('idle', t('synced')), 3000);
     } else {
-      updateSyncUI('idle', 'No new data in cloud');
-      setTimeout(() => updateSyncUI('idle', 'Synced'), 3000);
+      updateSyncUI('idle', t('no_new_cloud_data'));
+      setTimeout(() => updateSyncUI('idle', t('synced')), 3000);
     }
   });
 
@@ -1424,8 +1427,8 @@ function setupSyncEventListeners() {
     if (pulled) {
       await loadApp();
       updateStorageUsage();
-      updateSyncUI('success', 'Synced from cloud');
-      setTimeout(() => updateSyncUI('idle', 'Synced'), 3000);
+      updateSyncUI('success', t('synced_from_cloud'));
+      setTimeout(() => updateSyncUI('idle', t('synced')), 3000);
     }
   });
 
@@ -1444,11 +1447,11 @@ function setupSyncEventListeners() {
       a.download = `dooby-backup-${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      updateSyncUI('success', 'Exported');
-      setTimeout(() => updateSyncUI('idle', 'Synced'), 3000);
+      updateSyncUI('success', t('exported'));
+      setTimeout(() => updateSyncUI('idle', t('synced')), 3000);
     } catch (e) {
       console.error('Export failed:', e);
-      updateSyncUI('error', 'Export failed');
+      updateSyncUI('error', t('export_failed'));
     }
   });
 
@@ -1469,17 +1472,17 @@ function setupSyncEventListeners() {
         ? data.collections.reduce((sum, c) => sum + (c.tabs ? c.tabs.length : 0), 0)
         : 0;
 
-      if (confirm(`Import ${data.collections?.length || 0} collections with ${tabCount} tabs?\nThis will replace your current data.`)) {
+      if (confirm(t('import_replace_tabs_confirm', { collections: data.collections?.length || 0, tabs: tabCount }))) {
         await SyncManager.importData(data);
         await loadApp();
         updateStorageUsage();
-        updateSyncUI('success', 'Imported');
-        setTimeout(() => updateSyncUI('idle', 'Synced'), 3000);
+        updateSyncUI('success', t('imported'));
+        setTimeout(() => updateSyncUI('idle', t('synced')), 3000);
       }
     } catch (err) {
       console.error('Import failed:', err);
-      alert('Import failed: ' + err.message);
-      updateSyncUI('error', 'Import failed');
+      alert(t('import_failed', { error: err.message }));
+      updateSyncUI('error', t('import_failed_short'));
     }
 
     // Reset file input
@@ -1520,7 +1523,7 @@ function setupSyncEventListeners() {
     navigator.clipboard.writeText(address).then(() => {
       const btn = document.getElementById('btnCopyAddress');
       const original = btn.innerHTML;
-      btn.innerHTML = '✓ Copied!';
+      btn.innerHTML = t('copied');
       btn.style.color = 'var(--accent)';
       setTimeout(() => {
         btn.innerHTML = original;
@@ -1536,12 +1539,12 @@ function setupSyncEventListeners() {
     const errorEl = document.getElementById('activateError');
 
     if (!name) {
-      errorEl.textContent = 'Please enter your display name';
+      errorEl.textContent = t('enter_display_name');
       errorEl.classList.remove('hidden');
       return;
     }
     if (!code) {
-      errorEl.textContent = 'Please enter your activation code';
+      errorEl.textContent = t('enter_activation_code');
       errorEl.classList.remove('hidden');
       return;
     }
@@ -1559,7 +1562,7 @@ function setupSyncEventListeners() {
 
   // Deactivate
   document.getElementById('btnDeactivate').addEventListener('click', async () => {
-    if (confirm('This will deactivate your donor perks. You can re-activate anytime with your code.')) {
+    if (confirm(t('deactivate_confirm'))) {
       await DonorManager.deactivate();
       await DonorManager.setTheme('midnight');
       refreshDonateUI();
@@ -1596,12 +1599,12 @@ function setupSyncEventListeners() {
     try {
       const text = await file.text();
       const data = JSON.parse(text);
-      if (confirm(`Import ${data.spaces?.length || 0} spaces and ${data.collections?.length || 0} collections? This will replace your current data.`)) {
+      if (confirm(t('import_replace_confirm', { spaces: data.spaces?.length || 0, collections: data.collections?.length || 0 }))) {
         await SyncManager.importData(data);
         await loadApp();
       }
     } catch (err) {
-      alert('Import failed: ' + err.message);
+      alert(t('import_failed', { error: err.message }));
     }
     e.target.value = '';
     document.getElementById('exportImportModal').classList.add('hidden');
@@ -1619,6 +1622,7 @@ function setupSyncEventListeners() {
 
 async function openSettingsModal() {
   appSettings = await Storage.getSettings();
+  document.getElementById('settingLanguage').value = appSettings.language || 'auto';
   document.getElementById('settingCloseTab').checked = appSettings.closeTabAfterSave !== false;
   document.getElementById('settingCollectionSort').value = appSettings.collectionSort || 'manual';
   document.getElementById('settingTabSort').value = appSettings.tabSort || 'manual';
@@ -1628,7 +1632,7 @@ async function openSettingsModal() {
   select.innerHTML = '';
   const auto = document.createElement('option');
   auto.value = '';
-  auto.textContent = 'Auto (current space)';
+  auto.textContent = t('quick_save_auto');
   select.appendChild(auto);
   const spaces = await Storage.getSpaces();
   const collections = await Storage.getCollections();
@@ -1658,6 +1662,17 @@ function setupSettingsListeners() {
     appSettings = await Storage.saveSettings(patch);
     if (rerender) await renderCollections();
   };
+  document.getElementById('settingLanguage').addEventListener('change', async (e) => {
+    appSettings = await Storage.saveSettings({ language: e.target.value });
+    await I18n.load(appSettings.language);
+    I18n.applyToDom();
+    await loadApp();
+    refreshDonateUI();
+    refreshCloudUI();
+    updateSyncUI('idle', t('synced'));
+    updateStorageUsage();
+    await openSettingsModal();
+  });
   document.getElementById('settingCloseTab').addEventListener('change', (e) => apply({ closeTabAfterSave: e.target.checked }, false));
   document.getElementById('settingQuickSave').addEventListener('change', (e) => apply({ quickSaveCollectionId: e.target.value }, false));
   document.getElementById('settingCollectionSort').addEventListener('change', (e) => apply({ collectionSort: e.target.value }, true));
@@ -1673,12 +1688,12 @@ async function initCloud() {
         await loadApp();
         break;
       case 'sync_error':
-        updateSyncUI('error', data?.message || 'Cloud sync failed');
+        updateSyncUI('error', data?.message || t('cloud_sync_failed'));
         break;
       case 'sync_complete':
         if (CloudManager.isSignedIn()) {
-          updateSyncUI('success', 'Synced');
-          setTimeout(() => updateSyncUI('idle', 'Synced'), 3000);
+          updateSyncUI('success', t('synced'));
+          setTimeout(() => updateSyncUI('idle', t('synced')), 3000);
         }
         break;
     }
@@ -1709,7 +1724,7 @@ async function initCloud() {
       await CloudManager.signIn();
       await loadApp();
     } catch (e) {
-      err.textContent = e.message || 'Sign-in failed';
+      err.textContent = e.message || t('sign_in_failed');
       err.classList.remove('hidden');
     } finally {
       btn.disabled = false;
@@ -1725,7 +1740,7 @@ async function initCloud() {
   document.getElementById('btnCloudSyncNow').addEventListener('click', async () => {
     const err = document.getElementById('cloudError');
     err.classList.add('hidden');
-    updateSyncUI('syncing', 'Syncing...');
+    updateSyncUI('syncing', t('syncing'));
     try {
       const pulled = await CloudManager.pull(true);
       if (pulled) await loadApp();
@@ -1737,7 +1752,7 @@ async function initCloud() {
   });
 
   document.getElementById('btnCloudDelete').addEventListener('click', async () => {
-    if (!confirm('Delete your bookmarks from Dooby Cloud? Data on this device stays. Other devices will stop receiving updates until you sync again.')) return;
+    if (!confirm(t('delete_cloud_confirm'))) return;
     const err = document.getElementById('cloudError');
     err.classList.add('hidden');
     try {
@@ -1762,17 +1777,17 @@ function refreshCloudUI() {
 
   if (st.signedIn && st.user) {
     btn.classList.add('signed-in');
-    btn.title = 'Dooby Cloud: ' + (st.user.email || st.user.name);
+    btn.title = t('account_title_signed_in', { user: st.user.email || st.user.name });
     if (st.user.avatar) { avatar.src = st.user.avatar; avatar.classList.remove('hidden'); } else { avatar.classList.add('hidden'); }
     document.getElementById('cloudAvatar').src = st.user.avatar || '';
     document.getElementById('cloudName').textContent = st.user.name || '';
     document.getElementById('cloudEmail').textContent = st.user.email || '';
-    const when = st.lastSyncAt ? new Date(st.lastSyncAt).toLocaleString() : 'never';
-    document.getElementById('cloudSyncInfo').textContent = st.lastError ? 'Last error: ' + st.lastError : 'Last synced: ' + when;
+    const when = st.lastSyncAt ? new Date(st.lastSyncAt).toLocaleString() : t('never');
+    document.getElementById('cloudSyncInfo').textContent = st.lastError ? t('last_error', { error: st.lastError }) : t('last_synced', { when });
     document.getElementById('cloudWebAppLink').href = (typeof DoobyConfig !== 'undefined' && DoobyConfig.webAppUrl) || '#';
   } else {
     btn.classList.remove('signed-in');
-    btn.title = st.configured ? 'Dooby Cloud: sign in with Google' : 'Dooby Cloud (not enabled in this build)';
+    btn.title = st.configured ? t('account_title') : t('account_title_disabled');
     avatar.classList.add('hidden');
   }
 }

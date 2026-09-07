@@ -19,6 +19,8 @@
 // newer cloud versions.
 
 const CloudManager = {
+  _t(key, fallback, subs) { return typeof I18n !== 'undefined' ? I18n.t(key, subs) : fallback; },
+
   _session: null,
   _listeners: [],
   _pushTimer: null,
@@ -90,7 +92,7 @@ const CloudManager = {
     return new Promise((resolve, reject) => {
       chrome.identity.launchWebAuthFlow({ url, interactive: true }, redirectUrl => {
         if (chrome.runtime.lastError || !redirectUrl) {
-          reject(new Error(chrome.runtime.lastError ? chrome.runtime.lastError.message : 'Sign-in was cancelled'));
+          reject(new Error(chrome.runtime.lastError ? chrome.runtime.lastError.message : this._t('cloud_err_cancelled', 'Sign-in was cancelled')));
         } else {
           resolve(redirectUrl);
         }
@@ -178,7 +180,7 @@ const CloudManager = {
   },
 
   async _accessToken() {
-    if (!this._session) throw new Error('Not signed in');
+    if (!this._session) throw new Error(this._t('cloud_err_not_signed_in', 'Not signed in'));
     if (Date.now() < this._session.expires_at) return this._session.access_token;
 
     const res = await fetch(`${DoobyConfig.supabaseUrl}/auth/v1/token?grant_type=refresh_token`, {
@@ -192,7 +194,7 @@ const CloudManager = {
       this._session = null;
       await chrome.storage.local.remove(['cloudSession']);
       this._notify('auth_changed');
-      throw new Error(body.error_description || body.msg || 'Session expired, please sign in again');
+      throw new Error(body.error_description || body.msg || this._t('cloud_err_session_expired', 'Session expired, please sign in again'));
     }
     await this._storeSession(body);
     return this._session.access_token;
@@ -234,7 +236,7 @@ const CloudManager = {
     const res = await fetch(`${DoobyConfig.supabaseUrl}/rest/v1/dooby_data?select=data,updated_at&user_id=eq.${encodeURIComponent(uid)}`, {
       headers: await this._headers({ Accept: 'application/json' })
     });
-    if (!res.ok) throw new Error(`Cloud read failed (${res.status})`);
+    if (!res.ok) throw new Error(this._t('cloud_err_read', `Cloud read failed (${res.status})`, { status: res.status }));
     const rows = await res.json();
     if (!rows.length) return null;
     const doc = rows[0].data || {};
@@ -251,7 +253,7 @@ const CloudManager = {
     });
     if (!res.ok) {
       const text = await res.text().catch(() => '');
-      throw new Error(`Cloud write failed (${res.status}) ${text.slice(0, 120)}`);
+      throw new Error(this._t('cloud_err_write', `Cloud write failed (${res.status}) ${text.slice(0, 120)}`, { status: res.status, detail: text.slice(0, 120) }));
     }
   },
 
@@ -261,7 +263,7 @@ const CloudManager = {
       method: 'DELETE',
       headers: await this._headers()
     });
-    if (!res.ok) throw new Error(`Cloud delete failed (${res.status})`);
+    if (!res.ok) throw new Error(this._t('cloud_err_delete', `Cloud delete failed (${res.status})`, { status: res.status }));
   },
 
   // Pull if the cloud document is newer than local. Returns true when local

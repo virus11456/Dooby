@@ -81,6 +81,9 @@ const SyncManager = {
   // Target size for a single item, leaving headroom under the hard 8192 limit.
   MAX_ITEM_BYTES: 8000,
 
+  // Localized message when the UI loader is present (page), English otherwise (tests, worker).
+  _t(key, fallback, subs) { return typeof I18n !== 'undefined' ? I18n.t(key, subs) : fallback; },
+
   _encoder: new TextEncoder(),
 
   // Size of one item exactly as chrome.storage.sync accounts for it.
@@ -173,7 +176,7 @@ const SyncManager = {
       if (this._itemBytes('dooby_spaces', spacesStr) > this.QUOTA_BYTES_PER_ITEM) {
         this._notifyListeners('sync_error', {
           error: 'Spaces too large',
-          message: 'Too many spaces to sync (over 8 KB). Remove or rename some spaces.'
+          message: this._t('sync_err_spaces_too_large', 'Too many spaces to sync (over 8 KB). Remove or rename some spaces.')
         });
         return;
       }
@@ -210,7 +213,7 @@ const SyncManager = {
         console.warn('Dooby: Data too large for sync:', kb, 'KB');
         this._notifyListeners('sync_error', {
           error: 'Data too large',
-          message: `Data (${kb} KB) exceeds the 100 KB sync limit. Remove some tabs or use Export to back up.`
+          message: this._t('sync_err_data_too_large', `Data (${kb} KB) exceeds the 100 KB sync limit. Remove some tabs or use Export to back up.`, { kb })
         });
         return;
       }
@@ -239,13 +242,13 @@ const SyncManager = {
       // both spellings are recognized.
       const norm = (err.message || '').replace(/_/g, '').toLowerCase();
       if (norm.includes('quotabytesperitem')) {
-        message = 'A sync item exceeded the 8 KB per-item limit. Please report this bug.';
+        message = this._t('sync_err_item_too_large', 'A sync item exceeded the 8 KB per-item limit. Please report this bug.');
       } else if (norm.includes('quotabytes')) {
-        message = 'Storage quota exceeded (100 KB). Remove some tabs or use Export.';
+        message = this._t('sync_err_quota', 'Storage quota exceeded (100 KB). Remove some tabs or use Export.');
       } else if (norm.includes('maxwriteoperations')) {
-        message = 'Too many sync writes in a short time. Sync will retry automatically.';
+        message = this._t('sync_err_too_many_writes', 'Too many sync writes in a short time. Sync will retry automatically.');
       } else if (norm.includes('maxitems')) {
-        message = 'Too many sync items. Remove some tabs or use Export.';
+        message = this._t('sync_err_too_many_items', 'Too many sync items. Remove some tabs or use Export.');
       }
       this._notifyListeners('sync_error', { error: err.message, message });
     } finally {
