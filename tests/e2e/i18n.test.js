@@ -1,13 +1,18 @@
 // UI language: English by default on an English Chromium, switchable to
 // 繁體中文 in Settings, applied to static markup, dynamic renders, prompts and
 // the manifest name; persists across reload; Auto returns to the browser language.
-const { launchExtension, openNewTab, collectErrors, suite } = require('../helpers');
+const { launchExtension, openNewTab, collectErrors, suite, waitFor } = require('../helpers');
 
 suite('e2e: localization (en / zh_TW)', async (check) => {
   const ext = await launchExtension({ tag: 'i18n' });
   try {
     const page = await ext.ctx.newPage();
     const errors = collectErrors(page);
+    // openSettingsModal() populates the selects asynchronously; wait until it is really open.
+    const openSettings = async () => {
+      await page.click('#btnSettings');
+      await waitFor(page, () => !document.getElementById('settingsModal').classList.contains('hidden') && document.querySelectorAll('#settingQuickSave option').length > 0, { label: 'settings modal to open' });
+    };
     await openNewTab(ext, page);
     const txt = sel => page.evaluate(s => document.querySelector(s).textContent.trim(), sel);
     const attr = (sel, a) => page.evaluate(([s, a]) => document.querySelector(s).getAttribute(a), [sel, a]);
@@ -17,7 +22,7 @@ suite('e2e: localization (en / zh_TW)', async (check) => {
     check('html lang is en', (await page.evaluate(() => document.documentElement.lang)) === 'en');
 
     // Switch to zh_TW
-    await page.click('#btnSettings');
+    await openSettings();
     check('language select defaults to Auto', (await page.evaluate(() => document.getElementById('settingLanguage').value)) === 'auto');
     await page.selectOption('#settingLanguage', 'zh_TW');
     await page.waitForTimeout(800);
@@ -54,7 +59,7 @@ suite('e2e: localization (en / zh_TW)', async (check) => {
     check('language persists after reload', (await txt('#btnSaveSession')) === '儲存工作階段');
 
     // Back to Auto → English
-    await page.click('#btnSettings');
+    await openSettings();
     await page.selectOption('#settingLanguage', 'auto');
     await page.waitForTimeout(800);
     check('Auto returns to English', (await txt('#btnSaveSession')) === 'Save Session' && (await txt('#settingsModal h3')) === 'Settings');
