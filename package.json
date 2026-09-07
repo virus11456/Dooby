@@ -1,0 +1,15 @@
+{
+  "name": "dooby",
+  "version": "1.2.0",
+  "private": true,
+  "description": "Dooby - tab & bookmark manager Chrome extension (tests and tooling)",
+  "scripts": {
+    "test": "node tests/run-all.js",
+    "test:unit": "node tests/run-all.js unit",
+    "test:e2e": "node tests/run-all.js e2e",
+    "build:zip": "bash scripts/build-store-zip.sh"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1"
+  }
+}

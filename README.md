@@ -181,6 +181,32 @@ After donating, DM the developer with your **name + TX hash** to receive your ac
 
 ---
 
+## Testing
+
+The test suite runs the extension in a real Chromium (Playwright, new headless mode) plus a few pure-Node unit tests. It runs on every push through GitHub Actions (`.github/workflows/test.yml`).
+
+```bash
+npm ci
+npx playwright install --with-deps chromium   # first time only
+npm test            # everything
+npm run test:unit   # VM-level tests of js/sync.js (fast)
+npm run test:e2e    # Chromium tests
+node tests/run-all.js cloud   # only files whose name contains "cloud"
+```
+
+| File | What it proves |
+|------|----------------|
+| `tests/unit/sync-chunking.test.js` | 100 KB / 8 KB per-item quota rules are honoured for English, Chinese and emoji titles; stale chunks are cleaned; the chunker never splits a surrogate pair |
+| `tests/unit/sync-errors.test.js` | Chrome's real `Resource::kQuota…` error strings map to readable messages |
+| `tests/e2e/sync.test.js` | 100 Chinese-titled tabs push through the real `chrome.storage.sync` and pull back on a wiped profile |
+| `tests/e2e/add-bookmark.test.js` | Drag from favicon, drop on the card header, toolbar quick save (closes the tab), quick save into an empty space, non-web URLs refused |
+| `tests/e2e/background.test.js` | The periodic alarm leaves no unhandled rejection when no Dooby page is open |
+| `tests/e2e/extension-id.test.js` | The `key` in `manifest.json` yields the same extension ID from two different folders |
+| `tests/e2e/donor.test.js` | Activation codes: forged/old codes rejected, wrong name rejected, valid code activates and survives reload (uses a throw-away key pair, never the real private key) |
+| `tests/e2e/cloud.test.js` | Dooby Cloud against a mock Supabase (`tests/mock-supabase.js`): two devices sign in with the same Google account, merge, push/poll, token refresh, sign-out, delete, and row-level isolation |
+
+Set `DOOBY_CHROME=/path/to/chrome` to test against a different Chromium build.
+
 ## Project Structure
 
 ```
@@ -190,17 +216,24 @@ Dooby/
 │   └── newtab.css          # All styles (themes, layout, components)
 ├── js/
 │   ├── background.js       # Service worker (click-to-save, init)
+│   ├── config.js           # Dooby Cloud endpoints (Supabase URL, Google client ID)
 │   ├── storage.js          # Local storage abstraction layer
 │   ├── sync.js             # Chrome sync with chunking
+│   ├── cloud.js            # Dooby Cloud (Google sign-in, Supabase sync)
 │   ├── donor.js            # Donor system, themes, Wall of Fame
 │   ├── dragdrop.js         # Drag and drop manager
 │   └── newtab.js           # Main application logic
 ├── pages/
 │   └── newtab.html         # New tab dashboard
-└── icons/
-    ├── icon16.png
-    ├── icon48.png
-    └── icon128.png
+├── icons/
+│   ├── icon16.png
+│   ├── icon48.png
+│   └── icon128.png
+├── scripts/                # Store zip build, activation-code generator
+├── supabase/schema.sql     # Dooby Cloud table + RLS policies
+├── tests/                  # Unit + Playwright/Chromium tests (npm test)
+├── .github/workflows/      # CI: runs the test suite on every push
+└── index.html, changelog.html, privacy-policy.html, vercel.json   # toolist.cc website
 ```
 
 ## Tech Stack
