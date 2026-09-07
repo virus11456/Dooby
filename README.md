@@ -284,6 +284,11 @@ MIT
 
 ## Changelog
 
+### v1.5.1 (2026-09-07)
+- **Fix:** TabMe / Toby / Chrome-bookmark JSON can now be imported from every entry point (toolbar Import button, Export / Import dialog, Import Bookmarks dialog); previously only the last one detected formats and the others failed with "Invalid import data"
+- **Fix:** Duplicate element ids made the toolbar Export button download twice and the dialog's Export button do nothing
+- **Improve:** Import success is a toast; invalid JSON gets a clear message
+
 ### v1.5.0 (2026-09-07)
 - **New:** Undo toast after removing a tab, bulk-deleting, or deleting a collection or space (restores at the original position)
 - **New:** Free "Daylight" light theme

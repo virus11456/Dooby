@@ -446,9 +446,6 @@
   "import_replace_confirm": {
     "message": "要匯入 {spaces} 個空間、{collections} 個收藏嗎？這會取代目前的資料。"
   },
-  "import_replace_tabs_confirm": {
-    "message": "要匯入 {collections} 個收藏、共 {tabs} 個分頁嗎？\n這會取代目前的資料。"
-  },
   "export_import_data": {
     "message": "匯出／匯入資料"
   },
@@ -643,5 +640,8 @@
   },
   "toast_space_deleted": {
     "message": "已刪除空間「{name}」"
+  },
+  "import_not_json": {
+    "message": "這個檔案不是有效的 JSON。"
   }
 }
