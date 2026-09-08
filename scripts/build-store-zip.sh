@@ -5,8 +5,14 @@
 #   upload that contains it, and assigns its own key/ID to the listing.
 # - Excludes repo-only files (README, icon generator, scripts, git metadata).
 #
-# Usage: scripts/build-store-zip.sh [output-dir]   (default: dist/)
+# Usage: scripts/build-store-zip.sh [output-dir]          (default: dist/)
+#        scripts/build-store-zip.sh --dev [output-dir]    keeps the "key" so an
+#        unpacked install gets the fixed ID dfoidibckihcnmakgoabkebinahggked
+#        (needed for Google sign-in testing; never upload a --dev zip)
 set -euo pipefail
+
+DEV=0
+if [ "${1:-}" = "--dev" ]; then DEV=1; shift; fi
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT_DIR="${1:-$ROOT/dist}"
@@ -20,16 +26,18 @@ for entry in _locales css icons js pages privacy-policy.html; do
 done
 rm -f "$STAGE/dooby/icons/generate_icons.html"
 
-python3 - "$ROOT/manifest.json" "$STAGE/dooby/manifest.json" <<'PY'
+DOOBY_KEEP_KEY="$DEV" python3 - "$ROOT/manifest.json" "$STAGE/dooby/manifest.json" <<'PY'
 import json, sys
 m = json.load(open(sys.argv[1]))
-m.pop('key', None)
+import os
+if os.environ.get('DOOBY_KEEP_KEY') != '1':
+    m.pop('key', None)
 with open(sys.argv[2], 'w') as f:
     json.dump(m, f, indent=2, ensure_ascii=False)
     f.write('\n')
 PY
 
-ZIP="$OUT_DIR/dooby-$VERSION-webstore.zip"
+if [ "$DEV" = "1" ]; then ZIP="$OUT_DIR/dooby-$VERSION-dev-unpacked.zip"; else ZIP="$OUT_DIR/dooby-$VERSION-webstore.zip"; fi
 rm -f "$ZIP"
 (cd "$STAGE/dooby" && zip -qr -X "$ZIP" .)
 echo "built $ZIP"
