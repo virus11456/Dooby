@@ -150,7 +150,12 @@ The extension talks to Supabase with plain `fetch()` (no SDK, no remote code) an
    Add `https://toolist.cc` under **Authorized JavaScript origins** (for the web app). Note the client ID and secret.
 3. **Supabase → Authentication → Providers → Google**: enable, paste the client ID and secret.
 4. Fill `js/config.js` (`supabaseUrl`, `supabaseAnonKey`, `googleClientId`). These are public identifiers; the private data stays behind RLS.
-5. Rebuild the store zip.
+5. **Supabase → Authentication → URL Configuration**: Site URL `https://toolist.cc`, and add `https://toolist.cc/dooby/app` to Redirect URLs (the web app signs in with the PKCE redirect flow).
+6. Rebuild the store zip.
+
+### Web app (`app.html` → `toolist.cc/dooby/app`)
+
+A single static page (no build step) for iPad, iPhone and any browser. It uses the vendored `vendor/supabase-js-2.116.0.js` for Google sign-in (PKCE redirect) and reads/writes the same `dooby_data` row as the extension. Every write re-fetches the latest document, applies the change and upserts it with a new `updatedAt`, so the extension's last-writer-wins pull picks it up within a minute. `?add=URL&title=T` opens the add sheet pre-filled; the page shows a Safari bookmarklet and an iOS Shortcut recipe that use it. Tested in `tests/e2e/webapp.test.js` against the mock Supabase.
 
 While `js/config.js` is empty the account button explains that Dooby Cloud is not enabled and nothing else changes.
 
@@ -234,6 +239,8 @@ Dooby/
 │   ├── icon16.png
 │   ├── icon48.png
 │   └── icon128.png
+├── app.html                # Dooby web app (toolist.cc/dooby/app) for iPad / iPhone
+├── vendor/                 # supabase-js UMD build used by the web app only
 ├── scripts/                # Store zip build, activation-code generator
 ├── supabase/schema.sql     # Dooby Cloud table + RLS policies
 ├── tests/                  # Unit + Playwright/Chromium tests (npm test)
@@ -283,6 +290,10 @@ MIT
 ---
 
 ## Changelog
+
+### v1.6.0 (2026-09-08)
+- **New:** Dooby Cloud enabled (Supabase project + Google OAuth client configured in `js/config.js`)
+- **New:** Web app at `toolist.cc/dooby/app` (`app.html`, vendored `supabase-js`) for iPad / iPhone / any browser: same Google account, same `dooby_data` row; view, search, open, add (`?add=URL&title=T` from a bookmarklet or iOS Shortcut) and remove bookmarks; last-writer-wins with the extension
 
 ### v1.5.1 (2026-09-07)
 - **Fix:** TabMe / Toby / Chrome-bookmark JSON can now be imported from every entry point (toolbar Import button, Export / Import dialog, Import Bookmarks dialog); previously only the last one detected formats and the others failed with "Invalid import data"
