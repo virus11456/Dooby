@@ -1792,6 +1792,7 @@ function refreshCloudUI() {
   document.getElementById('cloudNotConfigured').classList.toggle('hidden', st.configured);
   document.getElementById('cloudSignedOut').classList.toggle('hidden', !st.configured || st.signedIn);
   document.getElementById('cloudSignedIn').classList.toggle('hidden', !st.configured || !st.signedIn);
+  document.querySelectorAll('#cloudModal .cloud-only').forEach(el => el.classList.toggle('hidden', !(st.configured && st.signedIn)));
 
   if (st.signedIn && st.user) {
     btn.classList.add('signed-in');
@@ -1801,7 +1802,9 @@ function refreshCloudUI() {
     document.getElementById('cloudName').textContent = st.user.name || '';
     document.getElementById('cloudEmail').textContent = st.user.email || '';
     const when = st.lastSyncAt ? new Date(st.lastSyncAt).toLocaleString() : t('never');
-    document.getElementById('cloudSyncInfo').textContent = st.lastError ? t('last_error', { error: st.lastError }) : t('last_synced', { when });
+    const info = document.getElementById('cloudSyncInfo');
+    info.textContent = st.lastError ? t('last_error', { error: st.lastError }) : t('last_synced', { when });
+    info.classList.toggle('error', !!st.lastError);
     document.getElementById('cloudWebAppLink').href = (typeof DoobyConfig !== 'undefined' && DoobyConfig.webAppUrl) || '#';
   } else {
     btn.classList.remove('signed-in');
