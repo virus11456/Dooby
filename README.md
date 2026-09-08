@@ -291,6 +291,9 @@ MIT
 
 ## Changelog
 
+### v1.6.3 (2026-09-08)
+- **Fix:** Collections and Open Tabs render incrementally (keyed by id): adding a bookmark updates only the changed card, favicons do not reload, expanded cards stay expanded
+
 ### v1.6.2 (2026-09-08)
 - **Improve:** Manual Chrome-sync buttons and the usage bar moved from the toolbar into the Dooby Cloud dialog; the toolbar sync indicator opens it
 
