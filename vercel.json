@@ -28,6 +28,14 @@
     {
       "source": "/dooby/changelog/",
       "destination": "/changelog"
+    },
+    {
+      "source": "/dooby/app",
+      "destination": "/app"
+    },
+    {
+      "source": "/dooby/app/",
+      "destination": "/app"
     }
   ]
 }

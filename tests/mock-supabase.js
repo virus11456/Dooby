@@ -77,7 +77,7 @@ function start() {
 
   return new Promise(resolve => server.listen(0, '127.0.0.1', () => resolve({
     url: `http://127.0.0.1:${server.address().port}`,
-    close: () => server.close(), rows, users, sessions, log,
+    close: () => server.close(), rows, users, sessions, refreshes, log,
     // Fake Google ID token for a user; nonce = sha256(rawNonce) like Google would return.
     idToken: (sub, email, name, hashedNonce) => [b64url(JSON.stringify({ alg: 'none' })), b64url(JSON.stringify({ sub, email, name, picture: '', nonce: hashedNonce, iss: 'https://accounts.google.com' })), 'sig'].join('.')
   })));

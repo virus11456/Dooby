@@ -65,7 +65,19 @@
     <p class="lead en">Fixes and new features in every Dooby release. Install from the <a href="https://chromewebstore.google.com/detail/pjbjldjdeaiffdbehpmbndjaiehcoahg">Chrome Web Store</a> to get updates automatically.</p>
 
     <div class="release">
-      <h2>v1.5.1 <span class="date">2026-09-07</span> <span class="latest zh">最新</span><span class="latest en">Latest</span></h2>
+      <h2>v1.6.0 <span class="date">2026-09-08</span> <span class="latest zh">最新</span><span class="latest en">Latest</span></h2>
+      <ul class="zh">
+        <li><span class="tag new">新增</span><b>Dooby Cloud 正式啟用。</b>按右上角帳號按鈕用 Google 登入，書籤就會存到 Dooby 自己的雲端，跨裝置同步不再受 Chrome 100 KB 的限制。第一次登入會把本機和雲端的書籤合併。</li>
+        <li><span class="tag new">新增</span><b>iPad／iPhone 網頁版：<a href="/dooby/app">toolist.cc/dooby/app</a>。</b>用同一個 Google 帳號登入，就能在任何瀏覽器查看、搜尋、開啟、新增和刪除書籤，改動一分鐘內同步回 Chrome。頁面裡有 Safari 書籤小工具和 iOS 捷徑的設定教學，可以從分享選單一鍵存網頁。</li>
+      </ul>
+      <ul class="en">
+        <li><span class="tag new">New</span><b>Dooby Cloud is live.</b> Sign in with Google from the account button (top right) and your bookmarks are stored in Dooby's own cloud, syncing across devices without Chrome's 100 KB limit. The first sign-in merges local and cloud data.</li>
+        <li><span class="tag new">New</span><b>Web app for iPad / iPhone: <a href="/dooby/app">toolist.cc/dooby/app</a>.</b> Sign in with the same Google account to view, search, open, add and remove bookmarks from any browser; changes sync back to Chrome within a minute. The page includes a Safari bookmarklet and an iOS Shortcut recipe to save pages from the share sheet.</li>
+      </ul>
+    </div>
+
+    <div class="release">
+      <h2>v1.5.1 <span class="date">2026-09-07</span></h2>
       <ul class="zh">
         <li><span class="tag fix">修正</span><b>從工具列的「匯入」按鈕匯入 TabMe／Toby 檔案會顯示「Import failed: Invalid import data」。</b>之前只有「匯入書籤」對話框裡的「Import JSON」會判斷格式，工具列按鈕和「匯出／匯入」對話框只吃 Dooby 自己的備份檔。現在三個入口都會自動判斷 Dooby 備份、TabMe、Toby、Chrome 書籤 JSON。</li>
         <li><span class="tag fix">修正</span>工具列的「匯出」按鈕會一次下載兩個檔案，而「匯出／匯入」對話框裡的「匯出成 JSON」按下去沒反應（兩個按鈕用了同一個 id）。</li>

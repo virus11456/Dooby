@@ -1,6 +1,6 @@
 {
   "name": "dooby",
-  "version": "1.5.1",
+  "version": "1.6.0",
   "private": true,
   "description": "Dooby - tab & bookmark manager Chrome extension (tests and tooling)",
   "scripts": {
