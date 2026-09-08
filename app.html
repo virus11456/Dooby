@@ -350,7 +350,10 @@
             var li = document.createElement('li'); li.dataset.tabId = tb.id;
             li.innerHTML = '<img alt="" loading="lazy"><a target="_blank" rel="noopener"></a><button class="x" title="Remove">&times;</button>';
             var img = li.querySelector('img'); img.src = tb.favicon || favicon(tb.url); img.addEventListener('error', function () { this.style.visibility = 'hidden'; });
-            var a = li.querySelector('a'); a.href = tb.url; a.textContent = tb.title || tb.url || t('untitled'); a.title = tb.url;
+            // Only http(s) links are clickable; anything else (e.g. a javascript: URL that
+            // slipped in through an import) is shown as plain text.
+            var a = li.querySelector('a'); a.textContent = tb.title || tb.url || t('untitled'); a.title = tb.url || '';
+            if (isWebUrl(tb.url)) a.href = tb.url; else { a.removeAttribute('href'); a.style.opacity = '.6'; }
             li.querySelector('.x').addEventListener('click', function () { removeTab(c.id, tb.id); });
             ul.appendChild(li);
           });
