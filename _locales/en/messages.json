@@ -649,5 +649,8 @@
   },
   "chrome_sync_hint": {
     "message": "Automatic between desktop Chromes signed into the same Google account. 100 KB limit."
+  },
+  "changelog": {
+    "message": "Changelog"
   }
 }

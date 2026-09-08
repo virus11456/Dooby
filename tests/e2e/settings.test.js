@@ -29,6 +29,10 @@ suite('e2e: settings (close after save, quick-save target, sorting)', async (che
     check('default: quick-save target is Auto', (await page.evaluate(() => document.getElementById('settingQuickSave').value)) === '');
     const options = await page.evaluate(() => [...document.querySelectorAll('#settingQuickSave option')].map(o => o.textContent));
     check('quick-save select lists every collection', ['Quick Save', 'Work', 'Reading List'].every(n => options.includes(n)), options);
+    const manifestVersion = await ext.sw.evaluate(() => chrome.runtime.getManifest().version);
+    check('settings footer shows the extension version', (await page.evaluate(() => document.getElementById('appVersion').textContent)) === 'Dooby v' + manifestVersion);
+    check('settings footer links to the changelog', (await page.evaluate(() => document.getElementById('appChangelogLink').href)) === 'https://toolist.cc/dooby/changelog');
+    check('logo tooltip carries the version', (await page.evaluate(() => document.getElementById('logoText').title)) === 'Dooby v' + manifestVersion);
 
     // 1. Close-after-save OFF: toolbar click keeps the tab open, drag-save keeps the tab open
     await page.click('label.switch');
