@@ -254,23 +254,25 @@
       <div id="cloudSignedIn" class="cloud-panel hidden">
         <div class="cloud-account">
           <img id="cloudAvatar" class="cloud-avatar" alt="">
-          <div>
+          <div class="cloud-who">
             <div id="cloudName" class="cloud-name"></div>
             <div id="cloudEmail" class="cloud-email"></div>
           </div>
+          <button id="btnCloudSignOut" class="btn btn-secondary btn-sm cloud-signout" data-i18n="sign_out">Sign out</button>
         </div>
-        <p class="modal-desc" id="cloudSyncInfo" style="margin-top:12px;"></p>
-        <p class="modal-desc"><span data-i18n="open_webapp_prefix">Open </span><a id="cloudWebAppLink" href="#" target="_blank" rel="noopener" data-i18n="open_webapp_link">the Dooby web app</a><span data-i18n="open_webapp_suffix"> on iPad or iPhone and sign in with the same Google account.</span></p>
-        <div class="modal-actions" style="margin-top:14px; gap:8px; flex-wrap:wrap;">
-          <button id="btnCloudSyncNow" class="btn btn-primary btn-sm" data-i18n="sync_now">Sync now</button>
-          <button id="btnCloudSignOut" class="btn btn-secondary btn-sm" data-i18n="sign_out">Sign out</button>
-          <button id="btnCloudDelete" class="btn btn-secondary btn-sm" style="opacity:.7;" data-i18n="delete_cloud_data">Delete cloud data</button>
+        <p id="cloudSyncInfo" class="cloud-status"></p>
+        <div class="cloud-hint">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="3" y="1.5" width="10" height="13" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="11.8" r="0.9" fill="currentColor"/></svg>
+          <p><span data-i18n="open_webapp_prefix">Open </span><a id="cloudWebAppLink" href="#" target="_blank" rel="noopener" data-i18n="open_webapp_link">the Dooby web app</a><span data-i18n="open_webapp_suffix"> on iPad or iPhone and sign in with the same Google account.</span></p>
         </div>
         <p id="cloudError" class="activate-error hidden" style="margin-top:10px;"></p>
       </div>
 
-      <div class="modal-actions" style="justify-content:center; margin-top:18px;">
+      <div class="cloud-footer">
+        <button id="btnCloudDelete" class="link-btn danger-text cloud-only hidden" data-i18n="delete_cloud_data">Delete cloud data</button>
+        <span class="cloud-footer-spacer"></span>
         <button id="btnCloseCloud" class="btn btn-secondary" data-i18n="close">Close</button>
+        <button id="btnCloudSyncNow" class="btn btn-primary cloud-only hidden" data-i18n="sync_now">Sync now</button>
       </div>
     </div>
   </div>

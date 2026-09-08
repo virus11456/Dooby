@@ -1781,7 +1781,22 @@ body::before {
 .account-avatar.hidden { display: none; }
 .account-btn.signed-in #accountIcon { display: none; }
 .cloud-points { margin: 12px 0 16px 18px; color: var(--text-secondary); font-size: 13px; line-height: 1.7; }
-.cloud-account { display: flex; align-items: center; gap: 12px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+.cloud-account { display: flex; align-items: center; gap: 12px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-top: 10px; }
+.cloud-who { min-width: 0; flex: 1; }
+.cloud-name, .cloud-email { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cloud-signout { flex: none; }
+.cloud-status { display: flex; align-items: center; gap: 8px; margin: 12px 2px 0; font-size: 13px; color: var(--text-secondary); }
+.cloud-status::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent-glow); flex: none; }
+.cloud-status.error::before { background: var(--danger); box-shadow: none; }
+.cloud-hint { display: flex; gap: 10px; align-items: flex-start; margin-top: 14px; padding: 11px 13px; border-radius: 10px; background: var(--accent-light); border: 1px solid var(--accent-light); color: var(--text-secondary); font-size: 13px; line-height: 1.5; }
+.cloud-hint svg { flex: none; margin-top: 2px; color: var(--accent); }
+.cloud-hint p { margin: 0; }
+.cloud-hint a { color: var(--accent); font-weight: 600; }
+.cloud-footer { display: flex; align-items: center; gap: 10px; margin-top: 20px; }
+.cloud-footer-spacer { flex: 1; }
+.cloud-footer .hidden { display: none; }
+.cloud-footer .link-btn { background: none; border: none; padding: 6px 2px; font-size: 13px; cursor: pointer; opacity: .8; }
+.cloud-footer .link-btn:hover { opacity: 1; text-decoration: underline; }
 .cloud-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-hover); object-fit: cover; }
 .cloud-name { font-weight: 600; color: var(--text-primary); }
 .cloud-email { font-size: 12px; color: var(--text-secondary); }

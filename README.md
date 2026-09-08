@@ -291,6 +291,9 @@ MIT
 
 ## Changelog
 
+### v1.6.1 (2026-09-08)
+- **Improve:** Dooby Cloud dialog layout (sign-out on the account card, status line, web-app hint box, footer with Close + Sync now, delete demoted to a link)
+
 ### v1.6.0 (2026-09-08)
 - **New:** Dooby Cloud enabled (Supabase project + Google OAuth client configured in `js/config.js`)
 - **New:** Web app at `toolist.cc/dooby/app` (`app.html`, vendored `supabase-js`) for iPad / iPhone / any browser: same Google account, same `dooby_data` row; view, search, open, add (`?add=URL&title=T` from a bookmarklet or iOS Shortcut) and remove bookmarks; last-writer-wins with the extension
