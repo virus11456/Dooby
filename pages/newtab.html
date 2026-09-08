@@ -32,7 +32,7 @@
     </div>
     <div class="top-bar-right">
       <!-- Sync Status Indicator with LED -->
-      <div id="syncStatus" class="sync-status" title="Cloud sync via Chrome account" data-i18n-title="sync_status_title">
+      <div id="syncStatus" class="sync-status" role="button" tabindex="0" title="Cloud sync via Chrome account" data-i18n-title="sync_status_title">
         <span id="syncLed" class="sync-led"></span>
         <svg class="sync-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
           <path d="M2 8a6 6 0 0 1 10.5-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -43,29 +43,6 @@
         <span id="syncStatusText" class="sync-status-text" data-i18n="synced">Synced</span>
       </div>
 
-      <!-- Storage Usage Indicator -->
-      <div id="storageUsage" class="storage-usage" title="Chrome Sync storage usage" data-i18n-title="storage_usage_title">
-        <div class="storage-usage-bar">
-          <div id="storageUsageFill" class="storage-usage-fill"></div>
-        </div>
-        <span id="storageUsageText" class="storage-usage-text">--</span>
-      </div>
-
-      <!-- Cloud Sync Buttons -->
-      <button id="btnCloudPush" class="btn-icon" title="Upload to cloud" data-i18n-title="upload_to_cloud">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M4 10c-1.7 0-3-1.3-3-3 0-1.5 1-2.7 2.4-2.9C4 2.3 5.8 1 8 1c2.8 0 5 2 5 4.5 0 .2 0 .3 0 .5 1.2.4 2 1.5 2 2.8 0 1.7-1.3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M8 8v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          <path d="M5.5 10.5L8 8l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-      <button id="btnCloudPull" class="btn-icon" title="Sync from cloud to this device" data-i18n-title="sync_from_cloud_title">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M4 10c-1.7 0-3-1.3-3-3 0-1.5 1-2.7 2.4-2.9C4 2.3 5.8 1 8 1c2.8 0 5 2 5 4.5 0 .2 0 .3 0 .5 1.2.4 2 1.5 2 2.8 0 1.7-1.3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M8 8v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          <path d="M5.5 11.5L8 14l2.5-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
       <button id="btnExportData" class="btn-icon" title="Export data to file (backup)" data-i18n-title="export_backup_title">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
           <path d="M14 10v3a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -266,6 +243,24 @@
           <p><span data-i18n="open_webapp_prefix">Open </span><a id="cloudWebAppLink" href="#" target="_blank" rel="noopener" data-i18n="open_webapp_link">the Dooby web app</a><span data-i18n="open_webapp_suffix"> on iPad or iPhone and sign in with the same Google account.</span></p>
         </div>
         <p id="cloudError" class="activate-error hidden" style="margin-top:10px;"></p>
+      </div>
+
+      <div class="chrome-sync">
+        <div class="chrome-sync-head">
+          <span class="chrome-sync-title" data-i18n="chrome_sync_title">Chrome account sync</span>
+          <div id="storageUsage" class="storage-usage" title="Chrome Sync storage usage" data-i18n-title="storage_usage_title">
+            <div class="storage-usage-bar">
+              <div id="storageUsageFill" class="storage-usage-fill"></div>
+            </div>
+            <span id="storageUsageText" class="storage-usage-text">--</span>
+          </div>
+        </div>
+        <p class="chrome-sync-hint" data-i18n="chrome_sync_hint">Automatic between desktop Chromes signed into the same Google account. 100 KB limit.</p>
+        <div class="chrome-sync-actions">
+          <button id="btnCloudPush" class="link-btn" data-i18n="upload_to_cloud">Upload to cloud</button>
+          <span class="chrome-sync-sep">·</span>
+          <button id="btnCloudPull" class="link-btn" data-i18n="sync_from_cloud_title">Sync from cloud to this device</button>
+        </div>
       </div>
 
       <div class="cloud-footer">

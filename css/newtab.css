@@ -1015,6 +1015,14 @@ body::before {
   color: var(--text-muted);
   background: var(--bg-tertiary);
   font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all var(--transition);
+}
+
+.sync-status:hover {
+  color: var(--text-primary);
+  border-color: var(--border-light);
 }
 
 .sync-status.hidden {
@@ -1985,3 +1993,15 @@ body::before {
   from { opacity: 0; transform: translate(-50%, 8px); }
   to { opacity: 1; transform: translate(-50%, 0); }
 }
+
+/* Chrome account sync section inside the Dooby Cloud dialog */
+.chrome-sync { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-light); }
+.chrome-sync-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.chrome-sync-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.chrome-sync .storage-usage { padding: 4px 10px; }
+.chrome-sync .storage-usage-bar { width: 72px; }
+.chrome-sync-hint { margin: 6px 0 0; font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+.chrome-sync-actions { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.chrome-sync-actions .link-btn { background: none; border: none; padding: 4px 0; font-size: 12px; color: var(--accent); cursor: pointer; }
+.chrome-sync-actions .link-btn:hover { text-decoration: underline; }
+.chrome-sync-sep { color: var(--text-muted); font-size: 12px; }

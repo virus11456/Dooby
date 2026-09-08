@@ -50,6 +50,11 @@ suite('e2e: Dooby Cloud (Google sign-in + Supabase sync, mocked)', async (check)
       await chrome.storage.local.set({ collections, localUpdateTime: Date.now() });
     });
     await A.open();
+    // Toolbar: manual Chrome-sync controls live in the dialog now; the indicator opens it.
+    check('toolbar has no manual cloud buttons or usage bar', await A.page.evaluate(() => !document.querySelector('.top-bar #btnCloudPush') && !document.querySelector('.top-bar #btnCloudPull') && !document.querySelector('.top-bar #storageUsage')));
+    await A.page.click('#syncStatus');
+    check('sync indicator opens the Dooby Cloud dialog with the Chrome sync section', await A.page.evaluate(() => !document.getElementById('cloudModal').classList.contains('hidden') && !!document.querySelector('#cloudModal .chrome-sync #storageUsage') && !!document.querySelector('#cloudModal #btnCloudPush')));
+    await A.page.click('#btnCloseCloud');
     await A.page.click('#btnAccount');
     check('signed-out panel shown before sign-in', await A.page.evaluate(() => !document.getElementById('cloudSignedOut').classList.contains('hidden')));
     await A.page.click('#btnCloudSignIn');

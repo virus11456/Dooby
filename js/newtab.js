@@ -1726,6 +1726,10 @@ async function initCloud() {
     refreshCloudUI();
     document.getElementById('cloudModal').classList.remove('hidden');
   });
+  // The toolbar sync indicator opens the same dialog (Chrome sync controls live there now).
+  const openCloud = () => { refreshCloudUI(); document.getElementById('cloudModal').classList.remove('hidden'); };
+  document.getElementById('syncStatus').addEventListener('click', openCloud);
+  document.getElementById('syncStatus').addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCloud(); } });
   document.getElementById('btnCloseCloud').addEventListener('click', () => {
     document.getElementById('cloudModal').classList.add('hidden');
   });
