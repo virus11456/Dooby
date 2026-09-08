@@ -18,7 +18,7 @@ suite('e2e: localization (en / zh_TW)', async (check) => {
     const attr = (sel, a) => page.evaluate(([s, a]) => document.querySelector(s).getAttribute(a), [sel, a]);
 
     check('manifest name is localized (English)', (await ext.sw.evaluate(() => chrome.runtime.getManifest().name)) === 'Dooby - Tab & Bookmark Manager');
-    check('default language is English on an English browser', (await txt('#btnSaveSession')) === 'Save Session' && (await txt('.spaces-sidebar h3')) === 'Spaces');
+    check('default language is English on an English browser', (await txt('#btnSaveSession')) === 'Save Session' && (await txt('.spaces-bar h3')) === 'Spaces');
     check('html lang is en', (await page.evaluate(() => document.documentElement.lang)) === 'en');
 
     // Switch to zh_TW
@@ -26,7 +26,7 @@ suite('e2e: localization (en / zh_TW)', async (check) => {
     check('language select defaults to Auto', (await page.evaluate(() => document.getElementById('settingLanguage').value)) === 'auto');
     await page.selectOption('#settingLanguage', 'zh_TW');
     await page.waitForTimeout(800);
-    check('static markup switches to zh_TW', (await txt('#btnSaveSession')) === '儲存工作階段' && (await txt('.spaces-sidebar h3')) === '空間' && (await txt('.tabs-sidebar h3')) === '開啟中的分頁');
+    check('static markup switches to zh_TW', (await txt('#btnSaveSession')) === '儲存工作階段' && (await txt('.spaces-bar h3')) === '空間' && (await txt('.tabs-sidebar h3')) === '開啟中的分頁');
     check('settings modal itself is translated', (await txt('#settingsModal h3')) === '設定' && (await txt('#btnCloseSettings')) === '完成');
     check('select options are translated', (await page.evaluate(() => document.querySelector('#settingCollectionSort option[value="name"]').textContent)) === '名稱 A → Z');
     check('attributes (placeholder/title) are translated', (await attr('#searchInput', 'placeholder')) === '搜尋分頁和收藏…（Ctrl+K）' && (await attr('#btnSettings', 'title')) === '設定');

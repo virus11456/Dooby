@@ -115,25 +115,20 @@
   </header>
 
   <div class="main-layout">
-    <!-- Spaces Sidebar -->
-    <aside class="spaces-sidebar">
-      <div class="sidebar-header">
-        <h3 data-i18n="spaces">Spaces</h3>
-        <button id="btnAddSpace" class="btn-icon" title="Add new space" data-i18n-title="add_space_title">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <line x1="8" y1="2" x2="8" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            <line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </button>
-      </div>
-      <ul id="spacesList" class="spaces-list"></ul>
-    </aside>
-
     <!-- Main Content -->
     <main class="content">
       <div class="content-header">
-        <h2 id="spaceTitle">My Space</h2>
-        <div style="display:flex;gap:8px;align-items:center;">
+        <div class="spaces-bar">
+          <h3 class="spaces-label" data-i18n="spaces">Spaces</h3>
+          <ul id="spacesList" class="spaces-list"></ul>
+          <button id="btnAddSpace" class="btn-icon btn-add-space" title="Add new space" data-i18n-title="add_space_title">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <line x1="8" y1="2" x2="8" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="content-actions">
           <button id="btnAddCollection" class="btn btn-secondary">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
               <line x1="8" y1="2" x2="8" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -158,16 +153,25 @@
           </button>
         </div>
       </div>
+      <h2 id="spaceTitle" class="space-title">My Space</h2>
       <div id="collectionsGrid" class="collections-grid"></div>
     </main>
 
-    <!-- Open Tabs Sidebar -->
-    <aside class="tabs-sidebar">
+    <!-- Open Tabs Sidebar (collapsible) -->
+    <aside class="tabs-sidebar" id="tabsSidebar">
       <div class="sidebar-header">
         <h3 data-i18n="open_tabs">Open Tabs</h3>
         <span id="openTabCount" class="badge">0</span>
+        <button id="btnToggleTabs" class="btn-icon btn-toggle-tabs" title="Hide open tabs" data-i18n-title="collapse_open_tabs">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
       </div>
       <ul id="openTabsList" class="open-tabs-list"></ul>
+      <button id="btnExpandTabs" class="tabs-rail" title="Show open tabs" data-i18n-title="expand_open_tabs">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span id="openTabCountRail" class="badge">0</span>
+        <span class="tabs-rail-label" data-i18n="open_tabs">Open Tabs</span>
+      </button>
     </aside>
   </div>
 
