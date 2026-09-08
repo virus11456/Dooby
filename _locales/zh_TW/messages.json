@@ -643,5 +643,11 @@
   },
   "import_not_json": {
     "message": "這個檔案不是有效的 JSON。"
+  },
+  "chrome_sync_title": {
+    "message": "Chrome 帳號同步"
+  },
+  "chrome_sync_hint": {
+    "message": "登入同一個 Google 帳號的桌面版 Chrome 之間自動同步，上限 100 KB。"
   }
 }

@@ -643,5 +643,11 @@
   },
   "import_not_json": {
     "message": "This file is not valid JSON."
+  },
+  "chrome_sync_title": {
+    "message": "Chrome account sync"
+  },
+  "chrome_sync_hint": {
+    "message": "Automatic between desktop Chromes signed into the same Google account. 100 KB limit."
   }
 }

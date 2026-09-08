@@ -291,6 +291,9 @@ MIT
 
 ## Changelog
 
+### v1.6.2 (2026-09-08)
+- **Improve:** Manual Chrome-sync buttons and the usage bar moved from the toolbar into the Dooby Cloud dialog; the toolbar sync indicator opens it
+
 ### v1.6.1 (2026-09-08)
 - **Improve:** Dooby Cloud dialog layout (sign-out on the account card, status line, web-app hint box, footer with Close + Sync now, delete demoted to a link)
 
