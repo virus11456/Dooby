@@ -5,6 +5,7 @@ let allCollections = [];
 let bulkMode = false;
 let selectedTabs = new Map(); // tabId -> { collectionId, url, title }
 let appSettings = { ...DEFAULT_SETTINGS };
+const expandedCollections = new Set(); // collection ids the user expanded ("Show more")
 
 // ============================================
 // Initialization
@@ -256,9 +257,8 @@ function getCardColor(index) {
 
 async function renderCollections() {
   const grid = document.getElementById('collectionsGrid');
-  grid.innerHTML = '';
 
-  if (!activeSpaceId) return;
+  if (!activeSpaceId) { grid.innerHTML = ''; return; }
 
   allCollections = await Storage.getCollectionsBySpace(activeSpaceId);
   const spaces = await Storage.getSpaces();
@@ -270,10 +270,35 @@ async function renderCollections() {
   const unpinned = sortCollections(allCollections.filter(c => !c.pinned));
   const sorted = [...pinned, ...unpinned];
 
-  for (let i = 0; i < sorted.length; i++) {
-    const card = createCollectionCard(sorted[i], i);
-    grid.appendChild(card);
-  }
+  // Reconcile instead of rebuilding: cards whose content did not change are
+  // kept as-is (no favicon reload, no flicker, expanded state and scroll
+  // position survive); only changed cards are re-created, then the DOM order
+  // is fixed up with the minimum number of moves.
+  const existing = new Map();
+  for (const el of grid.querySelectorAll(':scope > .collection-card')) existing.set(el.dataset.collectionId, el);
+  const desired = [];
+  sorted.forEach((collection, i) => {
+    const sig = collectionSignature(collection, i);
+    let el = existing.get(collection.id);
+    if (!el || el.dataset.sig !== sig) {
+      el = createCollectionCard(collection, i);
+      el.dataset.sig = sig;
+    }
+    desired.push(el);
+  });
+  const keep = new Set(desired);
+  for (const el of existing.values()) if (!keep.has(el)) el.remove();
+  desired.forEach((el, i) => {
+    if (grid.children[i] !== el) grid.insertBefore(el, grid.children[i] || null);
+  });
+}
+
+// Everything a card's markup depends on; equal signature = card can be reused.
+function collectionSignature(c, colorIndex) {
+  return JSON.stringify([
+    c.name, !!c.pinned, colorIndex, appSettings.tabSort, I18n.lang(),
+    (c.tabs || []).map(t => [t.id, t.title, t.url, t.favicon || '', !!t.pinned])
+  ]);
 }
 
 // Stable sorts driven by Settings. "manual" keeps the stored order.
@@ -414,7 +439,8 @@ function createCollectionCard(collection, colorIndex = 0) {
   if (collection.tabs.length === 0) {
     body.innerHTML = `<div class="collection-body-empty">${t('drag_tabs_here')}</div>`;
   } else {
-    if (collection.tabs.length > MAX_VISIBLE) {
+    const expanded = expandedCollections.has(collection.id);
+    if (collection.tabs.length > MAX_VISIBLE && !expanded) {
       body.classList.add('collapsed');
     }
     for (const tab of sortTabs(collection.tabs)) {
@@ -425,15 +451,17 @@ function createCollectionCard(collection, colorIndex = 0) {
       const showMoreBtn = document.createElement('button');
       showMoreBtn.className = 'btn-show-more';
       const hiddenCount = collection.tabs.length - MAX_VISIBLE;
-      showMoreBtn.innerHTML = `<span>${t('show_more', { n: hiddenCount })}</span><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+      const paintShowMore = (collapsed) => {
+        showMoreBtn.innerHTML = collapsed
+          ? `<span>${t('show_more', { n: hiddenCount })}</span><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`
+          : `<span>${t('show_less')}</span><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 10l4-4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+      };
+      paintShowMore(!expanded);
       showMoreBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         const isCollapsed = body.classList.toggle('collapsed');
-        if (isCollapsed) {
-          showMoreBtn.innerHTML = `<span>${t('show_more', { n: hiddenCount })}</span><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
-        } else {
-          showMoreBtn.innerHTML = `<span>${t('show_less')}</span><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 10l4-4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
-        }
+        if (isCollapsed) expandedCollections.delete(collection.id); else expandedCollections.add(collection.id);
+        paintShowMore(isCollapsed);
       });
       body.appendChild(showMoreBtn);
     }
@@ -595,7 +623,6 @@ function isSavableUrl(url) {
 
 async function renderOpenTabs() {
   const list = document.getElementById('openTabsList');
-  list.innerHTML = '';
 
   let tabs = [];
   try {
@@ -610,38 +637,57 @@ async function renderOpenTabs() {
 
   document.getElementById('openTabCount').textContent = tabs.length;
 
+  // Reuse unchanged rows (keyed by tab id) so favicons do not reload.
+  const existing = new Map();
+  for (const el of list.querySelectorAll(':scope > .open-tab-item')) existing.set(el.dataset.tabId, el);
+  const desired = [];
   for (const tab of tabs) {
-    const li = document.createElement('li');
-    li.className = 'open-tab-item';
-
-    const faviconSrc = tab.favIconUrl || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(new URL(tab.url).hostname)}&sz=32`;
-
-    li.innerHTML = `
-      <img src="${escapeHtml(faviconSrc)}" alt="" draggable="false">
-      <span class="open-tab-title" title="${escapeHtml(tab.url)}">${escapeHtml(tab.title || t('untitled'))}</span>
-    `;
-
-    li.querySelector('img').addEventListener('error', function() {
-      this.style.display = 'none';
-    });
-
-    // Make draggable
-    DragDrop.makeDraggable(li, {
-      type: 'open-tab',
-      chromeTabId: tab.id,
-      title: tab.title || t('untitled'),
-      url: tab.url,
-      favicon: tab.favIconUrl || ''
-    });
-
-    // Click to switch to tab
-    li.addEventListener('click', () => {
-      chrome.tabs.update(tab.id, { active: true });
-      chrome.windows.update(tab.windowId, { focused: true });
-    });
-
-    list.appendChild(li);
+    const sig = JSON.stringify([tab.title || '', tab.url, tab.favIconUrl || '', tab.windowId, I18n.lang()]);
+    let li = existing.get(String(tab.id));
+    if (!li || li.dataset.sig !== sig) {
+      li = createOpenTabItem(tab);
+      li.dataset.tabId = String(tab.id);
+      li.dataset.sig = sig;
+    }
+    desired.push(li);
   }
+  const keep = new Set(desired);
+  for (const el of existing.values()) if (!keep.has(el)) el.remove();
+  desired.forEach((el, i) => {
+    if (list.children[i] !== el) list.insertBefore(el, list.children[i] || null);
+  });
+}
+
+function createOpenTabItem(tab) {
+  const li = document.createElement('li');
+  li.className = 'open-tab-item';
+
+  const faviconSrc = tab.favIconUrl || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(new URL(tab.url).hostname)}&sz=32`;
+
+  li.innerHTML = `
+    <img src="${escapeHtml(faviconSrc)}" alt="" draggable="false">
+    <span class="open-tab-title" title="${escapeHtml(tab.url)}">${escapeHtml(tab.title || t('untitled'))}</span>
+  `;
+
+  li.querySelector('img').addEventListener('error', function() {
+    this.style.display = 'none';
+  });
+
+  // Make draggable
+  DragDrop.makeDraggable(li, {
+    type: 'open-tab',
+    chromeTabId: tab.id,
+    title: tab.title || t('untitled'),
+    url: tab.url,
+    favicon: tab.favIconUrl || ''
+  });
+
+  // Click to switch to tab
+  li.addEventListener('click', () => {
+    chrome.tabs.update(tab.id, { active: true });
+    chrome.windows.update(tab.windowId, { focused: true });
+  });
+  return li;
 }
 
 // ============================================
