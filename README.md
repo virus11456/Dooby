@@ -6,7 +6,7 @@
 
 ## Features
 
-- **Spaces** — Separate workspaces (Work, Personal, Side Project...)
+- **Spaces** — Separate workspaces (Work, Personal, Side Project...) as chips above the collections
 - **Collections** — Organize tabs into named groups within each space
 - **Drag & Drop** — Drag open tabs from the sidebar into any collection
 - **Session Save** — Save all open tabs as a collection with one click
@@ -290,6 +290,9 @@ MIT
 ---
 
 ## Changelog
+
+### v1.6.5 (2026-09-08)
+- **Improve:** Layout: spaces are chips above the collections (left column removed); the Open Tabs column collapses to a rail (remembered per device); collections use a left-to-right masonry grid that gains columns when the rail is collapsed
 
 ### v1.6.4 (2026-09-08)
 - **New:** Version shown in the Settings footer (with changelog link) and in the logo tooltip

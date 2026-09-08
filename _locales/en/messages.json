@@ -652,5 +652,11 @@
   },
   "changelog": {
     "message": "Changelog"
+  },
+  "collapse_open_tabs": {
+    "message": "Hide open tabs"
+  },
+  "expand_open_tabs": {
+    "message": "Show open tabs"
   }
 }

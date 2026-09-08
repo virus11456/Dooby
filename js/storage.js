@@ -3,6 +3,7 @@
 // Per-device preferences. Stored in chrome.storage.local only (not synced).
 const DEFAULT_SETTINGS = {
   language: 'auto',             // auto | en | zh_TW
+  openTabsCollapsed: false,     // Open Tabs column collapsed to a rail
   closeTabAfterSave: true,      // close the browser tab after quick-save / drag-save
   quickSaveCollectionId: '',    // '' = auto (the "Quick Save" collection of the active space)
   collectionSort: 'manual',     // manual | name | newest | oldest | count

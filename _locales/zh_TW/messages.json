@@ -652,5 +652,11 @@
   },
   "changelog": {
     "message": "更新記錄"
+  },
+  "collapse_open_tabs": {
+    "message": "收起開啟中的分頁"
+  },
+  "expand_open_tabs": {
+    "message": "展開開啟中的分頁"
   }
 }

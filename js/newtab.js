@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupEventListeners();
   setupSettingsListeners();
   setupToastListeners();
+  setupTabsSidebar();
   setupTabListeners();
   await initSync();
   await initCloud();
@@ -292,6 +293,29 @@ async function renderCollections() {
   desired.forEach((el, i) => {
     if (grid.children[i] !== el) grid.insertBefore(el, grid.children[i] || null);
   });
+  layoutMasonry();
+}
+
+// Give every card a grid row span matching its height (8px lattice) so the
+// grid packs like a masonry while keeping left-to-right order. Re-run when a
+// card's content changes (Show more) or the width changes.
+const MASONRY_ROW = 8;
+let _masonryObserver = null;
+function layoutMasonry() {
+  const grid = document.getElementById('collectionsGrid');
+  if (!grid) return;
+  if (!_masonryObserver && typeof ResizeObserver !== 'undefined') {
+    _masonryObserver = new ResizeObserver(() => layoutMasonry());
+    _masonryObserver.observe(grid);
+  }
+  for (const card of grid.children) {
+    if (_masonryObserver && !card.dataset.observed) { _masonryObserver.observe(card); card.dataset.observed = '1'; }
+    const gap = parseFloat(getComputedStyle(card).marginBottom) || 0;
+    const h = card.getBoundingClientRect().height;
+    const span = Math.max(1, Math.ceil((h + gap) / MASONRY_ROW));
+    const value = `span ${span}`;
+    if (card.style.gridRowEnd !== value) card.style.gridRowEnd = value;
+  }
 }
 
 // Everything a card's markup depends on; equal signature = card can be reused.
@@ -637,6 +661,8 @@ async function renderOpenTabs() {
   tabs = tabs.filter(t => isSavableUrl(t.url));
 
   document.getElementById('openTabCount').textContent = tabs.length;
+  const rail = document.getElementById('openTabCountRail');
+  if (rail) rail.textContent = tabs.length;
 
   // Reuse unchanged rows (keyed by tab id) so favicons do not reload.
   const existing = new Map();
@@ -1680,6 +1706,24 @@ function setupSyncEventListeners() {
 // ============================================
 // Dooby Cloud (Google sign-in + Supabase)
 // ============================================
+
+// ============================================
+// Open Tabs column: collapsible, remembered per device
+// ============================================
+
+function setTabsCollapsed(collapsed) {
+  document.getElementById('tabsSidebar').classList.toggle('collapsed', !!collapsed);
+}
+
+function setupTabsSidebar() {
+  setTabsCollapsed(appSettings.openTabsCollapsed);
+  const toggle = async (collapsed) => {
+    setTabsCollapsed(collapsed);
+    appSettings = await Storage.saveSettings({ openTabsCollapsed: collapsed });
+  };
+  document.getElementById('btnToggleTabs').addEventListener('click', () => toggle(true));
+  document.getElementById('btnExpandTabs').addEventListener('click', () => toggle(false));
+}
 
 // ============================================
 // Version (Settings footer + logo tooltip)
