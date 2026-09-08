@@ -2005,3 +2005,9 @@ body::before {
 .chrome-sync-actions .link-btn { background: none; border: none; padding: 4px 0; font-size: 12px; color: var(--accent); cursor: pointer; }
 .chrome-sync-actions .link-btn:hover { text-decoration: underline; }
 .chrome-sync-sep { color: var(--text-muted); font-size: 12px; }
+
+/* Version line in the Settings footer */
+.settings-footer { justify-content: space-between; align-items: center; }
+.app-version { font-size: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.app-version a { color: var(--text-secondary); text-decoration: none; }
+.app-version a:hover { color: var(--accent); text-decoration: underline; }

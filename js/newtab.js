@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   appSettings = await Storage.getSettings();
   await I18n.load(appSettings.language);
   I18n.applyToDom();
+  showAppVersion();
   await DonorManager.init();
   DragDrop.init();
   await loadApp();
@@ -1679,6 +1680,20 @@ function setupSyncEventListeners() {
 // ============================================
 // Dooby Cloud (Google sign-in + Supabase)
 // ============================================
+
+// ============================================
+// Version (Settings footer + logo tooltip)
+// ============================================
+
+function showAppVersion() {
+  let version = '';
+  try { version = chrome.runtime.getManifest().version || ''; } catch (e) {}
+  const label = version ? `Dooby v${version}` : 'Dooby';
+  const el = document.getElementById('appVersion');
+  if (el) el.textContent = label;
+  const logo = document.getElementById('logoText');
+  if (logo) logo.title = label;
+}
 
 // ============================================
 // Settings

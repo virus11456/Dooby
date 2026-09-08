@@ -649,5 +649,8 @@
   },
   "chrome_sync_hint": {
     "message": "登入同一個 Google 帳號的桌面版 Chrome 之間自動同步，上限 100 KB。"
+  },
+  "changelog": {
+    "message": "更新記錄"
   }
 }
