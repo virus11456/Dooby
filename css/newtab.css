@@ -491,16 +491,20 @@ body::before {
    ============================================ */
 
 .collections-grid {
-  /* Left-to-right grid; as many 320px+ columns as fit, so collapsing the
-     Open Tabs column adds columns instead of wasting the space. Rows are a
-     fine 8px lattice and each card spans as many as it needs (set in JS),
-     which packs cards of different heights like a masonry. */
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  grid-auto-rows: 8px;
-  column-gap: 20px;
-  row-gap: 0;
-  align-items: start;
+  /* Fixed columns (count computed in JS from the width): card i sits in
+     column i % N, so the order reads left to right and a card growing only
+     pushes down its own column. Collapsing the Open Tabs rail adds columns. */
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.masonry-col {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .collection-card {
@@ -514,7 +518,6 @@ body::before {
   overflow: hidden;
   transition: all var(--transition-slow);
   position: relative;
-  margin-bottom: 20px;
   border-left: 4px solid var(--card-accent);
 }
 

@@ -18,7 +18,10 @@ suite('e2e: settings (close after save, quick-save target, sorting)', async (che
 
     const tabCount = () => page.evaluate(async () => (await chrome.tabs.query({})).length);
     const tabsIn = name => page.evaluate(async n => { const c = (await Storage.getCollections()).find(x => x.name === n); return c ? c.tabs.map(t => t.title) : null; }, name);
-    const cardOrder = () => page.evaluate(() => [...document.querySelectorAll('.collection-card .collection-title')].map(e => e.textContent));
+    // Visual order (row by row, left to right); DOM order is column by column.
+    const cardOrder = () => page.evaluate(() => [...document.querySelectorAll('.collection-card')]
+      .map(c => ({ name: c.querySelector('.collection-title').textContent, t: Math.round(c.getBoundingClientRect().top / 10), l: c.getBoundingClientRect().left }))
+      .sort((a, b) => a.t - b.t || a.l - b.l).map(c => c.name));
     const findTab = suffix => page.evaluate(async s => (await chrome.tabs.query({})).find(t => t.url && t.url.endsWith(s)), suffix);
     const modalVisible = () => page.evaluate(() => !document.getElementById('settingsModal').classList.contains('hidden'));
 

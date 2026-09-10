@@ -274,10 +274,9 @@ async function renderCollections() {
 
   // Reconcile instead of rebuilding: cards whose content did not change are
   // kept as-is (no favicon reload, no flicker, expanded state and scroll
-  // position survive); only changed cards are re-created, then the DOM order
-  // is fixed up with the minimum number of moves.
+  // position survive); only changed cards are re-created.
   const existing = new Map();
-  for (const el of grid.querySelectorAll(':scope > .collection-card')) existing.set(el.dataset.collectionId, el);
+  for (const el of grid.querySelectorAll('.collection-card')) existing.set(el.dataset.collectionId, el);
   const desired = [];
   sorted.forEach((collection, i) => {
     const sig = collectionSignature(collection, i);
@@ -290,31 +289,42 @@ async function renderCollections() {
   });
   const keep = new Set(desired);
   for (const el of existing.values()) if (!keep.has(el)) el.remove();
-  desired.forEach((el, i) => {
-    if (grid.children[i] !== el) grid.insertBefore(el, grid.children[i] || null);
-  });
-  layoutMasonry();
+  placeInColumns(grid, desired);
 }
 
-// Give every card a grid row span matching its height (8px lattice) so the
-// grid packs like a masonry while keeping left-to-right order. Re-run when a
-// card's content changes (Show more) or the width changes.
-const MASONRY_ROW = 8;
-let _masonryObserver = null;
-function layoutMasonry() {
-  const grid = document.getElementById('collectionsGrid');
-  if (!grid) return;
-  if (!_masonryObserver && typeof ResizeObserver !== 'undefined') {
-    _masonryObserver = new ResizeObserver(() => layoutMasonry());
-    _masonryObserver.observe(grid);
-  }
-  for (const card of grid.children) {
-    if (_masonryObserver && !card.dataset.observed) { _masonryObserver.observe(card); card.dataset.observed = '1'; }
-    const gap = parseFloat(getComputedStyle(card).marginBottom) || 0;
-    const h = card.getBoundingClientRect().height;
-    const span = Math.max(1, Math.ceil((h + gap) / MASONRY_ROW));
-    const value = `span ${span}`;
-    if (card.style.gridRowEnd !== value) card.style.gridRowEnd = value;
+// Cards live in fixed columns: card i goes to column i % N, reading left to
+// right, row by row. A card is only ever moved when the set/order of cards or
+// the number of columns changes, never because a card got taller, so
+// expanding "Show more" pushes down its own column and nothing else jumps.
+const CARD_MIN_WIDTH = 320;
+const CARD_GAP = 20;
+let _columnsObserver = null;
+let _lastPlacement = [];
+
+function columnCountFor(grid) {
+  const w = grid.clientWidth || 0;
+  return Math.max(1, Math.floor((w + CARD_GAP) / (CARD_MIN_WIDTH + CARD_GAP)));
+}
+
+function placeInColumns(grid, cards) {
+  _lastPlacement = cards;
+  const n = columnCountFor(grid);
+  let cols = [...grid.querySelectorAll(':scope > .masonry-col')];
+  while (cols.length < n) { const c = document.createElement('div'); c.className = 'masonry-col'; grid.appendChild(c); cols.push(c); }
+  while (cols.length > n) cols.pop().remove();
+  const perCol = cols.map(() => []);
+  cards.forEach((card, i) => perCol[i % n].push(card));
+  cols.forEach((col, ci) => {
+    perCol[ci].forEach((card, i) => {
+      if (col.children[i] !== card) col.insertBefore(card, col.children[i] || null);
+    });
+  });
+  grid.dataset.columns = String(n);
+  if (!_columnsObserver && typeof ResizeObserver !== 'undefined') {
+    _columnsObserver = new ResizeObserver(() => {
+      if (String(columnCountFor(grid)) !== grid.dataset.columns) placeInColumns(grid, _lastPlacement.filter(c => c.isConnected));
+    });
+    _columnsObserver.observe(grid);
   }
 }
 

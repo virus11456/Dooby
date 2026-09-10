@@ -291,6 +291,9 @@ MIT
 
 ## Changelog
 
+### v1.6.6 (2026-09-10)
+- **Fix:** Collections use fixed columns (card i → column i % N) so expanding a card never moves cards in other columns
+
 ### v1.6.5 (2026-09-08)
 - **Improve:** Layout: spaces are chips above the collections (left column removed); the Open Tabs column collapses to a rail (remembered per device); collections use a left-to-right masonry grid that gains columns when the rail is collapsed
 
