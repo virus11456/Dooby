@@ -109,6 +109,16 @@
 
     .final { text-align: center; padding: 96px 0 60px; }
     .final h2 { font-size: 36px; margin-bottom: 22px; }
+    .siblings { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 4px 0 8px; }
+    .siblings-label { font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--dim); margin-right: 4px; }
+    .sib { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--panel-2); color: var(--muted); font-size: 13px; font-weight: 600; }
+    .sib:hover { color: var(--text); text-decoration: none; border-color: rgba(16,185,129,0.4); background: rgba(16,185,129,0.1); }
+    .sib i { width: 7px; height: 7px; border-radius: 50%; display: block; flex: none; }
+    .sib.moneytools i { background: #34d399; box-shadow: 0 0 8px #34d399; }
+    .sib.crypig i { background: #22d3ee; box-shadow: 0 0 8px #22d3ee; }
+    .sib.warhubs i { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+    .simples { color: var(--dim); font-size: 12px; letter-spacing: .02em; }
+    .simples:hover { color: var(--muted); }
     footer { padding: 28px 0 48px; color: var(--dim); font-size: 13px; text-align: center; border-top: 1px solid var(--border); margin-top: 20px; }
     footer a { color: var(--muted); margin: 0 6px; }
     @media (max-width: 720px) {
@@ -143,6 +153,13 @@
         </span>
       </nav>
     </header>
+
+    <nav class="siblings" aria-label="Sibling tools">
+      <span class="siblings-label"><span class="zh">連結</span><span class="en">Links</span></span>
+      <a class="sib moneytools" href="https://moneytools-eight.vercel.app/tw" target="_blank" rel="noopener noreferrer" data-sibling="moneytools"><i></i>Moneytools</a>
+      <a class="sib crypig" href="https://hypeboss.cc/" target="_blank" rel="noopener noreferrer" data-sibling="crypig"><i></i>Crypig</a>
+      <a class="sib warhubs" href="https://warhubs.com/" target="_blank" rel="noopener noreferrer" data-sibling="warhubs"><i></i>WARHUBS</a>
+    </nav>
 
     <div class="hero">
       <div class="pill"><i></i><span class="zh">Chrome 擴充功能 — 免費使用</span><span class="en">Chrome Extension — Free to use</span></div>
@@ -283,6 +300,8 @@
       <a href="/dooby/changelog"><span class="zh">更新記錄</span><span class="en">Changelog</span></a> ·
       <a href="/dooby/privacy-policy"><span class="zh">隱私權政策</span><span class="en">Privacy Policy</span></a> ·
       <a href="https://chromewebstore.google.com/detail/pjbjldjdeaiffdbehpmbndjaiehcoahg"><span class="zh">Chrome 線上應用程式商店</span><span class="en">Chrome Web Store</span></a>
+      <br>
+      <a class="simples" href="https://simples.com.tw/" target="_blank" rel="noopener noreferrer" data-footer="simples">SIMPLES 工具網</a>
     </footer>
   </div>
   <script>
