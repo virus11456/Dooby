@@ -658,5 +658,14 @@
   },
   "expand_open_tabs": {
     "message": "Show open tabs"
+  },
+  "shortcuts_label": {
+    "message": "Links"
+  },
+  "shortcut_moneytools": {
+    "message": "Moneytools"
+  },
+  "shortcut_crypig": {
+    "message": "Crypig"
   }
 }

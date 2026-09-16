@@ -658,5 +658,14 @@
   },
   "expand_open_tabs": {
     "message": "展開開啟中的分頁"
+  },
+  "shortcuts_label": {
+    "message": "連結"
+  },
+  "shortcut_moneytools": {
+    "message": "Moneytools"
+  },
+  "shortcut_crypig": {
+    "message": "Crypig"
   }
 }
