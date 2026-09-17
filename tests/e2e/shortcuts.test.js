@@ -1,8 +1,8 @@
-// Persistent partner shortcut chips on the new-tab page: Moneytools + Crypig,
+// Persistent partner shortcut chips on the new-tab page: Stocktools + Crypig,
 // plus a small SIMPLES 工具網 footer. No RimTown/Polyboy, no affiliate params.
 const { launchExtension, openNewTab, collectErrors, suite } = require('../helpers');
 
-const MONEYTOOLS = 'https://moneytools-eight.vercel.app/tw';
+const STOCKTOOLS = 'https://stocktools.cc/';
 const CRYPIG = 'https://hypeboss.cc/';
 const SIMPLES = 'https://simples.com.tw/';
 
@@ -21,7 +21,7 @@ suite('e2e: persistent shortcut chips and footer', async (check) => {
       target: a.getAttribute('target')
     })));
     check('exactly two shortcut chips', chips.length === 2, chips);
-    check('Moneytools chip URL (no affiliate params)', chips[0] && chips[0].key === 'moneytools' && chips[0].href === MONEYTOOLS && chips[0].search === '' && chips[0].text === 'Moneytools');
+    check('Stocktools chip URL (no affiliate params)', chips[0] && chips[0].key === 'stocktools' && chips[0].href === STOCKTOOLS && chips[0].search === '' && chips[0].text === 'Stocktools');
     check('Crypig chip URL (no affiliate params)', chips[1] && chips[1].key === 'crypig' && chips[1].href === CRYPIG && chips[1].search === '' && chips[1].text === 'Crypig');
     check('chips open in a new tab', chips.every(c => c.target === '_blank'));
 
@@ -46,7 +46,7 @@ suite('e2e: persistent shortcut chips and footer', async (check) => {
 
     await openNewTab(ext, page);
     check('chips persist after reload', (await page.evaluate(() => document.querySelectorAll('.quick-link-chip').length)) === 2
-      && (await page.evaluate(() => document.querySelector('[data-shortcut="moneytools"]').href)) === MONEYTOOLS
+      && (await page.evaluate(() => document.querySelector('[data-shortcut="stocktools"]').href)) === STOCKTOOLS
       && (await page.evaluate(() => document.querySelector('[data-shortcut="crypig"]').href)) === CRYPIG
       && (await page.evaluate(() => document.querySelector('[data-footer="simples"]').textContent.trim())) === 'SIMPLES 工具網');
 
@@ -54,8 +54,8 @@ suite('e2e: persistent shortcut chips and footer', async (check) => {
     await page.selectOption('#settingLanguage', 'zh_TW');
     await page.waitForTimeout(800);
     check('shortcuts label localizes to 連結', (await page.evaluate(() => document.getElementById('quickLinksLabel').textContent.trim())) === '連結');
-    check('brand names stay Moneytools / Crypig in zh_TW', (await page.evaluate(() => [...document.querySelectorAll('.quick-link-chip')].map(a => a.textContent.replace(/\s+/g, ' ').trim())))
-      .join('|') === 'Moneytools|Crypig');
+    check('brand names stay Stocktools / Crypig in zh_TW', (await page.evaluate(() => [...document.querySelectorAll('.quick-link-chip')].map(a => a.textContent.replace(/\s+/g, ' ').trim())))
+      .join('|') === 'Stocktools|Crypig');
 
     check('no page errors', errors.length === 0, errors);
   } finally { await ext.close(); }
