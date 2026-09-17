@@ -523,7 +523,7 @@ body::before {
   flex-shrink: 0;
 }
 
-.quick-link-dot.moneytools {
+.quick-link-dot.stocktools {
   background: #34d399;
   box-shadow: 0 0 6px var(--accent-glow);
 }

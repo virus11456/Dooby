@@ -15,16 +15,17 @@ function tagHref(marker) {
   const m = html.slice(start, end).match(/href="([^"]+)"/);
   return m ? m[1] : null;
 }
-const money = tagHref('data-sibling="moneytools"');
+const stocktools = tagHref('data-sibling="stocktools"');
 const crypig = tagHref('data-sibling="crypig"');
 const warhubs = tagHref('data-sibling="warhubs"');
 const simples = tagHref('data-footer="simples"');
 
-check('Moneytools → https://moneytools-eight.vercel.app/tw', money === 'https://moneytools-eight.vercel.app/tw', money);
+check('Stocktools → https://stocktools.cc/', stocktools === 'https://stocktools.cc/', stocktools);
 check('Crypig → https://hypeboss.cc/', crypig === 'https://hypeboss.cc/', crypig);
 check('WARHUBS → https://warhubs.com/', warhubs === 'https://warhubs.com/', warhubs);
 check('SIMPLES 工具網 → https://simples.com.tw/', simples === 'https://simples.com.tw/' && html.includes('SIMPLES 工具網'), simples);
-check('no affiliate query params on sibling URLs', [money, crypig, warhubs, simples].every(u => u && !u.includes('?')));
+check('no affiliate query params on sibling URLs', [stocktools, crypig, warhubs, simples].every(u => u && !u.includes('?')));
+check('does not link to moneytools-eight.vercel.app', !/moneytools-eight\.vercel\.app/i.test(html));
 check('does not mention RimTown or Polyboy', !/rimtown/i.test(html) && !/polyboy/i.test(html));
 
 console.log(fails ? `\nlanding links: ${fails} FAILED` : '\nlanding links: PASSED');

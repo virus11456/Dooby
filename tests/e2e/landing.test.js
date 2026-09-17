@@ -28,7 +28,7 @@ suite('e2e: toolist.cc landing sibling links', async (check) => {
       key: a.dataset.sibling, href: a.href, text: a.textContent.replace(/\s+/g, ' ').trim(), search: a.search
     })));
     check('exactly three sibling chips', links.length === 3, links);
-    check('Moneytools', links[0] && links[0].key === 'moneytools' && links[0].href === 'https://moneytools-eight.vercel.app/tw' && links[0].search === '' && links[0].text.includes('Moneytools'));
+    check('Stocktools', links[0] && links[0].key === 'stocktools' && links[0].href === 'https://stocktools.cc/' && links[0].search === '' && links[0].text.includes('Stocktools'));
     check('Crypig / hypeboss.cc', links[1] && links[1].key === 'crypig' && links[1].href === 'https://hypeboss.cc/' && links[1].search === '' && links[1].text.includes('Crypig'));
     check('WARHUBS', links[2] && links[2].key === 'warhubs' && links[2].href === 'https://warhubs.com/' && links[2].search === '' && links[2].text.includes('WARHUBS'));
     const simples = await page.evaluate(() => {
@@ -37,6 +37,7 @@ suite('e2e: toolist.cc landing sibling links', async (check) => {
     });
     check('SIMPLES 工具網 footer', simples && simples.href === 'https://simples.com.tw/' && simples.text === 'SIMPLES 工具網' && simples.search === '');
     check('no RimTown/Polyboy', await page.evaluate(() => !/rimtown/i.test(document.body.innerText) && !/polyboy/i.test(document.body.innerText)));
+    check('no moneytools-eight.vercel.app in sibling list', await page.evaluate(() => ![...document.querySelectorAll('[data-sibling]')].some(a => /moneytools-eight\.vercel\.app/i.test(a.href))));
     const chipsVisible = await page.evaluate(() => {
       const el = document.querySelector('.siblings');
       const r = el.getBoundingClientRect();
