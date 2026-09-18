@@ -24,9 +24,25 @@ check('Stocktools → https://stocktools.cc/', stocktools === 'https://stocktool
 check('Crypig → https://hypeboss.cc/', crypig === 'https://hypeboss.cc/', crypig);
 check('WARHUBS → https://warhubs.com/', warhubs === 'https://warhubs.com/', warhubs);
 check('SIMPLES 工具網 → https://simples.com.tw/', simples === 'https://simples.com.tw/' && html.includes('SIMPLES 工具網'), simples);
-check('no affiliate query params on sibling URLs', [stocktools, crypig, warhubs, simples].every(u => u && !u.includes('?')));
+
+const RELATED = {
+  'us-fee': 'https://www.stocktools.cc/tw/us-fee-calculator',
+  'us-etf': 'https://www.stocktools.cc/tw/us-etf',
+  'us-deposit': 'https://www.stocktools.cc/tw/us-deposit',
+};
+const relatedHrefs = Object.keys(RELATED).map(k => tagHref(`data-related="${k}"`));
+check('美股手續費 → Stocktools fee calculator', relatedHrefs[0] === RELATED['us-fee'], relatedHrefs[0]);
+check('美股 ETF → Stocktools ETF page', relatedHrefs[1] === RELATED['us-etf'], relatedHrefs[1]);
+check('美股入金 → Stocktools deposit page', relatedHrefs[2] === RELATED['us-deposit'], relatedHrefs[2]);
+check('相關工具 rows in header and footer', (html.match(/aria-label="相關工具"/g) || []).length === 2);
+check('each related deep link appears twice (header + footer)', Object.keys(RELATED).every(k => (html.match(new RegExp(`data-related="${k}"`, 'g')) || []).length === 2));
+check('related labels are Traditional Chinese', html.includes('>美股手續費<') && html.includes('>美股 ETF<') && html.includes('>美股入金<'));
+
+const networkUrls = [stocktools, crypig, warhubs, simples, ...relatedHrefs];
+check('no affiliate query params on sibling or related URLs', networkUrls.every(u => u && !u.includes('?')));
 check('does not link to moneytools-eight.vercel.app', !/moneytools-eight\.vercel\.app/i.test(html));
 check('does not mention RimTown or Polyboy', !/rimtown/i.test(html) && !/polyboy/i.test(html));
+check('no Firstrade or other financial affiliate URLs', !/firstrade|ftdl\.|affid=|ibstat|partnerid|ref_id=/i.test(html));
 
 console.log(fails ? `\nlanding links: ${fails} FAILED` : '\nlanding links: PASSED');
 process.exit(fails ? 1 : 0);
