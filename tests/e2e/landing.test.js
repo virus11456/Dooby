@@ -38,12 +38,30 @@ suite('e2e: toolist.cc landing sibling links', async (check) => {
     check('SIMPLES 工具網 footer', simples && simples.href === 'https://simples.com.tw/' && simples.text === 'SIMPLES 工具網' && simples.search === '');
     check('no RimTown/Polyboy', await page.evaluate(() => !/rimtown/i.test(document.body.innerText) && !/polyboy/i.test(document.body.innerText)));
     check('no moneytools-eight.vercel.app in sibling list', await page.evaluate(() => ![...document.querySelectorAll('[data-sibling]')].some(a => /moneytools-eight\.vercel\.app/i.test(a.href))));
+    const related = await page.evaluate(() => [...document.querySelectorAll('[data-related]')].map(a => ({
+      key: a.dataset.related, href: a.href, text: a.textContent.trim(), search: a.search
+    })));
+    const expectedRelated = [
+      { key: 'us-fee', href: 'https://www.stocktools.cc/tw/us-fee-calculator', text: '美股手續費' },
+      { key: 'us-etf', href: 'https://www.stocktools.cc/tw/us-etf', text: '美股 ETF' },
+      { key: 'us-deposit', href: 'https://www.stocktools.cc/tw/us-deposit', text: '美股入金' },
+    ];
+    check('six related deep links (header + footer)', related.length === 6, related);
+    check('header related tools match Stocktools pages', expectedRelated.every((exp, i) => related[i] && related[i].key === exp.key && related[i].href === exp.href && related[i].text === exp.text && related[i].search === ''));
+    check('footer related tools match Stocktools pages', expectedRelated.every((exp, i) => related[i + 3] && related[i + 3].key === exp.key && related[i + 3].href === exp.href && related[i + 3].text === exp.text && related[i + 3].search === ''));
+    check('no Firstrade / affiliate URLs', await page.evaluate(() => ![...document.querySelectorAll('a')].some(a => /firstrade|ftdl\.|\?/.test(a.href))));
     const chipsVisible = await page.evaluate(() => {
       const el = document.querySelector('.siblings');
       const r = el.getBoundingClientRect();
       return r.top >= 0 && r.bottom <= window.innerHeight && r.width > 0;
     });
     check('sibling chips visible without scrolling', chipsVisible);
+    const relatedVisible = await page.evaluate(() => {
+      const el = document.querySelector('.related-tools');
+      const r = el.getBoundingClientRect();
+      return r.top >= 0 && r.bottom <= window.innerHeight && r.width > 0;
+    });
+    check('header 相關工具 row visible without scrolling', relatedVisible);
   } finally {
     await browser.close();
     site.close();
