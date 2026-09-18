@@ -46,5 +46,23 @@ check('does not link to moneytools-eight.vercel.app', !/moneytools-eight\.vercel
 check('does not mention RimTown or Polyboy', !/rimtown/i.test(html) && !/polyboy/i.test(html));
 check('no Firstrade or other financial affiliate URLs', !/firstrade|ftdl\.|affid=|ibstat|partnerid|ref_id=/i.test(html));
 
+const ROOT = path.resolve(__dirname, '..', '..');
+const robots = fs.readFileSync(path.join(ROOT, 'robots.txt'), 'utf8');
+check('robots.txt allows all crawlers', /^\s*User-agent:\s*\*\s*$/m.test(robots));
+check('robots.txt allows /', /^\s*Allow:\s*\/\s*$/m.test(robots));
+check('robots.txt points at the sitemap', /^\s*Sitemap:\s*https:\/\/toolist\.cc\/sitemap\.xml\s*$/m.test(robots));
+
+const sitemap = fs.readFileSync(path.join(ROOT, 'sitemap.xml'), 'utf8');
+const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]);
+const expectedLocs = [
+  'https://toolist.cc/',
+  'https://toolist.cc/changelog',
+  'https://toolist.cc/privacy-policy',
+  'https://toolist.cc/app',
+];
+check('sitemap lists homepage + public 200 routes', expectedLocs.every(u => locs.includes(u)) && locs.length === expectedLocs.length, locs);
+check('sitemap URLs are absolute toolist.cc https', locs.every(u => /^https:\/\/toolist\.cc(\/|$)/.test(u)));
+check('sitemap has no .html aliases or /dooby duplicates', locs.every(u => !u.endsWith('.html') && !u.includes('/dooby')));
+
 console.log(fails ? `\nlanding links: ${fails} FAILED` : '\nlanding links: PASSED');
 process.exit(fails ? 1 : 0);
