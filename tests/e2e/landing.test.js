@@ -11,7 +11,7 @@ function serveSite() {
     const file = path.join(ROOT, p);
     if (!file.startsWith(ROOT) || !fs.existsSync(file)) { res.writeHead(404); return res.end('not found'); }
     const ext = path.extname(file);
-    const types = { '.html': 'text/html; charset=utf-8', '.png': 'image/png', '.css': 'text/css' };
+    const types = { '.html': 'text/html; charset=utf-8', '.png': 'image/png', '.css': 'text/css', '.txt': 'text/plain; charset=utf-8', '.xml': 'application/xml; charset=utf-8' };
     res.writeHead(200, { 'Content-Type': types[ext] || 'application/octet-stream' });
     fs.createReadStream(file).pipe(res);
   });
@@ -63,6 +63,18 @@ suite('e2e: toolist.cc landing sibling links', async (check) => {
       return r.top >= 0 && r.bottom <= window.innerHeight && r.width > 0;
     });
     check('header 相關工具 row visible without scrolling', relatedVisible);
+
+    const robotsRes = await fetch(site.url + '/robots.txt');
+    const robotsBody = await robotsRes.text();
+    check('robots.txt 200', robotsRes.status === 200, robotsRes.status);
+    check('robots.txt content-type is text', /text\/plain/i.test(robotsRes.headers.get('content-type') || ''), robotsRes.headers.get('content-type'));
+    check('robots.txt body', /User-agent:\s*\*/.test(robotsBody) && /Allow:\s*\//.test(robotsBody) && robotsBody.includes('Sitemap: https://toolist.cc/sitemap.xml'));
+
+    const sitemapRes = await fetch(site.url + '/sitemap.xml');
+    const sitemapBody = await sitemapRes.text();
+    check('sitemap.xml 200', sitemapRes.status === 200, sitemapRes.status);
+    check('sitemap.xml content-type is xml', /xml/i.test(sitemapRes.headers.get('content-type') || ''), sitemapRes.headers.get('content-type'));
+    check('sitemap.xml lists public pages', ['https://toolist.cc/', 'https://toolist.cc/changelog', 'https://toolist.cc/privacy-policy', 'https://toolist.cc/app'].every(u => sitemapBody.includes(`<loc>${u}</loc>`)));
   } finally {
     await browser.close();
     site.close();
