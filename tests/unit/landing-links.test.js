@@ -32,6 +32,7 @@ const RELATED = {
   'us-open-account': 'https://www.stocktools.cc/tw/us-open-account',
   'us-dividend': 'https://www.stocktools.cc/tw/us-dividend',
   'us-first-buy': 'https://www.stocktools.cc/tw/us-first-buy',
+  'us-premarket': 'https://www.stocktools.cc/tw/us-premarket',
 };
 const relatedHrefs = Object.keys(RELATED).map(k => tagHref(`data-related="${k}"`));
 check('美股手續費 → Stocktools fee calculator', relatedHrefs[0] === RELATED['us-fee'], relatedHrefs[0]);
@@ -40,9 +41,10 @@ check('美股入金 → Stocktools deposit page', relatedHrefs[2] === RELATED['u
 check('美股開戶 → Stocktools open-account page', relatedHrefs[3] === RELATED['us-open-account'], relatedHrefs[3]);
 check('美股配息 → Stocktools dividend page', relatedHrefs[4] === RELATED['us-dividend'], relatedHrefs[4]);
 check('第一次買美股 → Stocktools first-buy page', relatedHrefs[5] === RELATED['us-first-buy'], relatedHrefs[5]);
+check('美股盤前盤後 → Stocktools premarket page', relatedHrefs[6] === RELATED['us-premarket'], relatedHrefs[6]);
 check('相關工具 rows in header and footer', (html.match(/aria-label="相關工具"/g) || []).length === 2);
 check('each related deep link appears twice (header + footer)', Object.keys(RELATED).every(k => (html.match(new RegExp(`data-related="${k}"`, 'g')) || []).length === 2));
-check('related labels are Traditional Chinese', html.includes('>美股手續費<') && html.includes('>美股 ETF<') && html.includes('>美股入金<') && html.includes('>美股開戶<') && html.includes('>美股配息<') && html.includes('>第一次買美股<'));
+check('related labels are Traditional Chinese', html.includes('>美股手續費<') && html.includes('>美股 ETF<') && html.includes('>美股入金<') && html.includes('>美股開戶<') && html.includes('>美股配息<') && html.includes('>第一次買美股<') && html.includes('>美股盤前盤後<'));
 
 const networkUrls = [stocktools, crypig, warhubs, simples, ...relatedHrefs];
 check('no affiliate query params on sibling or related URLs', networkUrls.every(u => u && !u.includes('?')));
