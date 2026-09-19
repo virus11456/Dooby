@@ -37,6 +37,7 @@ const RELATED = {
   'us-adr': 'https://www.stocktools.cc/tw/us-adr',
   'us-fx': 'https://www.stocktools.cc/tw/us-fx',
   'us-fractional': 'https://www.stocktools.cc/tw/us-fractional',
+  'us-earnings': 'https://www.stocktools.cc/tw/us-earnings',
 };
 const relatedHrefs = Object.keys(RELATED).map(k => tagHref(`data-related="${k}"`));
 check('美股手續費 → Stocktools fee calculator', relatedHrefs[0] === RELATED['us-fee'], relatedHrefs[0]);
@@ -50,9 +51,10 @@ check('市價／限價 → Stocktools order-types page', relatedHrefs[7] === REL
 check('美股 ADR → Stocktools ADR page', relatedHrefs[8] === RELATED['us-adr'], relatedHrefs[8]);
 check('美股匯損 → Stocktools FX page', relatedHrefs[9] === RELATED['us-fx'], relatedHrefs[9]);
 check('美股碎股 → Stocktools fractional page', relatedHrefs[10] === RELATED['us-fractional'], relatedHrefs[10]);
+check('美股財報日 → Stocktools earnings page', relatedHrefs[11] === RELATED['us-earnings'], relatedHrefs[11]);
 check('相關工具 rows in header and footer', (html.match(/aria-label="相關工具"/g) || []).length === 2);
 check('each related deep link appears twice (header + footer)', Object.keys(RELATED).every(k => (html.match(new RegExp(`data-related="${k}"`, 'g')) || []).length === 2));
-check('related labels are Traditional Chinese', html.includes('>美股手續費<') && html.includes('>美股 ETF<') && html.includes('>美股入金<') && html.includes('>美股開戶<') && html.includes('>美股配息<') && html.includes('>第一次買美股<') && html.includes('>美股盤前盤後<') && html.includes('>市價／限價<') && html.includes('>美股 ADR<') && html.includes('>美股匯損<') && html.includes('>美股碎股<'));
+check('related labels are Traditional Chinese', html.includes('>美股手續費<') && html.includes('>美股 ETF<') && html.includes('>美股入金<') && html.includes('>美股開戶<') && html.includes('>美股配息<') && html.includes('>第一次買美股<') && html.includes('>美股盤前盤後<') && html.includes('>市價／限價<') && html.includes('>美股 ADR<') && html.includes('>美股匯損<') && html.includes('>美股碎股<') && html.includes('>美股財報日<'));
 
 const networkUrls = [stocktools, crypig, warhubs, simples, ...relatedHrefs];
 check('no affiliate query params on sibling or related URLs', networkUrls.every(u => u && !u.includes('?')));

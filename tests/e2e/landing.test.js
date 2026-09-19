@@ -53,10 +53,11 @@ suite('e2e: toolist.cc landing sibling links', async (check) => {
       { key: 'us-adr', href: 'https://www.stocktools.cc/tw/us-adr', text: '美股 ADR' },
       { key: 'us-fx', href: 'https://www.stocktools.cc/tw/us-fx', text: '美股匯損' },
       { key: 'us-fractional', href: 'https://www.stocktools.cc/tw/us-fractional', text: '美股碎股' },
+      { key: 'us-earnings', href: 'https://www.stocktools.cc/tw/us-earnings', text: '美股財報日' },
     ];
-    check('twenty-two related deep links (header + footer)', related.length === 22, related);
+    check('twenty-four related deep links (header + footer)', related.length === 24, related);
     check('header related tools match Stocktools pages', expectedRelated.every((exp, i) => related[i] && related[i].key === exp.key && related[i].href === exp.href && related[i].text === exp.text && related[i].search === ''));
-    check('footer related tools match Stocktools pages', expectedRelated.every((exp, i) => related[i + 11] && related[i + 11].key === exp.key && related[i + 11].href === exp.href && related[i + 11].text === exp.text && related[i + 11].search === ''));
+    check('footer related tools match Stocktools pages', expectedRelated.every((exp, i) => related[i + 12] && related[i + 12].key === exp.key && related[i + 12].href === exp.href && related[i + 12].text === exp.text && related[i + 12].search === ''));
     check('no Firstrade / affiliate URLs', await page.evaluate(() => ![...document.querySelectorAll('a')].some(a => /firstrade|ftdl\.|\?/.test(a.href))));
     const chipsVisible = await page.evaluate(() => {
       const el = document.querySelector('.siblings');
