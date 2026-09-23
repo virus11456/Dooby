@@ -21,7 +21,7 @@ const warhubs = tagHref('data-sibling="warhubs"');
 const simples = tagHref('data-footer="simples"');
 
 check('Stocktools → https://stocktools.cc/', stocktools === 'https://stocktools.cc/', stocktools);
-check('Crypig → https://hypeboss.cc/', crypig === 'https://hypeboss.cc/', crypig);
+check('HypeBoss → https://hypeboss.cc/', crypig === 'https://hypeboss.cc/' && html.includes('data-sibling="crypig"><i></i>HypeBoss'), crypig);
 check('WARHUBS → https://warhubs.com/', warhubs === 'https://warhubs.com/', warhubs);
 check('SIMPLES 工具網 → https://simples.com.tw/', simples === 'https://simples.com.tw/' && html.includes('SIMPLES 工具網'), simples);
 

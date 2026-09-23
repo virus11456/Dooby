@@ -29,7 +29,7 @@ suite('e2e: toolist.cc landing sibling links', async (check) => {
     })));
     check('exactly three sibling chips', links.length === 3, links);
     check('Stocktools', links[0] && links[0].key === 'stocktools' && links[0].href === 'https://stocktools.cc/' && links[0].search === '' && links[0].text.includes('Stocktools'));
-    check('Crypig / hypeboss.cc', links[1] && links[1].key === 'crypig' && links[1].href === 'https://hypeboss.cc/' && links[1].search === '' && links[1].text.includes('Crypig'));
+    check('HypeBoss / hypeboss.cc', links[1] && links[1].key === 'crypig' && links[1].href === 'https://hypeboss.cc/' && links[1].search === '' && links[1].text.includes('HypeBoss'));
     check('WARHUBS', links[2] && links[2].key === 'warhubs' && links[2].href === 'https://warhubs.com/' && links[2].search === '' && links[2].text.includes('WARHUBS'));
     const simples = await page.evaluate(() => {
       const a = document.querySelector('[data-footer="simples"]');
