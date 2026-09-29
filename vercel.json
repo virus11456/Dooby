@@ -2,14 +2,6 @@
   "cleanUrls": true,
   "rewrites": [
     {
-      "source": "/dooby",
-      "destination": "/dooby.html"
-    },
-    {
-      "source": "/dooby/",
-      "destination": "/dooby.html"
-    },
-    {
       "source": "/dooby/privacy-policy",
       "destination": "/privacy-policy"
     },
@@ -39,7 +31,7 @@
     },
     {
       "source": "/aiflow/script",
-      "destination": "/aiflow-script.html"
+      "destination": "/aiflow-script"
     }
   ]
 }
