@@ -1,10 +1,11 @@
-// The Vercel project `dooby` serves this repo's index.html as https://toolist.cc/.
-// Homepage sibling links must be present with clean URLs (no affiliate params).
+// The Vercel project `dooby` serves this repo's dooby.html as https://toolist.cc/dooby
+// (index.html is the Toolist tools directory). The Dooby page's sibling links must be
+// present with clean URLs (no affiliate params).
 const fs = require('fs'), path = require('path');
-const html = fs.readFileSync(path.resolve(__dirname, '..', '..', 'index.html'), 'utf8');
+const html = fs.readFileSync(path.resolve(__dirname, '..', '..', 'dooby.html'), 'utf8');
 let fails = 0;
 const check = (label, ok, detail) => { if (!ok) fails++; console.log(`  ${ok ? '✓' : '✗'} ${label}${!ok && detail ? '  → ' + JSON.stringify(detail) : ''}`); };
-console.log('\n# unit: toolist.cc landing sibling links');
+console.log('\n# unit: toolist.cc/dooby page sibling links');
 
 function tagHref(marker) {
   const i = html.indexOf(marker);
