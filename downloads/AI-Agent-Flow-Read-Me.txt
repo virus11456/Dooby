@@ -1,13 +1,13 @@
-AI Agent Flow 0.3.8 — macOS 13+ / Apple Silicon
+AI Agent Flow 0.3.9 — macOS 13+ / Apple Silicon
 
-安裝：將 AI Agent Flow.app 拖曳到 Applications 捷徑。
-開啟應用程式，依畫面提示安裝官方 CLI 並登入帳號。
-此版本使用 ad-hoc 簽章，尚未經 Apple 公證。請確認下載來源；不需要停用 Gatekeeper。
-Mac 必須保持執行與連線才能查詢新額度。iPhone / iPad 透過 Scriptable 與 iCloud 顯示摘要。
+安裝：把 App 拖曳到 Applications。
+Claude：在官方 Claude Code 登入，再於 AI Flow 連接官方摘要。
+AI Flow 不讀取 Claude 鑰匙圈或更新其憑證。完成一次 Claude Code 對話後才有摘要；只用網頁聊天時可能不更新。
 
-Install: Drag AI Agent Flow.app onto the Applications shortcut.
-Open the app, then follow its prompts to install the official CLIs and sign in.
-This build is ad-hoc signed and is not Apple-notarized. Verify the download source; do not disable Gatekeeper.
-Your Mac must stay awake, online, and running the app to collect new usage. iPhone / iPad display summaries through Scriptable and iCloud.
+Install: Drag the app onto Applications.
+Claude: Sign in in official Claude Code, then connect the official summary in AI Flow.
+AI Flow does not read Claude Keychain credentials or renew its tokens. A Claude Code interaction is needed to provide a summary; web-only activity may not update it.
 
-Setup / 安裝說明: https://toolist.cc/aiflow
+此 App 為 ad-hoc 簽章，尚未經 Apple 公證。 / Ad-hoc signed, not Apple-notarized.
+Setup / 安裝：https://toolist.cc/aiflow
+Source / 原始碼：https://github.com/virus11456/aiagentflow

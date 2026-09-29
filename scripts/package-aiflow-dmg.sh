@@ -2,7 +2,7 @@
 set -euo pipefail
 # macOS only. Input: the already-built, signed distribution ZIP (never an installed app).
 repo_dir="$(cd "$(dirname "$0")/.." && pwd)"
-version="${1:-0.3.8}"
+version="${1:-0.3.9}"
 [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || exit 2
 stage="$(mktemp -d /private/tmp/aiflow-dmg.XXXXXX)"
 trap 'rm -rf "$stage"' EXIT

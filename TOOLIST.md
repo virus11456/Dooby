@@ -21,3 +21,8 @@ The primary Mac download is now a DMG with the app, Applications shortcut and bi
 
 GitHub: https://github.com/virus11456/Dooby and https://github.com/virus11456/aiagentflow
 No company attribution is shown in the footer.
+
+## 0.3.9 security update
+AI Flow now reads official Claude Code status-line summaries. ClaudeRefresh and direct OAuth/keychain access are removed. The site and bilingual setup instructions describe the dependency on active Claude Code sessions, missing plan/model-specific data, and receipt-time semantics.
+Mac source: https://github.com/virus11456/aiagentflow/commit/52351a4188b319733cf6e82783f8a3d17c4818f3
+The primary downloads are now version 0.3.9. Older named downloads remain historical releases.

@@ -128,5 +128,17 @@
   "下一次查看額度，": "Your next usage check?",
   "看一眼就好。": "Just a glance.",
   "複製完整 Scriptable 腳本，貼入 iPhone 或 iPad 的 Scriptable。": "Copy the complete script into Scriptable on your iPhone or iPad.",
-  "。": "."
+  "。": ".",
+  "Claude Code 需 2.1.251 以上版本。完成一次對話後，官方狀態列才會提供用量。AI Flow 不讀取 Claude 鑰匙圈憑證；已有自訂狀態列時不會覆蓋，請依 GitHub 說明整合。": "Requires Claude Code 2.1.251 or later and an interaction before usage is available. AI Flow does not access Claude Keychain credentials. Existing custom status lines are preserved; see GitHub for integration instructions.",
+  "開啟 App，在「帳號登入」完成 Codex 官方登入。Claude 請在官方 Claude Code 登入，再於 AI Flow 點「連接官方摘要」。": "Open the app and sign in to Codex through Account Sign-in. Sign in to Claude in official Claude Code, then choose Connect Official Summary in AI Flow.",
+  "不需要。Scriptable 只讀 iCloud 用量摘要；AI Flow 也不需要 Claude 密碼或 Token。Claude 登入在官方 Claude Code 完成。": "No. Scriptable only reads iCloud usage summaries. AI Flow also needs no Claude password or token. Sign in through official Claude Code.",
+  "0.3.9 已移除 ClaudeRefresh 與直接憑證查詢。若仍看到 ClaudeRefresh 要求密碼，請確認舊 App 已結束，並從 Applications 啟動新版；官方 Claude Code 自己的系統授權仍由它處理。": "Version 0.3.9 removes ClaudeRefresh and direct credential queries. If ClaudeRefresh still requests a password, quit the old app and launch the new version from Applications. Official Claude Code remains responsible for its own system authorization.",
+  "。Claude 改讀官方狀態列的 5 小時及每週摘要。只使用網頁聊天時可能沒有新資料，摘要接收時間也不等於服務端查詢時間。": ". Claude reads official 5-hour and weekly status-line summaries. Web-only activity may not update them, and receipt time is not the same as a server-query timestamp.",
+  "Claude 登入交由官方 Claude Code 管理，AI Flow 不碰 Claude 憑證。OpenAI 沿用 Codex 官方登入；iCloud 只同步用量摘要。": "Official Claude Code handles Claude sign-in; AI Flow does not access its credentials. OpenAI uses official Codex sign-in. iCloud carries usage summaries only.",
+  "OpenAI 顯示來源提供的方案；Claude 官方摘要未提供方案或個別模型限制，不猜測、不沿用舊資料。": "OpenAI shows plan details when supplied. The Claude summary does not provide a plan or per-model limits; missing information is never guessed or reused from legacy data.",
+  "確認收到兩家的額度後，再設定手機同步。Claude 方案與模型專屬額度未由官方摘要提供時，不會顯示。": "Once both usage summaries appear, set up phone sync. Claude plan details and model-specific limits are omitted when the official summary does not provide them.",
+  "Mac 每 30 分鐘查詢 OpenAI 並讀取 Claude 摘要。": "Every 30 minutes the Mac app checks OpenAI and reads the Claude summary.",
+  "只傳送用量摘要，不傳送登入資料。": "Only usage summaries travel, never sign-in data.",
+  "OpenAI 定期查詢，Claude 讀官方摘要。": "OpenAI is queried periodically; Claude supplies official summaries.",
+  "只讀 Claude 官方摘要": "Official Claude summaries only"
 }
