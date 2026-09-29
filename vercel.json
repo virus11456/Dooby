@@ -3,11 +3,11 @@
   "rewrites": [
     {
       "source": "/dooby",
-      "destination": "/"
+      "destination": "/dooby.html"
     },
     {
       "source": "/dooby/",
-      "destination": "/"
+      "destination": "/dooby.html"
     },
     {
       "source": "/dooby/privacy-policy",
@@ -36,6 +36,10 @@
     {
       "source": "/dooby/app/",
       "destination": "/app"
+    },
+    {
+      "source": "/aiflow/script",
+      "destination": "/aiflow-script.html"
     }
   ]
 }
