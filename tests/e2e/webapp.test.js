@@ -10,7 +10,7 @@ const ROOT = path.resolve(__dirname, '..', '..');
 
 // Static server mimicking the Vercel rewrites (cleanUrls + /dooby/app -> app.html).
 function serveSite() {
-  const types = { '.html': 'text/html; charset=utf-8', '.js': 'application/javascript', '.png': 'image/png', '.css': 'text/css' };
+  const types = { '.html': 'text/html; charset=utf-8', '.js': 'application/javascript', '.png': 'image/png', '.css': 'text/css', '.webmanifest': 'application/manifest+json' };
   const server = http.createServer((req, res) => {
     let p = new URL(req.url, 'http://x').pathname;
     if (p === '/dooby/app' || p === '/dooby/app/') p = '/app.html';
@@ -125,10 +125,47 @@ suite('e2e: Dooby web app (iPad / iPhone) against mock Supabase', async (check) 
     check('language switch to English', await page.evaluate(() => document.documentElement.className === 'lang-en' && document.getElementById('search').placeholder === 'Search bookmarks…'));
     check('bookmarklet points at toolist.cc', (await page.evaluate(() => document.getElementById('bookmarkletEn').textContent)).startsWith("javascript:(function(){location.href='https://toolist.cc/dooby/app?add='"));
 
-    // 9. Sign out
+    // 9. PWA: manifest, share target (Android "Share → Dooby"), app shortcut, service worker, offline
+    const manifest = await page.evaluate(async () => { const r = await fetch('/app.webmanifest'); return { ok: r.ok, type: r.headers.get('content-type'), json: await r.json() }; });
+    check('manifest is served and linked', manifest.ok && /manifest\+json/.test(manifest.type) && (await page.evaluate(() => document.querySelector('link[rel="manifest"]').getAttribute('href'))) === '/app.webmanifest');
+    check('manifest is installable (standalone, 192 + 512 icons, start_url inside scope)', manifest.json.display === 'standalone' && manifest.json.start_url.startsWith(manifest.json.scope) && ['192x192', '512x512'].every(sz => manifest.json.icons.some(i => i.sizes === sz && i.purpose === 'any')) && manifest.json.icons.some(i => i.purpose === 'maskable'), manifest.json);
+    check('manifest icons exist', (await page.evaluate(async (icons) => (await Promise.all(icons.map(i => fetch(i.src).then(r => r.ok)))).every(Boolean), manifest.json.icons)));
+    check('share target is a GET to the app with url/text/title params', manifest.json.share_target && manifest.json.share_target.method === 'GET' && manifest.json.share_target.action === '/dooby/app' && manifest.json.share_target.params.url === 'add' && manifest.json.share_target.params.text === 'text', manifest.json.share_target);
+    await page.goto(`${site.url}/dooby/app?title=${encodeURIComponent('Shared page')}&text=${encodeURIComponent('https://example.com/shared?a=1')}`);
+    await waitFor(page, () => !document.getElementById('addSheet').classList.contains('hidden'), { label: 'add sheet from share target' });
+    check('Android share (URL in text) pre-fills the sheet', await page.evaluate(() => document.getElementById('addUrl').value === 'https://example.com/shared?a=1' && document.getElementById('addTitle').value === 'Shared page'));
+    await page.click('#btnAddCancel');
+    await page.goto(`${site.url}/dooby/app?text=${encodeURIComponent('Look at this\nhttps://example.com/in-text')}`);
+    await waitFor(page, () => !document.getElementById('addSheet').classList.contains('hidden'), { label: 'add sheet from text share' });
+    check('share text with a URL inside extracts URL and uses the rest as title', await page.evaluate(() => document.getElementById('addUrl').value === 'https://example.com/in-text' && document.getElementById('addTitle').value === 'Look at this'));
+    await page.click('#btnAddCancel');
+    check('cancelling clears the share query', (await page.evaluate(() => location.search)) === '');
+    await page.goto(`${site.url}/dooby/app?source=shortcut&new=1`);
+    await waitFor(page, () => !document.getElementById('addSheet').classList.contains('hidden'), { label: 'add sheet from shortcut' });
+    check('app shortcut opens an empty add sheet', await page.evaluate(() => document.getElementById('addUrl').value === '' && document.activeElement && document.activeElement.id === 'addUrl'));
+    await page.click('#btnAddCancel');
+    await page.goto(`${site.url}/dooby/app?source=pwa`);
+    await waitFor(page, () => document.querySelectorAll('.card').length > 0, { label: 'cards after start_url' });
+    check('start_url with ?source=pwa does not open the sheet', await page.evaluate(() => document.getElementById('addSheet').classList.contains('hidden')));
+    await waitFor(page, async () => { const r = await navigator.serviceWorker.getRegistration('/dooby/app'); return !!(r && r.active) && !!(await caches.match('/dooby/app')) && !!(await caches.match('/vendor/supabase-js-2.116.0.js')); }, { label: 'service worker active with the shell cached', timeout: 15000 });
+    check('service worker registered for /dooby/app with the shell precached', true);
+    check('last synced document cached locally', await page.evaluate(() => { const c = JSON.parse(localStorage.getItem('dooby-doc-cache')); return c && c.uid === 'web-user-1' && c.doc.collections.length === 3; }));
+    await ctx.setOffline(true);
+    await page.reload();
+    await waitFor(page, () => document.querySelectorAll('.card').length > 0, { label: 'cards while offline' });
+    check('offline: app shell and collections still render from cache', (await cards()).map(x => x.name).join('|') === 'Reading|Quick Save');
+    await waitFor(page, () => document.getElementById('status').classList.contains('offline') || document.getElementById('status').classList.contains('err'), { label: 'offline status' });
+    check('offline: status says so instead of an error', await page.evaluate(() => { const s = document.getElementById('status'); return s.classList.contains('offline') && !s.classList.contains('err') && /離線|Offline/.test(s.textContent); }), await page.evaluate(() => document.getElementById('status').textContent));
+    await ctx.setOffline(false);
+    await page.reload();
+    await waitFor(page, () => document.querySelectorAll('.card').length > 0 && /已同步|Synced/.test(document.getElementById('status').textContent), { label: 'back online' });
+    check('back online: synced again', true);
+
+    // 10. Sign out
     await page.click('#btnSignOut');
     await waitFor(page, () => !document.getElementById('viewSignedOut').classList.contains('hidden'), { label: 'signed-out after sign-out' });
     check('sign out returns to the signed-out view', true);
+    check('sign out clears the local document cache', await page.evaluate(() => localStorage.getItem('dooby-doc-cache') === null));
     check('no page errors', errors.length === 0, errors);
   } finally { await browser.close(); site.close(); srv.close(); }
 });

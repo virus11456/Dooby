@@ -1,0 +1,30 @@
+{
+  "id": "/dooby/app",
+  "name": "Dooby",
+  "short_name": "Dooby",
+  "description": "Your saved tabs on every device. 在任何裝置上查看與新增你的 Dooby 書籤。",
+  "start_url": "/dooby/app?source=pwa",
+  "scope": "/dooby/app",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b1020",
+  "theme_color": "#0b1020",
+  "lang": "zh-TW",
+  "dir": "ltr",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    { "src": "/icons/icon192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon192-maskable.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/icon512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "share_target": {
+    "action": "/dooby/app",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": { "title": "title", "text": "text", "url": "add" }
+  },
+  "shortcuts": [
+    { "name": "Add bookmark", "short_name": "Add", "url": "/dooby/app?source=shortcut&new=1", "icons": [{ "src": "/icons/icon192.png", "sizes": "192x192" }] }
+  ]
+}
