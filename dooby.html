@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dooby — Chrome 分頁與書籤管理 | Toolist</title><link rel="canonical" href="https://toolist.cc/dooby">
+  <meta name="description" content="Your new tab, reimagined. Dooby replaces Chrome's new tab with a visual workspace for tabs and bookmarks. 把 Chrome 新分頁變成視覺化的分頁與書籤工作區。">
+  <link rel="icon" href="/icons/icon48.png">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0b1020; --bg-2: #0e1428; --panel: rgba(255,255,255,0.03); --panel-2: rgba(255,255,255,0.06);
+      --text: #eef2f7; --muted: #9aa8bd; --dim: #61708a;
+      --accent: #10b981; --accent-2: #22d3ee; --accent-dark: #059669;
+      --border: rgba(255,255,255,0.08); --radius: 14px;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.7; overflow-x: hidden;
+    }
+    body::before, body::after {
+      content: ""; position: fixed; z-index: -1; border-radius: 50%; filter: blur(90px); opacity: .55; pointer-events: none;
+    }
+    body::before { width: 640px; height: 640px; left: -200px; top: -160px; background: radial-gradient(circle, #10b981 0%, transparent 65%); }
+    body::after { width: 560px; height: 560px; right: -180px; top: 30%; background: radial-gradient(circle, #06b6d4 0%, transparent 65%); opacity: .35; }
+    a { color: var(--accent-2); text-decoration: none; } a:hover { text-decoration: underline; }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+
+    html.lang-zh .en, html.lang-en .zh { display: none !important; }
+    .lang-switch { display: inline-flex; border: 1px solid var(--border); border-radius: 999px; overflow: hidden; margin-left: 14px; vertical-align: middle; }
+    .lang-switch button { background: transparent; color: var(--muted); border: 0; padding: 4px 11px; font-size: 12px; cursor: pointer; font-weight: 600; }
+    .lang-switch button.on { background: var(--accent); color: #06261b; }
+
+    header { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; flex-wrap: wrap; gap: 10px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 20px; color: var(--text); letter-spacing: -0.01em; }
+    .brand img { width: 32px; height: 32px; border-radius: 8px; }
+    nav { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 22px; }
+    nav a { color: var(--muted); font-size: 14px; font-weight: 500; } nav a:hover { color: var(--text); text-decoration: none; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; border-radius: 10px; font-weight: 700; font-size: 15px; border: 1px solid var(--border); color: var(--text); background: var(--panel-2); transition: transform .15s, background .15s; }
+    .btn:hover { text-decoration: none; background: rgba(255,255,255,0.1); transform: translateY(-1px); }
+    .btn.primary { background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%); border-color: transparent; color: #04211a; box-shadow: 0 8px 30px rgba(16,185,129,0.35); }
+    .btn.primary:hover { background: linear-gradient(135deg, #34d399 0%, #22d3ee 100%); }
+    .btn.sm { padding: 8px 16px; font-size: 13px; }
+
+    .hero { text-align: center; padding: 84px 0 40px; }
+    .pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; border: 1px solid rgba(16,185,129,0.35); background: rgba(16,185,129,0.1); color: var(--accent-2); font-size: 13px; font-weight: 600; margin-bottom: 26px; }
+    .pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-2); box-shadow: 0 0 10px var(--accent-2); }
+    .hero h1 { font-size: 64px; line-height: 1.05; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 20px; }
+    .hero h1 .grad { background: linear-gradient(90deg, #34d399 0%, #22d3ee 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .hero p { font-size: 18px; color: var(--muted); max-width: 600px; margin: 0 auto 34px; }
+    .cta { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+    .shot { margin: 56px auto 0; max-width: 980px; border-radius: 16px; overflow: hidden; border: 1px solid var(--border); background: #0f1629; box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(16,185,129,0.15); text-align: left; }
+    .shot .bar { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border); background: #121a30; }
+    .shot .bar i { width: 11px; height: 11px; border-radius: 50%; background: #2a3550; display: block; }
+    .shot .bar i:nth-child(1) { background: #ff5f57; } .shot .bar i:nth-child(2) { background: #febc2e; } .shot .bar i:nth-child(3) { background: #28c840; }
+    .shot .bar span { margin-left: auto; margin-right: auto; font-size: 12px; color: var(--dim); }
+    .shot .app { display: grid; grid-template-columns: 170px 1fr; min-height: 300px; }
+    .shot .side { border-right: 1px solid var(--border); padding: 16px 12px; background: #0d1426; }
+    .shot .side small { display: block; font-size: 10px; letter-spacing: .12em; color: var(--dim); margin-bottom: 10px; }
+    .shot .side div { padding: 7px 10px; border-radius: 8px; font-size: 13px; color: var(--muted); }
+    .shot .side div.on { background: rgba(16,185,129,0.18); color: var(--text); }
+    .shot .main { padding: 18px; }
+    .shot .main .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .shot .main .top b { font-size: 18px; }
+    .shot .main .top span { font-size: 11px; color: var(--dim); }
+    .shot .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .card { border-radius: 10px; border: 1px solid var(--border); background: #141d33; overflow: hidden; }
+    .card .h { padding: 9px 12px; font-weight: 700; font-size: 13px; border-left: 3px solid var(--accent); display: flex; justify-content: space-between; }
+    .card .h b { background: rgba(16,185,129,0.2); color: #34d399; border-radius: 999px; padding: 0 8px; font-size: 11px; font-weight: 600; }
+    .card:nth-child(2) .h { border-left-color: #22d3ee; } .card:nth-child(3) .h { border-left-color: #f59e0b; }
+    .card ul { list-style: none; padding: 6px 12px 10px; }
+    .card li { font-size: 12px; color: var(--muted); padding: 4px 0; display: flex; gap: 8px; align-items: center; }
+    .card li::before { content: ""; width: 7px; height: 7px; border-radius: 2px; background: #2c3a56; flex: none; }
+
+    section { padding: 88px 0 20px; }
+    .eyebrow { font-size: 11px; letter-spacing: .18em; font-weight: 700; color: var(--accent-2); text-transform: uppercase; margin-bottom: 12px; }
+    h2 { font-size: 40px; line-height: 1.1; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px; }
+    h2 .grad { background: linear-gradient(90deg, #34d399, #22d3ee); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .lead { color: var(--muted); margin-bottom: 30px; font-size: 16px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+    .feature { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; transition: border-color .15s, transform .15s; }
+    .feature:hover { border-color: rgba(16,185,129,0.4); transform: translateY(-2px); }
+    .feature .ic { width: 34px; height: 34px; border-radius: 9px; background: rgba(16,185,129,0.15); display: flex; align-items: center; justify-content: center; margin-bottom: 12px; font-size: 16px; }
+    .feature h3 { font-size: 16px; margin-bottom: 6px; } .feature p { font-size: 14px; color: var(--muted); }
+
+    .themes { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+    .theme { border-radius: 12px; border: 1px solid var(--border); padding: 14px; position: relative; min-height: 92px; display: flex; flex-direction: column; justify-content: flex-end; }
+    .theme .dot { position: absolute; top: 12px; left: 14px; width: 12px; height: 12px; border-radius: 50%; }
+    .theme .tag { position: absolute; top: 10px; right: 12px; font-size: 10px; font-weight: 700; letter-spacing: .06em; padding: 2px 8px; border-radius: 999px; background: rgba(255,255,255,0.08); color: var(--muted); }
+    .theme .tag.free { background: rgba(16,185,129,0.18); color: #34d399; }
+    .theme b { font-size: 14px; }
+
+    .mobile-banner { position: relative; overflow: hidden; border-radius: 18px; padding: 34px 30px; border: 1px solid rgba(34,211,238,0.28); background: linear-gradient(135deg, rgba(16,185,129,0.14) 0%, rgba(34,211,238,0.08) 60%, rgba(255,255,255,0.02) 100%); }
+    .mobile-banner::after { content: ""; position: absolute; right: -80px; top: -80px; width: 260px; height: 260px; border-radius: 50%; background: radial-gradient(circle, rgba(34,211,238,0.22), transparent 65%); pointer-events: none; }
+    .mobile-banner .soon { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border-radius: 999px; background: #22d3ee; color: #04262b; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 16px; }
+    .mobile-banner h3 { font-size: 26px; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 10px; }
+    .mobile-banner p { color: var(--muted); font-size: 15px; max-width: 620px; margin-bottom: 20px; }
+    .platforms { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 22px; }
+    .platform { display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 12px; border: 1px solid var(--border); background: var(--panel-2); font-weight: 700; font-size: 14px; }
+    .platform svg { width: 20px; height: 20px; flex: none; }
+    .platform small { font-weight: 600; font-size: 11px; color: var(--dim); letter-spacing: .06em; text-transform: uppercase; }
+    .now-box { position: relative; border: 1px solid rgba(16,185,129,0.35); background: rgba(16,185,129,0.08); border-radius: 12px; padding: 14px 16px; max-width: 640px; }
+    .now-title { font-weight: 800; font-size: 14px; color: #34d399; margin-bottom: 8px; letter-spacing: .02em; }
+    .now-box ul { list-style: none; display: grid; gap: 6px; }
+    .now-box li { font-size: 14px; color: var(--muted); }
+    .now-box li b { color: var(--text); }
+    .now-box a { font-weight: 700; }
+    ol.steps { padding-left: 22px; } ol.steps li { margin-bottom: 10px; color: var(--muted); } ol.steps li strong { color: var(--text); }
+    code { background: rgba(255,255,255,0.08); padding: 2px 7px; border-radius: 6px; font-size: 13px; word-break: break-all; }
+    .box { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.3); border-radius: var(--radius); padding: 22px; }
+
+    .final { text-align: center; padding: 96px 0 60px; }
+    .final h2 { font-size: 36px; margin-bottom: 22px; }
+    .siblings { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 4px 0 8px; }
+    .siblings-label { font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--dim); margin-right: 4px; }
+    .sib { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--panel-2); color: var(--muted); font-size: 13px; font-weight: 600; }
+    .sib:hover { color: var(--text); text-decoration: none; border-color: rgba(16,185,129,0.4); background: rgba(16,185,129,0.1); }
+    .sib i { width: 7px; height: 7px; border-radius: 50%; display: block; flex: none; }
+    .sib.stocktools i { background: #34d399; box-shadow: 0 0 8px #34d399; }
+    .sib.crypig i { background: #22d3ee; box-shadow: 0 0 8px #22d3ee; }
+    .sib.warhubs i { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+    .simples { color: var(--dim); font-size: 12px; letter-spacing: .02em; }
+    .simples:hover { color: var(--muted); }
+    .related-tools { display: flex; align-items: center; justify-content: center; gap: 6px 14px; flex-wrap: wrap; margin: 0 0 10px; }
+    .related-tools-label { font-size: 11px; font-weight: 700; letter-spacing: .16em; color: var(--dim); }
+    .related-tools a { color: var(--muted); font-size: 13px; font-weight: 600; }
+    .related-tools a:hover { color: var(--text); text-decoration: none; }
+    footer { padding: 28px 0 48px; color: var(--dim); font-size: 13px; text-align: center; border-top: 1px solid var(--border); margin-top: 20px; }
+    footer a { color: var(--muted); margin: 0 6px; }
+    footer .related-tools { margin: 10px 0 0; }
+    footer .related-tools a { margin: 0; }
+    @media (max-width: 720px) {
+      .hero { padding-top: 56px; } .hero h1 { font-size: 40px; } h2 { font-size: 30px; }
+      .shot .app { grid-template-columns: 1fr; } .shot .side { display: none; } .shot .cards { grid-template-columns: 1fr; }
+    }
+  </style>
+  <script>
+    (function () {
+      var saved = null;
+      try { saved = localStorage.getItem('toolist-lang'); } catch (e) {}
+      var lang = saved || ((navigator.language || '').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en');
+      document.documentElement.className = 'lang-' + lang;
+      document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+    })();
+  </script>
+</head>
+<body>
+  <div class="wrap">
+    <div style="padding-top:20px;font-size:13px"><a href="/"><span class="zh">← Toolist 所有工具</span><span class="en">← All Toolist tools</span></a></div><header>
+      <a class="brand" href="/dooby"><img src="/icons/icon128.png" alt="Dooby"> Dooby</a>
+      <nav>
+        <a href="#features"><span class="zh">功能</span><span class="en">Features</span></a>
+        <a href="#themes"><span class="zh">主題</span><span class="en">Themes</span></a>
+        <a href="#install"><span class="zh">安裝</span><span class="en">Install</span></a>
+        <a href="#mobile"><span class="zh">手機版</span><span class="en">Mobile</span></a>
+        <a href="/dooby/changelog"><span class="zh">更新記錄</span><span class="en">Changelog</span></a>
+        <a class="btn primary sm" href="#support"><span class="zh">贊助 $1</span><span class="en">Support $1</span></a>
+        <span class="lang-switch" role="group" aria-label="Language">
+          <button type="button" data-lang="zh">中文</button>
+          <button type="button" data-lang="en">EN</button>
+        </span>
+      </nav>
+    <a href="https://github.com/virus11456/Dooby" target="_blank" rel="noopener noreferrer" style="font-size:13px"><span class="zh">GitHub 原始碼 ↗</span><span class="en">Source on GitHub ↗</span></a></header>
+
+    <nav class="siblings" aria-label="Sibling tools">
+      <span class="siblings-label"><span class="zh">連結</span><span class="en">Links</span></span>
+      <a class="sib stocktools" href="https://stocktools.cc/" target="_blank" rel="noopener noreferrer" data-sibling="stocktools"><i></i>Stocktools</a>
+      <a class="sib crypig" href="https://hypeboss.cc/" target="_blank" rel="noopener noreferrer" data-sibling="crypig"><i></i>HypeBoss</a>
+      <a class="sib warhubs" href="https://warhubs.com/" target="_blank" rel="noopener noreferrer" data-sibling="warhubs"><i></i>WARHUBS</a>
+    </nav>
+    <nav class="related-tools" aria-label="相關工具">
+      <span class="related-tools-label">相關工具</span>
+      <a href="https://www.stocktools.cc/tw/us-fee-calculator" target="_blank" rel="noopener noreferrer" title="Stocktools 美股手續費" data-related="us-fee">美股手續費</a>
+      <a href="https://www.stocktools.cc/tw/us-etf" target="_blank" rel="noopener noreferrer" title="Stocktools 美股 ETF" data-related="us-etf">美股 ETF</a>
+      <a href="https://www.stocktools.cc/tw/us-deposit" target="_blank" rel="noopener noreferrer" title="Stocktools 美股入金" data-related="us-deposit">美股入金</a>
+      <a href="https://www.stocktools.cc/tw/us-open-account" target="_blank" rel="noopener noreferrer" title="Stocktools 美股開戶" data-related="us-open-account">美股開戶</a>
+      <a href="https://www.stocktools.cc/tw/us-dividend" target="_blank" rel="noopener noreferrer" title="Stocktools 美股配息" data-related="us-dividend">美股配息</a>
+      <a href="https://www.stocktools.cc/tw/us-first-buy" target="_blank" rel="noopener noreferrer" title="Stocktools 第一次買美股" data-related="us-first-buy">第一次買美股</a>
+      <a href="https://www.stocktools.cc/tw/us-premarket" target="_blank" rel="noopener noreferrer" title="Stocktools 美股盤前盤後" data-related="us-premarket">美股盤前盤後</a>
+      <a href="https://www.stocktools.cc/tw/us-order-types" target="_blank" rel="noopener noreferrer" title="Stocktools 市價／限價" data-related="us-order-types">市價／限價</a>
+      <a href="https://www.stocktools.cc/tw/us-adr" target="_blank" rel="noopener noreferrer" title="Stocktools 美股 ADR" data-related="us-adr">美股 ADR</a>
+      <a href="https://www.stocktools.cc/tw/us-fx" target="_blank" rel="noopener noreferrer" title="Stocktools 美股匯損" data-related="us-fx">美股匯損</a>
+      <a href="https://www.stocktools.cc/tw/us-fractional" target="_blank" rel="noopener noreferrer" title="Stocktools 美股碎股" data-related="us-fractional">美股碎股</a>
+      <a href="https://www.stocktools.cc/tw/us-earnings" target="_blank" rel="noopener noreferrer" title="Stocktools 美股財報日" data-related="us-earnings">美股財報日</a>
+    </nav>
+
+    <div class="hero">
+      <div class="pill"><i></i><span class="zh">Chrome 擴充功能 — 免費使用</span><span class="en">Chrome Extension — Free to use</span></div>
+      <h1 class="zh">全新的新分頁，<br><span class="grad">重新想像。</span></h1>
+      <h1 class="en">Your New Tab,<br><span class="grad">Reimagined.</span></h1>
+      <p class="zh">把新分頁換成視覺化的工作區。用 Spaces 與 Collections 整理分頁與書籤，一鍵儲存工作階段，跨裝置同步。</p>
+      <p class="en">Replaces your new tab with a visual workspace. Organize tabs into Spaces &amp; Collections, save whole sessions in a click, and sync across devices.</p>
+      <div class="cta">
+        <a class="btn primary" href="https://chromewebstore.google.com/detail/pjbjldjdeaiffdbehpmbndjaiehcoahg">⬇ <span class="zh">免費安裝</span><span class="en">Add to Chrome</span></a>
+        <a class="btn" href="#features"><span class="zh">看看功能</span><span class="en">See Features</span> ↓</a>
+      </div>
+
+      <div class="shot" aria-hidden="true">
+        <div class="bar"><i></i><i></i><i></i><span>New Tab · Dooby</span></div>
+        <div class="app">
+          <div class="side">
+            <small>SPACES</small>
+            <div class="on">Work</div><div>Personal</div><div>Side Project</div><div>Research</div>
+          </div>
+          <div class="main">
+            <div class="top"><b>Work</b><span>3 collections · 12 tabs</span></div>
+            <div class="cards">
+              <div class="card"><div class="h">Design <b>4</b></div><ul><li>Figma — Dashboard v2</li><li>Color palette tool</li><li>Icon set</li><li>Type scale</li></ul></div>
+              <div class="card"><div class="h">Dev <b>5</b></div><ul><li>Pull requests</li><li>API docs</li><li>Staging server</li><li>Error tracker</li></ul></div>
+              <div class="card"><div class="h">Pinned <b>3</b></div><ul><li>Weekly planning</li><li>Team calendar</li><li>Analytics</li></ul></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section id="features">
+      <div class="eyebrow">Features</div>
+      <h2 class="zh">你需要的都有，<br><span class="grad">多餘的都沒有。</span></h2>
+      <h2 class="en">Everything you need.<br><span class="grad">Nothing you don't.</span></h2>
+      <p class="lead zh">尊重你工作流程的貼心設計。所有資料都在你的瀏覽器裡。</p>
+      <p class="lead en">Thoughtful features that respect your workflow. Everything stays in your browser.</p>
+      <div class="grid zh">
+        <div class="feature"><div class="ic">▦</div><h3>Spaces 與 Collections</h3><p>用空間區分工作、個人、副業，再用收藏卡片把分頁分門別類。</p></div>
+        <div class="feature"><div class="ic">✥</div><h3>拖曳整理</h3><p>從側欄把開啟中的分頁拖進任何收藏，或按工具列圖示一鍵快速儲存。</p></div>
+        <div class="feature"><div class="ic">▣</div><h3>儲存工作階段</h3><p>一鍵把目前所有分頁存成一個收藏，之後隨時整組打開。</p></div>
+        <div class="feature"><div class="ic">⌕</div><h3>即時搜尋</h3><p>Ctrl+K 全文搜尋所有已存分頁，重要的收藏或分頁可釘選置頂。</p></div>
+        <div class="feature"><div class="ic">☁</div><h3>雲端同步</h3><p>Chrome 帳號自動同步，或用 Google 登入 Dooby Cloud，連 <a href="/dooby/app">iPad／iPhone 網頁版</a>都能看到同一份書籤。</p></div>
+        <div class="feature"><div class="ic">◇</div><h3>零依賴</h3><p>使用原生 JavaScript，無須前端框架。本機整理可直接使用，雲端同步為選用功能。</p></div>
+      </div>
+      <div class="grid en">
+        <div class="feature"><div class="ic">▦</div><h3>Spaces &amp; Collections</h3><p>Separate workspaces for Work, Personal and side projects. Organize tabs into named groups.</p></div>
+        <div class="feature"><div class="ic">✥</div><h3>Drag &amp; Drop</h3><p>Drag open tabs from the sidebar into any collection, or quick-save the current page from the toolbar icon.</p></div>
+        <div class="feature"><div class="ic">▣</div><h3>Session Save</h3><p>Save all open tabs as a collection in one click and reopen the whole set later.</p></div>
+        <div class="feature"><div class="ic">⌕</div><h3>Instant Search</h3><p>Press Ctrl+K to search every saved tab. Pin important collections or tabs to the top.</p></div>
+        <div class="feature"><div class="ic">☁</div><h3>Cloud Sync</h3><p>Auto-sync through your Chrome account, or sign in with Google for Dooby Cloud and the <a href="/dooby/app">iPad / iPhone web app</a>.</p></div>
+        <div class="feature"><div class="ic">◇</div><h3>Zero Dependencies</h3><p>Built with vanilla JavaScript, without a frontend framework. Organize locally or opt into cloud sync.</p></div>
+      </div>
+    </section>
+
+    <section id="themes">
+      <div class="eyebrow">Themes</div>
+      <h2 class="zh">5 款精美主題</h2>
+      <h2 class="en">5 Beautiful Themes</h2>
+      <p class="lead zh">Midnight 免費。贊助開發即可解鎖 Aurora、Sunset、Ocean 與 Sakura。</p>
+      <p class="lead en">Midnight is free. Support development to unlock Aurora, Sunset, Ocean &amp; Sakura.</p>
+      <div class="themes">
+        <div class="theme" style="background:#0f1117"><span class="dot" style="background:#10b981"></span><span class="tag free"><span class="zh">免費</span><span class="en">Free</span></span><b>Midnight</b></div>
+        <div class="theme" style="background:#0a0e1a"><span class="dot" style="background:#7c3aed"></span><span class="tag">Premium</span><b>Aurora</b></div>
+        <div class="theme" style="background:#140c08"><span class="dot" style="background:#f97316"></span><span class="tag">Premium</span><b>Sunset</b></div>
+        <div class="theme" style="background:#080e14"><span class="dot" style="background:#0ea5e9"></span><span class="tag">Premium</span><b>Ocean</b></div>
+        <div class="theme" style="background:#12080f"><span class="dot" style="background:#ec4899"></span><span class="tag">Premium</span><b>Sakura</b></div>
+      </div>
+    </section>
+
+    <section id="install">
+      <div class="eyebrow">Install</div>
+      <h2 class="zh">安裝</h2>
+      <h2 class="en">Install</h2>
+      <p class="lead zh">從 Chrome 線上應用程式商店安裝，之後會自動更新。</p>
+      <p class="lead en">Install from the Chrome Web Store. Updates arrive automatically.</p>
+      <p style="margin-bottom:22px;"><a class="btn primary" href="https://chromewebstore.google.com/detail/pjbjldjdeaiffdbehpmbndjaiehcoahg">⬇ <span class="zh">前往 Chrome 線上應用程式商店</span><span class="en">Open in the Chrome Web Store</span></a></p>
+      <ol class="steps zh">
+        <li><strong>安裝：</strong>在商店頁面按「加到 Chrome」。</li>
+        <li><strong>開新分頁：</strong>Dooby 會取代新分頁頁面。把工具列的 Dooby 圖示釘選起來，在任何網頁按一下就能快速儲存。</li>
+        <li><strong>啟用同步：</strong>確認 Chrome 已登入 Google 帳號並開啟同步，且「擴充功能」的同步項目為開啟。</li>
+      </ol>
+      <ol class="steps en">
+        <li><strong>Install:</strong> click "Add to Chrome" on the store page.</li>
+        <li><strong>Open a new tab:</strong> Dooby replaces the new tab page. Pin the toolbar icon to quick-save any page with one click.</li>
+        <li><strong>Enable sync:</strong> make sure Chrome is signed in with sync on, and that "Extensions" is included in what you sync.</li>
+      </ol>
+    </section>
+
+    <section id="mobile">
+      <div class="eyebrow">Mobile</div>
+      <div class="mobile-banner">
+        <div class="soon"><span class="zh">即將推出</span><span class="en">Coming soon</span></div>
+        <h3 class="zh">Dooby 即將登陸 iOS 與 Android</h3>
+        <h3 class="en">Dooby is coming to iOS and Android</h3>
+        <p class="zh">App Store 與 Google Play 版本開發中。在那之前，網頁版已經可以直接裝到主畫面：分享選單一鍵存網頁、離線瀏覽收藏、和電腦上的 Chrome 即時同步。用同一個 Google 帳號登入，書籤在每台裝置上都一樣。</p>
+        <p class="en">App Store and Google Play versions are in the works. Until then the web app already installs to your home screen: save pages from the share sheet, browse your collections offline, and stay in sync with Chrome on your desktop. Sign in with the same Google account and your bookmarks follow you everywhere.</p>
+        <div class="platforms">
+          <div class="platform"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.365 1.43c0 1.14-.42 2.2-1.24 3.1-.98 1.1-2.16 1.73-3.44 1.63-.05-1.1.4-2.24 1.2-3.1.9-1 2.34-1.7 3.48-1.63zM20.9 17.1c-.55 1.27-.82 1.84-1.53 2.96-.99 1.57-2.39 3.52-4.12 3.54-1.54.01-1.94-1.01-4.03-1-2.09.01-2.53 1.02-4.07 1-1.73-.02-3.06-1.78-4.05-3.35C.36 15.9 0 11.05 1.62 8.44c1.14-1.83 2.94-2.9 4.63-2.9 1.72 0 2.8 1 4.23 1 1.38 0 2.22-1 4.21-1 1.5 0 3.09.82 4.22 2.24-3.71 2.03-3.11 7.32.99 9.32z"/></svg><div>iOS<br><small class="zh">iPhone・iPad</small><small class="en">iPhone · iPad</small></div></div>
+          <div class="platform"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.6 9.48l1.84-3.18c.16-.31.04-.69-.26-.85a.63.63 0 0 0-.83.22l-1.88 3.24a11.43 11.43 0 0 0-8.94 0L5.65 5.67a.63.63 0 0 0-.83-.22c-.3.16-.42.54-.26.85L6.4 9.48A10.81 10.81 0 0 0 1 18h22a10.81 10.81 0 0 0-5.4-8.52zM7 15.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5zm10 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5z"/></svg><div>Android<br><small class="zh">手機・平板</small><small class="en">Phone · Tablet</small></div></div>
+        </div>
+        <div class="now-box">
+          <div class="now-title zh">現在就能裝到手機上</div>
+          <div class="now-title en">Available on your phone today</div>
+          <ul class="zh">
+            <li><b>iPhone／iPad：</b>用 Safari 開 <a href="/dooby/app">網頁版</a> → 分享 → 加入主畫面。離線也看得到收藏。</li>
+            <li><b>Android：</b>用 Chrome 開 <a href="/dooby/app">網頁版</a> → 選單 → 安裝應用程式。之後任何網頁按「分享」→ Dooby，一鍵收藏。</li>
+          </ul>
+          <ul class="en">
+            <li><b>iPhone / iPad:</b> open the <a href="/dooby/app">web app</a> in Safari → Share → Add to Home Screen. Collections stay readable offline.</li>
+            <li><b>Android:</b> open the <a href="/dooby/app">web app</a> in Chrome → menu → Install app. Then Share → Dooby from any page saves it in one tap.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="support">
+      <div class="eyebrow">Support</div>
+      <h2 class="zh">請開發者喝杯咖啡</h2>
+      <h2 class="en">Buy the developer a coffee</h2>
+      <p class="lead zh">Dooby 免費使用。贊助 1 USDT 即可解鎖付費主題、列入 Wall of Fame，並優先體驗新功能。</p>
+      <p class="lead en">Dooby is free. Support with 1 USDT to unlock the premium themes, get listed on the Wall of Fame, and get features first.</p>
+      <div class="box">
+        <p><strong><span class="zh">USDT（TRC-20）地址</span><span class="en">USDT (TRC-20) address</span></strong></p>
+        <p style="margin:6px 0 4px;"><code>TMx7ja4r3WGFcnwKNqAVogY91XRgGaQA1q</code></p>
+        <ol class="steps zh" style="margin-top:12px;">
+          <li>轉 1 USDT 以上到上面的地址。</li>
+          <li>把<strong>顯示名稱</strong>和<strong>交易 hash</strong>私訊給開發者。</li>
+          <li>收到啟用碼後，在 Dooby 的「Activate」分頁輸入同一個名稱和啟用碼即可解鎖。</li>
+        </ol>
+        <ol class="steps en" style="margin-top:12px;">
+          <li>Send 1 USDT or more to the address above.</li>
+          <li>Message the developer your <strong>display name</strong> and the <strong>transaction hash</strong>.</li>
+          <li>Enter that same name and the activation code you receive in Dooby's "Activate" tab.</li>
+        </ol>
+      </div>
+    </section>
+
+    <div class="final">
+      <h2 class="zh">準備好整理你的瀏覽器了嗎？</h2>
+      <h2 class="en">Ready to organize your browser?</h2>
+      <a class="btn primary" href="https://chromewebstore.google.com/detail/pjbjldjdeaiffdbehpmbndjaiehcoahg">⬇ <span class="zh">免費安裝</span><span class="en">Add to Chrome</span></a>
+    </div>
+
+    <footer>
+      &copy; 2026 Dooby - Tab &amp; Bookmark Manager
+      <br>
+      <a href="/dooby/changelog"><span class="zh">更新記錄</span><span class="en">Changelog</span></a> ·
+      <a href="/dooby/privacy-policy"><span class="zh">隱私權政策</span><span class="en">Privacy Policy</span></a> ·
+      <a href="https://chromewebstore.google.com/detail/pjbjldjdeaiffdbehpmbndjaiehcoahg"><span class="zh">Chrome 線上應用程式商店</span><span class="en">Chrome Web Store</span></a>
+      <br>
+      <a class="simples" href="https://simples.com.tw/" target="_blank" rel="noopener noreferrer" data-footer="simples">SIMPLES 工具網</a>
+      <nav class="related-tools" aria-label="相關工具">
+        <span class="related-tools-label">相關工具</span>
+        <a href="https://www.stocktools.cc/tw/us-fee-calculator" target="_blank" rel="noopener noreferrer" title="Stocktools 美股手續費" data-related="us-fee">美股手續費</a>
+        <a href="https://www.stocktools.cc/tw/us-etf" target="_blank" rel="noopener noreferrer" title="Stocktools 美股 ETF" data-related="us-etf">美股 ETF</a>
+        <a href="https://www.stocktools.cc/tw/us-deposit" target="_blank" rel="noopener noreferrer" title="Stocktools 美股入金" data-related="us-deposit">美股入金</a>
+        <a href="https://www.stocktools.cc/tw/us-open-account" target="_blank" rel="noopener noreferrer" title="Stocktools 美股開戶" data-related="us-open-account">美股開戶</a>
+        <a href="https://www.stocktools.cc/tw/us-dividend" target="_blank" rel="noopener noreferrer" title="Stocktools 美股配息" data-related="us-dividend">美股配息</a>
+        <a href="https://www.stocktools.cc/tw/us-first-buy" target="_blank" rel="noopener noreferrer" title="Stocktools 第一次買美股" data-related="us-first-buy">第一次買美股</a>
+        <a href="https://www.stocktools.cc/tw/us-premarket" target="_blank" rel="noopener noreferrer" title="Stocktools 美股盤前盤後" data-related="us-premarket">美股盤前盤後</a>
+        <a href="https://www.stocktools.cc/tw/us-order-types" target="_blank" rel="noopener noreferrer" title="Stocktools 市價／限價" data-related="us-order-types">市價／限價</a>
+        <a href="https://www.stocktools.cc/tw/us-adr" target="_blank" rel="noopener noreferrer" title="Stocktools 美股 ADR" data-related="us-adr">美股 ADR</a>
+        <a href="https://www.stocktools.cc/tw/us-fx" target="_blank" rel="noopener noreferrer" title="Stocktools 美股匯損" data-related="us-fx">美股匯損</a>
+        <a href="https://www.stocktools.cc/tw/us-fractional" target="_blank" rel="noopener noreferrer" title="Stocktools 美股碎股" data-related="us-fractional">美股碎股</a>
+        <a href="https://www.stocktools.cc/tw/us-earnings" target="_blank" rel="noopener noreferrer" title="Stocktools 美股財報日" data-related="us-earnings">美股財報日</a>
+      </nav>
+    </footer>
+  </div>
+  <script>
+    (function () {
+      var buttons = document.querySelectorAll('.lang-switch button');
+      function paint() {
+        var cur = document.documentElement.className.indexOf('lang-en') >= 0 ? 'en' : 'zh';
+        buttons.forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-lang') === cur); });
+      }
+      buttons.forEach(function (b) {
+        b.addEventListener('click', function () {
+          var lang = b.getAttribute('data-lang');
+          document.documentElement.className = 'lang-' + lang;
+          document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+          try { localStorage.setItem('toolist-lang', lang); } catch (e) {}
+          paint();
+        });
+      });
+      paint();
+    })();
+  </script>
+</body>
+</html>

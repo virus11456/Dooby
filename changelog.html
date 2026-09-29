@@ -38,7 +38,7 @@
   <script>
     (function () {
       var saved = null;
-      try { saved = localStorage.getItem('dooby-lang'); } catch (e) {}
+      try { saved = localStorage.getItem('toolist-lang'); } catch (e) {}
       var lang = saved || ((navigator.language || '').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en');
       document.documentElement.className = 'lang-' + lang;
       document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
@@ -78,6 +78,12 @@
         <li><span class="tag new">New</span><b>Collections stay readable offline.</b> What was last synced stays on the phone, so the app opens and links work without a connection; it re-syncs as soon as you are back online.</li>
         <li><span class="tag improve">Improve</span>Proper 192 / 512 app icons, and a long-press "Add bookmark" shortcut on the icon.</li>
       </ul>
+    </div>
+
+    <div class="release">
+      <h2>v1.6.7 <span class="date">2026-09-16</span></h2>
+      <ul class="zh"><li><span class="tag new">新增</span>新分頁固定顯示 <b>Stocktools</b>、<b>Crypig</b> 捷徑，頁尾有 <b>SIMPLES 工具網</b> 連結。</li></ul>
+      <ul class="en"><li><span class="tag new">New</span>The new tab page now keeps persistent <b>Stocktools</b> and <b>Crypig</b> shortcut chips, plus a small <b>SIMPLES 工具網</b> footer link.</li></ul>
     </div>
 
     <div class="release">
@@ -322,7 +328,7 @@
           var lang = b.getAttribute('data-lang');
           document.documentElement.className = 'lang-' + lang;
           document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
-          try { localStorage.setItem('dooby-lang', lang); } catch (e) {}
+          try { localStorage.setItem('toolist-lang', lang); } catch (e) {}
           paint();
         });
       });
@@ -331,3 +337,4 @@
   </script>
 </body>
 </html>
+

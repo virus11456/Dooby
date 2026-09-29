@@ -1,0 +1,13 @@
+AI Agent Flow 0.3.9 — macOS 13+ / Apple Silicon
+
+安裝：把 App 拖曳到 Applications。
+Claude：在官方 Claude Code 登入，再於 AI Flow 連接官方摘要。
+AI Flow 不讀取 Claude 鑰匙圈或更新其憑證。完成一次 Claude Code 對話後才有摘要；只用網頁聊天時可能不更新。
+
+Install: Drag the app onto Applications.
+Claude: Sign in in official Claude Code, then connect the official summary in AI Flow.
+AI Flow does not read Claude Keychain credentials or renew its tokens. A Claude Code interaction is needed to provide a summary; web-only activity may not update it.
+
+此 App 為 ad-hoc 簽章，尚未經 Apple 公證。 / Ad-hoc signed, not Apple-notarized.
+Setup / 安裝：https://toolist.cc/aiflow
+Source / 原始碼：https://github.com/virus11456/aiagentflow
