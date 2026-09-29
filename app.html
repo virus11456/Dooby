@@ -6,10 +6,13 @@
   <title>Dooby</title>
   <meta name="description" content="Dooby web app: your saved tabs on iPad, iPhone and any browser. 在 iPad、iPhone 和任何瀏覽器查看你的 Dooby 書籤。">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Dooby">
   <meta name="theme-color" content="#0b1020">
+  <link rel="manifest" href="/app.webmanifest">
   <link rel="icon" href="/icons/icon48.png">
-  <link rel="apple-touch-icon" href="/icons/icon128.png">
+  <link rel="apple-touch-icon" href="/icons/icon192.png">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
@@ -59,6 +62,11 @@
     #search { flex: 1 1 180px; }
     .status { font-size: 12px; color: var(--dim); padding: 0 0 12px; min-height: 18px; }
     .status.err { color: var(--danger); }
+    .status.offline { color: #fbbf24; }
+    #btnInstall { border-color: rgba(16,185,129,0.5); color: #34d399; }
+    .install-tip { margin: 14px auto 0; max-width: 520px; padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(34,211,238,0.3); background: rgba(34,211,238,0.08); color: var(--muted); font-size: 13px; text-align: left; }
+    .install-tip b { color: var(--text); }
+    html.standalone .install-tip, html.standalone #btnInstall { display: none !important; }
 
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
     .card { border-radius: 12px; border: 1px solid var(--border); background: #121a30; overflow: hidden; border-top: 3px solid var(--card-accent, var(--accent)); }
@@ -113,8 +121,9 @@
 <body>
   <div class="wrap">
     <header>
-      <a class="brand" href="/dooby/"><img src="/icons/icon48.png" alt="">Dooby</a>
+      <a class="brand" href="/dooby"><img src="/icons/icon48.png" alt="">Dooby</a>
       <span class="spacer"></span>
+      <button id="btnInstall" class="btn sm ghost hidden"><span class="zh">安裝 App</span><span class="en">Install app</span></button>
       <div class="lang-switch"><button data-lang="zh">中文</button><button data-lang="en">EN</button></div>
       <img id="avatar" class="avatar hidden" alt="">
       <button id="btnSignOut" class="btn sm ghost hidden"><span class="zh">登出</span><span class="en">Sign out</span></button>
@@ -135,8 +144,10 @@
         <li class="en"><b>Sign in inside the Chrome extension first.</b> It uploads your bookmarks to Dooby Cloud; this page reads the same data.</li>
         <li class="zh"><b>這裡的修改會同步回電腦。</b>新增或刪除書籤後，Chrome 一分鐘內更新。</li>
         <li class="en"><b>Changes here sync back.</b> Add or remove a bookmark and Chrome catches up within a minute.</li>
-        <li class="zh"><b>iPad／iPhone 加入主畫面。</b>Safari 分享 → 加入主畫面，就像 app 一樣。</li>
-        <li class="en"><b>Add to Home Screen on iPad / iPhone.</b> Safari Share → Add to Home Screen and it behaves like an app.</li>
+        <li class="zh"><b>iPad／iPhone 加入主畫面。</b>Safari 分享 → 加入主畫面，就像 app 一樣，離線也能看收藏。</li>
+        <li class="en"><b>Add to Home Screen on iPad / iPhone.</b> Safari Share → Add to Home Screen and it behaves like an app, collections included offline.</li>
+        <li class="zh"><b>Android 一鍵收藏。</b>Chrome 選單 → 安裝應用程式，之後在任何網頁按「分享」→ Dooby 就存好了。</li>
+        <li class="en"><b>One-tap save on Android.</b> Chrome menu → Install app; then Share → Dooby from any page saves it.</li>
       </ul>
     </section>
 
@@ -149,6 +160,10 @@
       </div>
       <div id="status" class="status"></div>
       <div id="grid" class="grid"></div>
+      <div id="installTip" class="install-tip hidden">
+        <span class="zh"><b>把 Dooby 裝到手機上：</b><span id="installTipIos">Safari 分享 → 加入主畫面。</span><span id="installTipAndroid" class="hidden">Chrome 選單 → 安裝應用程式，之後任何網頁「分享」→ Dooby 即可一鍵收藏。</span></span>
+        <span class="en"><b>Put Dooby on your phone:</b> <span class="ios-only">Safari Share → Add to Home Screen.</span><span class="android-only hidden">Chrome menu → Install app; then Share → Dooby from any page saves it in one tap.</span></span>
+      </div>
       <div id="nothing" class="nothing hidden">
         <p class="zh"><b>還沒有資料。</b><br>在 Chrome 的 Dooby 套件按右上角帳號按鈕登入同一個 Google 帳號，書籤就會出現在這裡。</p>
         <p class="en"><b>Nothing here yet.</b><br>Sign in with the same Google account from the Dooby extension in Chrome (account button, top right) and your bookmarks will appear here.</p>
@@ -174,6 +189,11 @@
             <li>加入動作「開啟 URL」，內容填：<code>https://toolist.cc/dooby/app?add=</code>後面接上一步的「URL 編碼文字」變數。</li>
             <li>命名「存到 Dooby」。之後在 Safari 分享選單選它即可。</li>
           </ol>
+          <h4>Android：安裝後直接用「分享」</h4>
+          <ol>
+            <li>用 Chrome 開這個頁面 → 右上角選單 → 「安裝應用程式」（或畫面上方的「安裝 App」按鈕）。</li>
+            <li>之後在任何網頁按「分享」→ 選 Dooby，網址和標題會自動帶入，選收藏按儲存即可。</li>
+          </ol>
         </div>
         <div class="en">
           <h4>Option A: Safari bookmarklet (fastest)</h4>
@@ -190,12 +210,17 @@
             <li>Add action "Open URLs" with <code>https://toolist.cc/dooby/app?add=</code> followed by the "URL Encoded Text" variable.</li>
             <li>Name it "Save to Dooby". Pick it from Safari's share sheet.</li>
           </ol>
+          <h4>Android: install once, then just Share</h4>
+          <ol>
+            <li>Open this page in Chrome → menu (⋮) → "Install app" (or the "Install app" button at the top).</li>
+            <li>From any page tap Share → Dooby: the URL and title are filled in, pick a collection and save.</li>
+          </ol>
         </div>
       </div>
     </details>
 
     <footer>
-      <a href="/dooby/">Dooby</a> · <a href="/dooby/changelog"><span class="zh">更新記錄</span><span class="en">Changelog</span></a> · <a href="/dooby/privacy-policy"><span class="zh">隱私權政策</span><span class="en">Privacy</span></a> · <a href="https://chromewebstore.google.com/detail/pjbjldjdeaiffdbehpmbndjaiehcoahg">Chrome Web Store</a>
+      <a href="/dooby">Dooby</a> · <a href="/dooby/changelog"><span class="zh">更新記錄</span><span class="en">Changelog</span></a> · <a href="/dooby/privacy-policy"><span class="zh">隱私權政策</span><span class="en">Privacy</span></a> · <a href="https://chromewebstore.google.com/detail/pjbjldjdeaiffdbehpmbndjaiehcoahg">Chrome Web Store</a>
     </footer>
   </div>
 
@@ -225,8 +250,8 @@
     var APP_URL = location.origin + location.pathname.replace(/\/$/, '');
     var CARD_COLORS = ['#10b981', '#22d3ee', '#f59e0b', '#ec4899', '#8b5cf6', '#ef4444', '#14b8a6'];
     var T = {
-      zh: { search: '搜尋書籤…', synced: '已同步 ', never: '尚未同步', loading: '載入中…', saving: '儲存中…', saved: '已儲存', removed: '已移除', signInFailed: '登入失敗：', loadFailed: '讀取失敗：', saveFailed: '儲存失敗：', needUrl: '請輸入正確的網址（含 https://）', dragHint: '這個收藏還沒有書籤', quickSave: 'Quick Save', untitled: '未命名', noMatch: '沒有符合的書籤', signedInAs: '登入中：' },
-      en: { search: 'Search bookmarks…', synced: 'Synced ', never: 'not synced yet', loading: 'Loading…', saving: 'Saving…', saved: 'Saved', removed: 'Removed', signInFailed: 'Sign-in failed: ', loadFailed: 'Load failed: ', saveFailed: 'Save failed: ', needUrl: 'Enter a valid URL (with https://)', dragHint: 'No bookmarks in this collection yet', quickSave: 'Quick Save', untitled: 'Untitled', noMatch: 'No matching bookmarks', signedInAs: 'Signed in as ' }
+      zh: { search: '搜尋書籤…', synced: '已同步 ', never: '尚未同步', loading: '載入中…', saving: '儲存中…', saved: '已儲存', removed: '已移除', signInFailed: '登入失敗：', loadFailed: '讀取失敗：', saveFailed: '儲存失敗：', needUrl: '請輸入正確的網址（含 https://）', dragHint: '這個收藏還沒有書籤', quickSave: 'Quick Save', untitled: '未命名', noMatch: '沒有符合的書籤', signedInAs: '登入中：', offline: '目前離線，顯示上次同步的內容', offlineSave: '目前離線，連上網路後再試一次' },
+      en: { search: 'Search bookmarks…', synced: 'Synced ', never: 'not synced yet', loading: 'Loading…', saving: 'Saving…', saved: 'Saved', removed: 'Removed', signInFailed: 'Sign-in failed: ', loadFailed: 'Load failed: ', saveFailed: 'Save failed: ', needUrl: 'Enter a valid URL (with https://)', dragHint: 'No bookmarks in this collection yet', quickSave: 'Quick Save', untitled: 'Untitled', noMatch: 'No matching bookmarks', signedInAs: 'Signed in as ', offline: 'Offline: showing what was last synced', offlineSave: 'You are offline. Try again once connected' }
     };
     function lang() { return document.documentElement.className.indexOf('lang-en') >= 0 ? 'en' : 'zh'; }
     function t(k) { return (T[lang()] || T.en)[k] || k; }
@@ -237,8 +262,15 @@
     function isWebUrl(u) { return /^https?:\/\/\S+$/i.test(u || ''); }
 
     var sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey, { auth: { flowType: 'pkce', persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
-    var state = { user: null, doc: null, activeSpaceId: null, query: '', lastSync: 0, pollTimer: null };
+    var state = { user: null, doc: null, activeSpaceId: null, query: '', lastSync: 0, pollTimer: null, offline: false };
     var toastTimer = null;
+    var DOC_CACHE_KEY = 'dooby-doc-cache';
+    // Last synced document per user, so the installed app opens instantly and still shows collections offline.
+    function readDocCache(uid) { try { var c = JSON.parse(localStorage.getItem(DOC_CACHE_KEY) || 'null'); return c && c.uid === uid && c.doc ? c : null; } catch (e) { return null; } }
+    function writeDocCache() { try { if (state.user && state.doc) localStorage.setItem(DOC_CACHE_KEY, JSON.stringify({ uid: state.user.id, doc: state.doc, lastSync: state.lastSync })); } catch (e) {} }
+    function clearDocCache() { try { localStorage.removeItem(DOC_CACHE_KEY); } catch (e) {} }
+    var isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+    if (isStandalone) document.documentElement.classList.add('standalone');
 
     // ---------- language switch ----------
     (function () {
@@ -269,7 +301,7 @@
       var res = await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: APP_URL, queryParams: { prompt: 'select_account' } } });
       if (res.error) { $('signInError').textContent = t('signInFailed') + res.error.message; $('signInError').classList.remove('hidden'); }
     });
-    $('btnSignOut').addEventListener('click', async function () { await sb.auth.signOut(); state.doc = null; setUser(null); });
+    $('btnSignOut').addEventListener('click', async function () { await sb.auth.signOut(); state.doc = null; clearDocCache(); setUser(null); });
 
     // ---------- data ----------
     function emptyDoc() { var sid = 'space-default'; return { version: 3, spaces: [{ id: sid, name: 'My Space', createdAt: Date.now() }], collections: [], updatedAt: 0 }; }
@@ -291,35 +323,47 @@
     }
     async function load() {
       if (!state.user) return;
-      setStatus(t('loading'));
+      if (!state.doc) setStatus(t('loading'));
       try {
         state.doc = await fetchDoc();
         state.lastSync = Date.now();
+        state.offline = false;
+        writeDocCache();
         setStatus('');
         render();
-      } catch (e) { setStatus(t('loadFailed') + e.message, true); }
+      } catch (e) {
+        var cached = readDocCache(state.user.id);
+        if (cached && (navigator.onLine === false || /fetch|network|Load failed/i.test(e.message))) {
+          state.doc = cached.doc; state.lastSync = cached.lastSync || 0; state.offline = true;
+          render(); setStatus(t('offline'));
+        } else setStatus(t('loadFailed') + e.message, true);
+      }
     }
     // Re-read the latest document, apply the change, write it back (keeps the extension's last-writer-wins happy).
     async function save(mutate) {
+      if (navigator.onLine === false) throw new Error(t('offlineSave'));
       setStatus(t('saving'));
       var doc = normalize((await fetchDoc()) || emptyDoc());
       mutate(doc);
       doc.updatedAt = Date.now();
       var res = await sb.from('dooby_data').upsert({ user_id: state.user.id, data: doc, updated_at: new Date(doc.updatedAt).toISOString() }, { onConflict: 'user_id' });
       if (res.error) throw new Error(res.error.message);
-      state.doc = doc; state.lastSync = Date.now();
+      state.doc = doc; state.lastSync = Date.now(); state.offline = false;
+      writeDocCache();
       setStatus('');
       render();
     }
     function startPolling() { stopPolling(); state.pollTimer = setInterval(function () { if (document.visibilityState === 'visible') load(); }, 60000); }
     function stopPolling() { clearInterval(state.pollTimer); state.pollTimer = null; }
     document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && state.user && Date.now() - state.lastSync > 10000) load(); });
+    window.addEventListener('online', function () { if (state.user) load(); });
+    window.addEventListener('offline', function () { if (state.user && state.doc) { state.offline = true; setStatus(t('offline')); } });
 
     // ---------- render ----------
     function setStatus(msg, isErr) {
       var el = $('status');
       if (!msg && state.user) msg = state.lastSync ? t('synced') + new Date(state.lastSync).toLocaleTimeString() : t('never');
-      el.textContent = msg || ''; el.classList.toggle('err', !!isErr);
+      el.textContent = msg || ''; el.classList.toggle('err', !!isErr); el.classList.toggle('offline', !isErr && state.offline && msg === t('offline'));
     }
     function render() {
       if (!state.user) return;
@@ -391,7 +435,7 @@
       $('addSheet').classList.remove('hidden');
       (url ? $('addTitle') : $('addUrl')).focus();
     }
-    function closeAdd() { $('addSheet').classList.add('hidden'); if (location.search.indexOf('add=') >= 0) history.replaceState(null, '', APP_URL); }
+    function closeAdd() { $('addSheet').classList.add('hidden'); if (location.search) history.replaceState(null, '', APP_URL); }
     $('btnAdd').addEventListener('click', function () { openAdd('', ''); });
     $('btnAddCancel').addEventListener('click', closeAdd);
     $('addSheet').addEventListener('click', function (e) { if (e.target.id === 'addSheet') closeAdd(); });
@@ -414,24 +458,55 @@
     function toast(msg) { var el = document.querySelector('.toast'); if (!el) { el = document.createElement('div'); el.className = 'toast'; document.body.appendChild(el); } el.textContent = msg; clearTimeout(toastTimer); toastTimer = setTimeout(function () { el.remove(); }, 2500); }
 
     // ?add=URL&title=T (from the bookmarklet / iOS Shortcut)
+    // Also the Web Share Target (Android: Share → Dooby puts the page URL in `add`, `text` or `title`)
+    // and the app shortcut (?new=1 opens an empty sheet).
+    function parseShare(search) {
+      var p = new URLSearchParams(search);
+      var url = p.get('add') || '', title = p.get('title') || '', text = p.get('text') || '';
+      if (!isWebUrl(url)) { var m = (text + ' ' + title + ' ' + url).match(/https?:\/\/[^\s"'<>]+/i); url = m ? m[0] : ''; }
+      if (!url) return p.get('new') ? { url: '', title: '' } : null;
+      title = title.replace(/https?:\/\/[^\s"'<>]+/i, '').trim();
+      if (!title && text) title = text.replace(/https?:\/\/[^\s"'<>]+/i, '').trim();
+      return { url: url, title: title === url ? '' : title };
+    }
     function pendingAdd() {
       var search = location.search;
-      if (search.indexOf('add=') < 0) { try { search = sessionStorage.getItem('dooby-pending-add') || ''; sessionStorage.removeItem('dooby-pending-add'); } catch (e) { search = ''; } }
-      var p = new URLSearchParams(search); var url = p.get('add');
-      return url ? { url: url, title: p.get('title') || '' } : null;
+      if (!/[?&](add|text|url|new)=/.test(search)) { try { search = sessionStorage.getItem('dooby-pending-add') || ''; sessionStorage.removeItem('dooby-pending-add'); } catch (e) { search = ''; } }
+      return search ? parseShare(search) : null;
     }
+    // Save the sheet the OS handed us while the app is already open (share into a running PWA).
+    window.addEventListener('pageshow', function (e) { if (e.persisted && state.user) { var pa = pendingAdd(); if (pa) openAdd(pa.url, pa.title); } });
 
     // ---------- init ----------
     (async function init() {
       applyLang();
       var s = await sb.auth.getSession();
       setUser(s.data && s.data.session ? s.data.session.user : null);
+      if (state.user) { var cached = readDocCache(state.user.id); if (cached) { state.doc = cached.doc; state.lastSync = cached.lastSync || 0; render(); if (navigator.onLine === false) { state.offline = true; setStatus(t('offline')); } } }
       sb.auth.onAuthStateChange(function (event, session) {
         var u = session ? session.user : null;
         if ((u && !state.user) || (!u && state.user)) { setUser(u); if (u) load().then(afterLoad); }
       });
       if (state.user) { await load(); afterLoad(); }
       function afterLoad() { var pa = pendingAdd(); if (pa && state.user) openAdd(pa.url, pa.title); }
+    })();
+
+    // ---------- PWA: service worker + install ----------
+    if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+      window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js', { scope: '/dooby/app' }).catch(function () {}); });
+    }
+    (function () {
+      var deferred = null;
+      var ua = navigator.userAgent || '';
+      var isIos = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      var isAndroid = /Android/i.test(ua);
+      if (isAndroid) { document.querySelectorAll('#installTipAndroid, .android-only').forEach(function (n) { n.classList.remove('hidden'); }); document.querySelectorAll('#installTipIos, .ios-only').forEach(function (n) { n.classList.add('hidden'); }); }
+      function showTip() { if (!isStandalone && (isIos || isAndroid)) $('installTip').classList.remove('hidden'); }
+      window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferred = e; if (!isStandalone) $('btnInstall').classList.remove('hidden'); });
+      window.addEventListener('appinstalled', function () { deferred = null; $('btnInstall').classList.add('hidden'); $('installTip').classList.add('hidden'); });
+      $('btnInstall').addEventListener('click', async function () { if (!deferred) return; deferred.prompt(); try { await deferred.userChoice; } catch (e) {} deferred = null; $('btnInstall').classList.add('hidden'); });
+      sb.auth.onAuthStateChange(function (_e, session) { if (session) showTip(); });
+      sb.auth.getSession().then(function (r) { if (r.data && r.data.session) showTip(); });
     })();
   })();
   </script>

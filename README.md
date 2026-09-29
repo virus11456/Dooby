@@ -157,6 +157,8 @@ The extension talks to Supabase with plain `fetch()` (no SDK, no remote code) an
 
 A single static page (no build step) for iPad, iPhone and any browser. It uses the vendored `vendor/supabase-js-2.116.0.js` for Google sign-in (PKCE redirect) and reads/writes the same `dooby_data` row as the extension. Every write re-fetches the latest document, applies the change and upserts it with a new `updatedAt`, so the extension's last-writer-wins pull picks it up within a minute. `?add=URL&title=T` opens the add sheet pre-filled; the page shows a Safari bookmarklet and an iOS Shortcut recipe that use it. Tested in `tests/e2e/webapp.test.js` against the mock Supabase.
 
+It is also an installable PWA: `app.webmanifest` (standalone display, 192/512 + maskable icons in `icons/`, an "Add bookmark" shortcut) and `sw.js` (registered with scope `/dooby/app`; precaches the shell, network-first for navigations with the cached shell as offline fallback, never touches Supabase or favicon requests). The manifest declares a GET `share_target` so on Android "Share → Dooby" lands on `/dooby/app?title=…&text=…&add=…`; `parseShare()` pulls the first http(s) URL out of whichever field carries it. The last synced document is kept in `localStorage` (`dooby-doc-cache`) so the installed app renders instantly and still shows collections offline (writes are refused offline with a message). Bump `VERSION` in `sw.js` whenever the shell changes in a way old caches must not serve.
+
 While `js/config.js` is empty the account button explains that Dooby Cloud is not enabled and nothing else changes.
 
 ---
@@ -239,7 +241,8 @@ Dooby/
 │   ├── icon16.png
 │   ├── icon48.png
 │   └── icon128.png
-├── app.html                # Dooby web app (toolist.cc/dooby/app) for iPad / iPhone
+├── app.html                # Dooby web app (toolist.cc/dooby/app) for iPad / iPhone / Android, installable PWA
+├── app.webmanifest, sw.js  # PWA manifest (share target, icons) and service worker for the web app
 ├── vendor/                 # supabase-js UMD build used by the web app only
 ├── scripts/                # Store zip build, activation-code generator
 ├── supabase/schema.sql     # Dooby Cloud table + RLS policies
