@@ -1,4 +1,5 @@
-// Static homepage (index.html) that Vercel serves at https://toolist.cc/.
+// Static Dooby page (dooby.html) that Vercel serves at https://toolist.cc/dooby
+// (index.html is now the Toolist tools directory).
 const http = require('http'), fs = require('fs'), path = require('path');
 const { chromium } = require('playwright');
 const { suite } = require('../helpers');
@@ -7,7 +8,8 @@ const ROOT = path.resolve(__dirname, '..', '..');
 function serveSite() {
   const server = http.createServer((req, res) => {
     let p = new URL(req.url, 'http://x').pathname;
-    if (p === '/' || p === '/dooby' || p === '/dooby/') p = '/index.html';
+    if (p === '/' || p === '/index') p = '/index.html';
+    if (p === '/dooby' || p === '/dooby/') p = '/dooby.html';
     const file = path.join(ROOT, p);
     if (!file.startsWith(ROOT) || !fs.existsSync(file)) { res.writeHead(404); return res.end('not found'); }
     const ext = path.extname(file);
@@ -18,12 +20,12 @@ function serveSite() {
   return new Promise(r => server.listen(0, '127.0.0.1', () => r({ url: `http://127.0.0.1:${server.address().port}`, close: () => server.close() })));
 }
 
-suite('e2e: toolist.cc landing sibling links', async (check) => {
+suite('e2e: toolist.cc/dooby page sibling links', async (check) => {
   const site = await serveSite();
   const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'], ...(process.env.DOOBY_CHROME ? { executablePath: process.env.DOOBY_CHROME } : {}) });
   try {
     const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
-    await page.goto(site.url + '/');
+    await page.goto(site.url + '/dooby');
     const links = await page.evaluate(() => [...document.querySelectorAll('[data-sibling]')].map(a => ({
       key: a.dataset.sibling, href: a.href, text: a.textContent.replace(/\s+/g, ' ').trim(), search: a.search
     })));
