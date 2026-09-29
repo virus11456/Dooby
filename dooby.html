@@ -135,7 +135,7 @@
   <script>
     (function () {
       var saved = null;
-      try { saved = localStorage.getItem('dooby-lang'); } catch (e) {}
+      try { saved = localStorage.getItem('toolist-lang'); } catch (e) {}
       var lang = saved || ((navigator.language || '').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en');
       document.documentElement.className = 'lang-' + lang;
       document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
@@ -144,7 +144,7 @@
 </head>
 <body>
   <div class="wrap">
-    <div style="padding-top:20px;font-size:13px"><a href="/">← Toolist 所有工具</a></div><header>
+    <div style="padding-top:20px;font-size:13px"><a href="/"><span class="zh">← Toolist 所有工具</span><span class="en">← All Toolist tools</span></a></div><header>
       <a class="brand" href="/dooby"><img src="/icons/icon128.png" alt="Dooby"> Dooby</a>
       <nav>
         <a href="#features"><span class="zh">功能</span><span class="en">Features</span></a>
@@ -158,7 +158,7 @@
           <button type="button" data-lang="en">EN</button>
         </span>
       </nav>
-    </header>
+    <a href="https://github.com/virus11456/Dooby" target="_blank" rel="noopener noreferrer" style="font-size:13px"><span class="zh">GitHub 原始碼 ↗</span><span class="en">Source on GitHub ↗</span></a></header>
 
     <nav class="siblings" aria-label="Sibling tools">
       <span class="siblings-label"><span class="zh">連結</span><span class="en">Links</span></span>
@@ -224,7 +224,7 @@
         <div class="feature"><div class="ic">▣</div><h3>儲存工作階段</h3><p>一鍵把目前所有分頁存成一個收藏，之後隨時整組打開。</p></div>
         <div class="feature"><div class="ic">⌕</div><h3>即時搜尋</h3><p>Ctrl+K 全文搜尋所有已存分頁，重要的收藏或分頁可釘選置頂。</p></div>
         <div class="feature"><div class="ic">☁</div><h3>雲端同步</h3><p>Chrome 帳號自動同步，或用 Google 登入 Dooby Cloud，連 <a href="/dooby/app">iPad／iPhone 網頁版</a>都能看到同一份書籤。</p></div>
-        <div class="feature"><div class="ic">◇</div><h3>零依賴</h3><p>純原生 JavaScript，沒有框架、沒有外部伺服器、沒有追蹤，載入極快。</p></div>
+        <div class="feature"><div class="ic">◇</div><h3>零依賴</h3><p>使用原生 JavaScript，無須前端框架。本機整理可直接使用，雲端同步為選用功能。</p></div>
       </div>
       <div class="grid en">
         <div class="feature"><div class="ic">▦</div><h3>Spaces &amp; Collections</h3><p>Separate workspaces for Work, Personal and side projects. Organize tabs into named groups.</p></div>
@@ -232,7 +232,7 @@
         <div class="feature"><div class="ic">▣</div><h3>Session Save</h3><p>Save all open tabs as a collection in one click and reopen the whole set later.</p></div>
         <div class="feature"><div class="ic">⌕</div><h3>Instant Search</h3><p>Press Ctrl+K to search every saved tab. Pin important collections or tabs to the top.</p></div>
         <div class="feature"><div class="ic">☁</div><h3>Cloud Sync</h3><p>Auto-sync through your Chrome account, or sign in with Google for Dooby Cloud and the <a href="/dooby/app">iPad / iPhone web app</a>.</p></div>
-        <div class="feature"><div class="ic">◇</div><h3>Zero Dependencies</h3><p>Pure vanilla JavaScript. No frameworks, no external servers, no tracking, loads instantly.</p></div>
+        <div class="feature"><div class="ic">◇</div><h3>Zero Dependencies</h3><p>Built with vanilla JavaScript, without a frontend framework. Organize locally or opt into cloud sync.</p></div>
       </div>
     </section>
 
@@ -352,7 +352,7 @@
           var lang = b.getAttribute('data-lang');
           document.documentElement.className = 'lang-' + lang;
           document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
-          try { localStorage.setItem('dooby-lang', lang); } catch (e) {}
+          try { localStorage.setItem('toolist-lang', lang); } catch (e) {}
           paint();
         });
       });

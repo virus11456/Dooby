@@ -38,7 +38,7 @@
   <script>
     (function () {
       var saved = null;
-      try { saved = localStorage.getItem('dooby-lang'); } catch (e) {}
+      try { saved = localStorage.getItem('toolist-lang'); } catch (e) {}
       var lang = saved || ((navigator.language || '').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en');
       document.documentElement.className = 'lang-' + lang;
       document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
@@ -312,7 +312,7 @@
           var lang = b.getAttribute('data-lang');
           document.documentElement.className = 'lang-' + lang;
           document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
-          try { localStorage.setItem('dooby-lang', lang); } catch (e) {}
+          try { localStorage.setItem('toolist-lang', lang); } catch (e) {}
           paint();
         });
       });
@@ -321,3 +321,4 @@
   </script>
 </body>
 </html>
+

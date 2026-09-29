@@ -1,0 +1,13 @@
+AI Agent Flow 0.3.8 — macOS 13+ / Apple Silicon
+
+安裝：將 AI Agent Flow.app 拖曳到 Applications 捷徑。
+開啟應用程式，依畫面提示安裝官方 CLI 並登入帳號。
+此版本使用 ad-hoc 簽章，尚未經 Apple 公證。請確認下載來源；不需要停用 Gatekeeper。
+Mac 必須保持執行與連線才能查詢新額度。iPhone / iPad 透過 Scriptable 與 iCloud 顯示摘要。
+
+Install: Drag AI Agent Flow.app onto the Applications shortcut.
+Open the app, then follow its prompts to install the official CLIs and sign in.
+This build is ad-hoc signed and is not Apple-notarized. Verify the download source; do not disable Gatekeeper.
+Your Mac must stay awake, online, and running the app to collect new usage. iPhone / iPad display summaries through Scriptable and iCloud.
+
+Setup / 安裝說明: https://toolist.cc/aiflow
