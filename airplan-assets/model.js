@@ -29,6 +29,13 @@
     return {...outbound,trip,returnDate:q.returnDate};
   }
   function legs(q){const out={outbound:validate(q)};if(q.trip==='roundtrip')out.inbound=validate({origin:q.destination,destination:q.origin,date:q.returnDate,cabin:q.cabin,passengers:q.passengers});return out;}
+  function dateWindow(center){return Array.from({length:7},(_,i)=>{const d=new Date(center+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+i-3);return d.toISOString().slice(0,10);});}
+  function calendarJobs(q,now=new Date()){
+    return Object.entries(legs(q)).flatMap(([leg,query])=>dateWindow(query.date).flatMap(date=>['eva','cathay'].map(provider=>{
+      let status='queued',message='等待查詢';try{validate({...query,date},now);}catch{status='skipped';message='超出可查詢日期範圍';}
+      return {key:provider+(leg==='inbound'?'Return':'')+'_'+date,provider,leg,query:{...query,date},status,phase:'form',message,rows:[]};
+    })));
+  }
   function availability(p){
     if(!p||p.status!=='ready')return p?.status||'idle';
     const rows=p.rows||[];
@@ -54,5 +61,5 @@
   }
   function cathayURL(q){const u=new URL(cxBase);Object.entries({CABINCLASS:{economy:'Y',premium:'W',business:'J'}[q.cabin],TRIPTYPE:'O',ADULT:q.passengers,CHILD:0,FLEXIBLEDATE:'true','ORIGIN[1]':q.origin,'DESTINATION[1]':q.destination,'DEPARTUREDATE[1]':q.date.replaceAll('-','')}).forEach(([k,v])=>u.searchParams.set(k,v));return u.href;}
   function cxStatus({disabled,waitlist,mixed}){return disabled?'unavailable':waitlist?'waitlist':mixed?'mixed':'available';}
-  const api={airports,cabins,evaSource,evaURL,cxBase,normalizeDate,validate,validateJourney,legs,availability,evaMiles,cathayURL,cxStatus};root.Airplan=api;if(typeof module!=='undefined')module.exports=api;
+  const api={airports,cabins,evaSource,evaURL,cxBase,normalizeDate,validate,validateJourney,legs,dateWindow,calendarJobs,availability,evaMiles,cathayURL,cxStatus};root.Airplan=api;if(typeof module!=='undefined')module.exports=api;
 })(globalThis);

@@ -5,3 +5,5 @@
 .other-inputs{grid-template-columns:1fr 1fr}.provider-message{margin-top:24px}.status.ready{font-weight:700}.flight p:empty{display:none}
 
 [hidden]{display:none!important}.other-inputs{grid-template-columns:repeat(2,minmax(0,1fr))}.leg-result{margin-top:18px;padding-top:16px;border-top:1px solid #dce4de}.leg-result h4{margin:0 0 8px}.leg-result .text-button{margin-top:8px}.leg-result .status{display:inline-block;margin-bottom:8px}@media(max-width:600px){.other-inputs{grid-template-columns:1fr}}
+
+.calendar-leg{background:white;border:1px solid #dfe5dc;border-radius:18px;padding:20px;margin:20px 0;overflow-x:auto}table{width:100%;border-collapse:collapse;text-align:center}caption{text-align:left;padding:8px 0;color:#687a72}th,td{padding:14px 8px;border-bottom:1px solid #e6ebe3}thead th{background:#edf1e7}.selected-date{background:#f0f4e9}td small{display:block;font-size:12px;max-width:260px;margin:auto}.availability-symbol{font-size:28px;font-weight:700}.available{color:#256a40}.waitlist{color:#996b18}.unavailable{color:#747b77}
