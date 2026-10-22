@@ -140,5 +140,13 @@
   "Mac 每 30 分鐘查詢 OpenAI 並讀取 Claude 摘要。": "Every 30 minutes the Mac app checks OpenAI and reads the Claude summary.",
   "只傳送用量摘要，不傳送登入資料。": "Only usage summaries travel, never sign-in data.",
   "OpenAI 定期查詢，Claude 讀官方摘要。": "OpenAI is queried periodically; Claude supplies official summaries.",
-  "只讀 Claude 官方摘要": "Official Claude summaries only"
+  "只讀 Claude 官方摘要": "Official Claude summaries only",
+  "開啟 Airplan 里程查票": "Open Airplan award search",
+  "選日期 · 選航線 · 查票位": "Date · Route · Availability",
+  "長榮航空 × 亞洲萬里通": "EVA Air × Asia Miles",
+  "03 / 查詢你的里程機位": "03 / FIND YOUR AWARD SEAT",
+  "選好日期與航線，按搜尋查看有票可換、候補或無票。": "Choose a date and route, then search for available, waitlisted or unavailable award seats.",
+  "網頁可查詢": "Search on the website",
+  "需安裝助手並登入航空會員": "Requires extension and airline login",
+  "開啟查票分頁 →": "Search award seats →"
 }

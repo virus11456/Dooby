@@ -26,3 +26,8 @@ No company attribution is shown in the footer.
 AI Flow now reads official Claude Code status-line summaries. ClaudeRefresh and direct OAuth/keychain access are removed. The site and bilingual setup instructions describe the dependency on active Claude Code sessions, missing plan/model-specific data, and receipt-time semantics.
 Mac source: https://github.com/virus11456/aiagentflow/commit/52351a4188b319733cf6e82783f8a3d17c4818f3
 The primary downloads are now version 0.3.9. Older named downloads remain historical releases.
+
+
+## Airplan 第三個工具（2026-10-22）
+
+`/airplan` 是可直接查詢的獨立頁面；`airplan-assets/` 放置查詢 UI 與助手 ZIP。需要安裝 Chrome 助手及自行登入兩家航空會員。只有按搜尋才會查詢，預設 1 位成人單程經濟艙。不顯示里程數。Chrome popup 也可查詢，背景持續執行。隱私權頁為 `/airplan-privacy`。來源在 virus11456/airplan；同步 public 資產時需保留此站 `/airplan-assets/` 路徑。
