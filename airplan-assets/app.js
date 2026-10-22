@@ -37,6 +37,7 @@ function render(search){
     const symbol={available:'○',unavailable:'×',waitlist:'△',queued:'…',running:'…',skipped:'—'}[status]||'？';
     const label=names[status]||({queued:'等待查詢',skipped:'超出可查詢日期範圍'}[status])||'尚未確認';
     const td=document.createElement('td'),mark=node('span',symbol,'availability-symbol '+status);mark.setAttribute('aria-label',label);mark.title=label;td.append(mark);
+    if(status==='running')td.append(node('small',p?.message||'查詢中'));
     if(['login','attention','error','mixed','unknown','stopped','skipped'].includes(status)){td.append(node('small',status==='mixed'?names.mixed:(p?.message||label)));if(p?.tabId){const button=node('button','開啟官網','text-button');button.type='button';button.onclick=()=>focusProvider(key);td.append(button);}}
     if(['error','attention','stopped'].includes(status)){const retry=node('button','重試此日','text-button');retry.type='button';retry.onclick=async()=>{try{render(await request('RETRY',{provider:key}));}catch(e){$('form-message').textContent=e.message;}};td.append(retry);}
     tr.append(td);
