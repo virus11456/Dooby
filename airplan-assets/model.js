@@ -20,6 +20,24 @@
     if(q.date<today || +d>+now+360*86400000)throw Error('請選今天起 360 天內的日期。');
     return {origin:q.origin,destination:q.destination,date:q.date,cabin:q.cabin,passengers:q.passengers};
   }
+  function validateJourney(q,now=new Date()){
+    const outbound=validate(q,now),trip=q.trip||'oneway';
+    if(!['oneway','roundtrip'].includes(trip))throw Error('請選擇單程或來回。');
+    if(trip==='oneway')return {...outbound,trip};
+    validate({...outbound,date:q.returnDate},now);
+    if(q.returnDate<q.date)throw Error('回程日期不能早於出發日期。');
+    return {...outbound,trip,returnDate:q.returnDate};
+  }
+  function legs(q){const out={outbound:validate(q)};if(q.trip==='roundtrip')out.inbound=validate({origin:q.destination,destination:q.origin,date:q.returnDate,cabin:q.cabin,passengers:q.passengers});return out;}
+  function availability(p){
+    if(!p||p.status!=='ready')return p?.status||'idle';
+    const rows=p.rows||[];
+    if(rows.some(r=>r.status==='available'))return 'available';
+    if(rows.some(r=>r.status==='mixed'))return 'mixed';
+    if(rows.some(r=>r.status==='unknown'))return 'unknown';
+    if(rows.some(r=>r.status==='waitlist'))return 'waitlist';
+    return 'unavailable';
+  }
   function evaMiles(q){
     const a=airports.find(x=>x[0]===q.origin)?.[2],b=airports.find(x=>x[0]===q.destination)?.[2];
     const asia=x=>['TW','HK','AS'].includes(x);let rates;
@@ -36,5 +54,5 @@
   }
   function cathayURL(q){const u=new URL(cxBase);Object.entries({CABINCLASS:{economy:'Y',premium:'W',business:'J'}[q.cabin],TRIPTYPE:'O',ADULT:q.passengers,CHILD:0,FLEXIBLEDATE:'true','ORIGIN[1]':q.origin,'DESTINATION[1]':q.destination,'DEPARTUREDATE[1]':q.date.replaceAll('-','')}).forEach(([k,v])=>u.searchParams.set(k,v));return u.href;}
   function cxStatus({disabled,waitlist,mixed}){return disabled?'unavailable':waitlist?'waitlist':mixed?'mixed':'available';}
-  const api={airports,cabins,evaSource,evaURL,cxBase,normalizeDate,validate,evaMiles,cathayURL,cxStatus};root.Airplan=api;if(typeof module!=='undefined')module.exports=api;
+  const api={airports,cabins,evaSource,evaURL,cxBase,normalizeDate,validate,validateJourney,legs,availability,evaMiles,cathayURL,cxStatus};root.Airplan=api;if(typeof module!=='undefined')module.exports=api;
 })(globalThis);
