@@ -93,8 +93,9 @@ suite('e2e: storage integrity (concurrent writes, ids, timestamps, import)', asy
       const target = cols[0];
       await chrome.storage.local.set({ localUpdateTime: 1000 });
       const remote = { version: 3, updatedAt: 5000, spaces: await Storage.getSpaces(), collections: cols.map(c => ({ ...c, name: c.id === target.id ? 'From cloud' : c.name })) };
-      const orig = { isSignedIn: CloudManager.isSignedIn, fetchRemote: CloudManager.fetchRemote };
+      const orig = { isSignedIn: CloudManager.isSignedIn, fetchRemote: CloudManager.fetchRemote, fetchRemoteStamp: CloudManager.fetchRemoteStamp };
       CloudManager.isSignedIn = () => true;
+      CloudManager.fetchRemoteStamp = async () => 5000; // probe: cloud copy is newer than local (1000), so download it
       CloudManager.fetchRemote = async () => { await Storage.renameCollection(target.id, 'Edited locally'); return JSON.parse(JSON.stringify(remote)); };
       let replaced;
       try { replaced = await CloudManager.pull(); } finally { Object.assign(CloudManager, orig); }

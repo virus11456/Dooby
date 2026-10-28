@@ -667,5 +667,14 @@
   },
   "shortcut_crypig": {
     "message": "Crypig"
+  },
+  "sync_quota_near": {
+    "message": "Chrome sync storage is {percent}% full: room for about {remaining} more bookmarks. Dooby Cloud has no such limit."
+  },
+  "sync_quota_full": {
+    "message": "Chrome sync storage is full, so new bookmarks stay on this computer only. Dooby Cloud syncs all of them."
+  },
+  "sync_quota_action": {
+    "message": "Open Dooby Cloud"
   }
 }

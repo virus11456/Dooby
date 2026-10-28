@@ -667,5 +667,14 @@
   },
   "shortcut_crypig": {
     "message": "Crypig"
+  },
+  "sync_quota_near": {
+    "message": "Chrome 同步空間已用 {percent}%，大約還能再同步 {remaining} 個書籤。改用 Dooby Cloud 就沒有這個上限。"
+  },
+  "sync_quota_full": {
+    "message": "Chrome 同步空間已滿，新的書籤只會存在這台電腦。改用 Dooby Cloud 就能同步全部書籤。"
+  },
+  "sync_quota_action": {
+    "message": "開啟 Dooby Cloud"
   }
 }
