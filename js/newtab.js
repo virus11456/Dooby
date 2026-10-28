@@ -746,20 +746,7 @@ async function saveSession() {
 
   tabs = tabs.filter(t => isSavableUrl(t.url));
 
-  const collection = await Storage.addCollection(activeSpaceId, name.trim());
-  const collections = await Storage.getCollections();
-  const col = collections.find(c => c.id === collection.id);
-
-  if (col) {
-    col.tabs = tabs.map(t => ({
-      id: 'tab-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
-      title: t.title || 'Untitled',
-      url: t.url,
-      favicon: t.favIconUrl || '',
-      addedAt: Date.now()
-    }));
-    await Storage.saveCollections(collections);
-  }
+  await Storage.addCollectionWithTabs(activeSpaceId, name.trim(), tabs);
 
   await renderCollections();
 }

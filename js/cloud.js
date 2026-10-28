@@ -272,18 +272,22 @@ const CloudManager = {
     if (!this.isSignedIn()) return false;
     const remote = await this.fetchRemote();
     if (!remote) return false;
-    const local = await this._localDocument();
-    const remoteHasTabs = this._countTabs(remote.collections) > 0;
-    if (!force && local.updatedAt && remote.updatedAt <= local.updatedAt) {
-      this._markSynced();
-      return false;
-    }
-    if (!remoteHasTabs && this._countTabs(local.collections) > 0 && !force) {
-      // Never let an empty cloud document wipe a populated device.
-      console.warn('Dooby Cloud: cloud document is empty, keeping local data');
-      return false;
-    }
-    await this._applyDocument(remote);
+    // Compare and replace under the shared data lock: an edit made while the
+    // request was in flight bumps localUpdateTime first and wins.
+    const outcome = await DoobyData.withLock(async () => {
+      const local = await this._localDocument();
+      const remoteHasTabs = this._countTabs(remote.collections) > 0;
+      if (!force && local.updatedAt && remote.updatedAt <= local.updatedAt) return 'current';
+      if (!remoteHasTabs && this._countTabs(local.collections) > 0 && !force) {
+        // Never let an empty cloud document wipe a populated device.
+        console.warn('Dooby Cloud: cloud document is empty, keeping local data');
+        return 'kept';
+      }
+      await this._applyDocument(remote);
+      return 'applied';
+    });
+    if (outcome === 'current') { this._markSynced(); return false; }
+    if (outcome === 'kept') return false;
     this._markSynced();
     this._notify('data_updated');
     return true;
@@ -318,12 +322,14 @@ const CloudManager = {
 
   // Union-merge local and cloud, write the result to both sides.
   async mergeAndPush() {
-    const local = await this._localDocument();
     const remote = await this.fetchRemote();
-    const merged = remote ? this._merge(local, remote) : local;
-    if (!merged.updatedAt) merged.updatedAt = Date.now();
-    merged.updatedAt = Math.max(merged.updatedAt, Date.now());
-    await this._applyDocument(merged);
+    const merged = await DoobyData.withLock(async () => {
+      const local = await this._localDocument();
+      const doc = remote ? this._merge(local, remote) : local;
+      doc.updatedAt = Math.max(doc.updatedAt || 0, Date.now());
+      await this._applyDocument(doc);
+      return doc;
+    });
     await this.writeRemote(merged);
     this._markSynced();
     this._notify('data_updated');

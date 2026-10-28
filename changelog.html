@@ -65,7 +65,23 @@
     <p class="lead en">Fixes and new features in every Dooby release. Install from the <a href="https://chromewebstore.google.com/detail/pjbjldjdeaiffdbehpmbndjaiehcoahg">Chrome Web Store</a> to get updates automatically.</p>
 
     <div class="release">
-      <h2><span class="zh">網頁版</span><span class="en">Web app</span> <span class="date">2026-09-29</span> <span class="latest zh">最新</span><span class="latest en">Latest</span></h2>
+      <h2>v1.6.8 <span class="date">2026-10-28</span> <span class="latest zh">最新</span><span class="latest en">Latest</span></h2>
+      <ul class="zh">
+        <li><span class="tag fix">修正</span><b>同時存好幾個網頁不會再掉資料。</b>以前快速連續儲存、或在整理收藏時剛好按了工具列圖示，後寫入的會蓋掉先寫入的，書籤可能無聲消失。現在所有寫入都依序排隊，新分頁、其他 Dooby 分頁和工具列儲存之間也不會互相覆蓋。</li>
+        <li><span class="tag fix">修正</span><b>只用 Dooby Cloud 的人，剛做的修改不會被雲端蓋回去。</b>以前沒開 Chrome 同步時，編輯不會更新本機的修改時間，雲端同步可能把剛改好的內容換回舊版本。</li>
+        <li><span class="tag fix">修正</span><b>匯入瀏覽器書籤時，子資料夾不再重複出現。</b>以前每多一層資料夾就會多匯入一份。</li>
+        <li><span class="tag fix">修正</span>同一瞬間建立的收藏、空間不會再拿到相同的內部編號，避免刪一個卻連另一個一起刪掉。</li>
+      </ul>
+      <ul class="en">
+        <li><span class="tag fix">Fix</span><b>Saving several pages at once no longer loses any.</b> Rapid saves, or a toolbar save while you were organizing, could overwrite each other and silently drop bookmarks. Every write is now queued in order across the new tab page, other Dooby tabs and the toolbar button.</li>
+        <li><span class="tag fix">Fix</span><b>With Dooby Cloud only, a fresh edit is no longer replaced by the cloud copy.</b> Without Chrome sync, edits did not update the local change time, so a cloud pull could restore an older version.</li>
+        <li><span class="tag fix">Fix</span><b>Importing browser bookmarks no longer duplicates sub-folders.</b> Each extra level of nesting used to add another copy.</li>
+        <li><span class="tag fix">Fix</span>Collections and spaces created in the same instant no longer share an internal id, so deleting one can no longer take the other with it.</li>
+      </ul>
+    </div>
+
+    <div class="release">
+      <h2><span class="zh">網頁版</span><span class="en">Web app</span> <span class="date">2026-09-29</span></h2>
       <ul class="zh">
         <li><span class="tag new">新增</span><b>網頁版可以安裝成手機 App（PWA）。</b>iPhone／iPad 用 Safari「加入主畫面」，Android 用 Chrome「安裝應用程式」，圖示出現在主畫面、全螢幕開啟，不再有瀏覽器網址列。</li>
         <li><span class="tag new">新增</span><b>Android 分享選單一鍵收藏。</b>安裝後在任何網頁按「分享」→ Dooby，網址和標題自動帶入，選收藏按儲存即可，和電腦版按工具列圖示一樣快。</li>

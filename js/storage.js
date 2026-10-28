@@ -1,4 +1,8 @@
 // Storage layer for Dooby
+//
+// Reads go straight to chrome.storage.local. Every write to spaces /
+// collections goes through DoobyData.mutate() (js/datalock.js), which
+// serializes it against all other writers and stamps localUpdateTime.
 
 // Per-device preferences. Stored in chrome.storage.local only (not synced).
 const DEFAULT_SETTINGS = {
@@ -48,150 +52,149 @@ const Storage = {
   },
 
   async addSpace(name) {
-    const spaces = await this.getSpaces();
-    const newSpace = {
-      id: 'space-' + Date.now(),
-      name,
-      createdAt: Date.now()
-    };
-    spaces.push(newSpace);
-    await chrome.storage.local.set({ spaces });
+    const newSpace = { id: DoobyData.newId('space'), name, createdAt: Date.now() };
+    await DoobyData.mutate(['spaces'], (d) => { d.spaces.push(newSpace); });
     this._onDataChanged();
     return newSpace;
   },
 
   async renameSpace(spaceId, name) {
-    const spaces = await this.getSpaces();
-    const space = spaces.find(s => s.id === spaceId);
-    if (space) {
+    const changed = await DoobyData.mutate(['spaces'], (d) => {
+      const space = d.spaces.find(s => s.id === spaceId);
+      if (!space) return DoobyData.unchanged(false);
       space.name = name;
-      await chrome.storage.local.set({ spaces });
-      this._onDataChanged();
-    }
+      return true;
+    });
+    if (changed) this._onDataChanged();
   },
 
   async deleteSpace(spaceId) {
-    let spaces = await this.getSpaces();
-    spaces = spaces.filter(s => s.id !== spaceId);
-    let collections = await this.getCollections();
-    collections = collections.filter(c => c.spaceId !== spaceId);
-    await chrome.storage.local.set({ spaces, collections });
+    await DoobyData.mutate(['spaces', 'collections'], (d) => {
+      d.spaces = d.spaces.filter(s => s.id !== spaceId);
+      d.collections = d.collections.filter(c => c.spaceId !== spaceId);
+    });
     this._onDataChanged();
   },
 
   async addCollection(spaceId, name) {
-    const collections = await this.getCollections();
+    return this.addCollectionWithTabs(spaceId, name, []);
+  },
+
+  // Create a collection already holding `tabs` (browser tabs or {title,url,favicon})
+  // in one write, e.g. "Save session".
+  async addCollectionWithTabs(spaceId, name, tabs) {
+    const now = Date.now();
     const newCollection = {
-      id: 'col-' + Date.now(),
+      id: DoobyData.newId('col'),
       spaceId,
       name,
-      tabs: [],
-      createdAt: Date.now()
+      tabs: (tabs || []).map(t => this._newTab(t, now)),
+      createdAt: now
     };
-    collections.push(newCollection);
-    await chrome.storage.local.set({ collections });
+    await DoobyData.mutate(['collections'], (d) => { d.collections.push(newCollection); });
     this._onDataChanged();
     return newCollection;
   },
 
   async renameCollection(collectionId, name) {
-    const collections = await this.getCollections();
-    const col = collections.find(c => c.id === collectionId);
-    if (col) {
+    const changed = await DoobyData.mutate(['collections'], (d) => {
+      const col = d.collections.find(c => c.id === collectionId);
+      if (!col) return DoobyData.unchanged(false);
       col.name = name;
-      await chrome.storage.local.set({ collections });
-      this._onDataChanged();
-    }
+      return true;
+    });
+    if (changed) this._onDataChanged();
   },
 
   // ---- Undo helpers: put deleted items back where they were ----
   async restoreTabs(collectionId, entries) {
     // entries: [{ tab, index }] in ascending index order
-    const collections = await this.getCollections();
-    const col = collections.find(c => c.id === collectionId);
-    if (!col) return false;
-    const existing = new Set(col.tabs.map(t => t.id));
-    for (const { tab, index } of [...entries].sort((a, b) => a.index - b.index)) {
-      if (existing.has(tab.id)) continue;
-      col.tabs.splice(Math.min(index, col.tabs.length), 0, tab);
-      existing.add(tab.id);
-    }
-    await chrome.storage.local.set({ collections });
-    this._onDataChanged();
-    return true;
+    const ok = await DoobyData.mutate(['collections'], (d) => {
+      const col = d.collections.find(c => c.id === collectionId);
+      if (!col) return DoobyData.unchanged(false);
+      const existing = new Set(col.tabs.map(t => t.id));
+      for (const { tab, index } of [...entries].sort((a, b) => a.index - b.index)) {
+        if (existing.has(tab.id)) continue;
+        col.tabs.splice(Math.min(index, col.tabs.length), 0, tab);
+        existing.add(tab.id);
+      }
+      return true;
+    });
+    if (ok) this._onDataChanged();
+    return ok;
   },
 
   async restoreCollection(collection, index) {
-    const collections = await this.getCollections();
-    if (collections.some(c => c.id === collection.id)) return false;
-    collections.splice(Math.min(index, collections.length), 0, collection);
-    await chrome.storage.local.set({ collections });
-    this._onDataChanged();
-    return true;
+    const ok = await DoobyData.mutate(['collections'], (d) => {
+      if (d.collections.some(c => c.id === collection.id)) return DoobyData.unchanged(false);
+      d.collections.splice(Math.min(index, d.collections.length), 0, collection);
+      return true;
+    });
+    if (ok) this._onDataChanged();
+    return ok;
   },
 
   async restoreSpace(space, index, spaceCollections) {
-    const spaces = await this.getSpaces();
-    if (!spaces.some(s => s.id === space.id)) spaces.splice(Math.min(index, spaces.length), 0, space);
-    const collections = await this.getCollections();
-    const ids = new Set(collections.map(c => c.id));
-    for (const c of spaceCollections) if (!ids.has(c.id)) collections.push(c);
-    await chrome.storage.local.set({ spaces, collections });
+    await DoobyData.mutate(['spaces', 'collections'], (d) => {
+      if (!d.spaces.some(s => s.id === space.id)) d.spaces.splice(Math.min(index, d.spaces.length), 0, space);
+      const ids = new Set(d.collections.map(c => c.id));
+      for (const c of spaceCollections) if (!ids.has(c.id)) d.collections.push(c);
+    });
     this._onDataChanged();
     return true;
   },
 
   async deleteCollection(collectionId) {
-    let collections = await this.getCollections();
-    collections = collections.filter(c => c.id !== collectionId);
-    await chrome.storage.local.set({ collections });
+    await DoobyData.mutate(['collections'], (d) => {
+      d.collections = d.collections.filter(c => c.id !== collectionId);
+    });
     this._onDataChanged();
   },
 
   async addTabToCollection(collectionId, tab) {
-    const collections = await this.getCollections();
-    const col = collections.find(c => c.id === collectionId);
-    if (col) {
-      col.tabs.push({
-        id: 'tab-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
-        title: tab.title || 'Untitled',
-        url: tab.url,
-        favicon: tab.favicon || tab.favIconUrl || '',
-        addedAt: Date.now()
-      });
-      await chrome.storage.local.set({ collections });
-      this._onDataChanged();
-    }
+    const changed = await DoobyData.mutate(['collections'], (d) => {
+      const col = d.collections.find(c => c.id === collectionId);
+      if (!col) return DoobyData.unchanged(false);
+      if (!Array.isArray(col.tabs)) col.tabs = [];
+      col.tabs.push(this._newTab(tab));
+      return true;
+    });
+    if (changed) this._onDataChanged();
   },
 
   async removeTabFromCollection(collectionId, tabId) {
-    const collections = await this.getCollections();
-    const col = collections.find(c => c.id === collectionId);
-    if (col) {
-      col.tabs = col.tabs.filter(t => t.id !== tabId);
-      await chrome.storage.local.set({ collections });
-      this._onDataChanged();
-    }
+    return this.removeTabsFromCollection(collectionId, [tabId]);
   },
 
   async moveTab(fromCollectionId, toCollectionId, tabId, toIndex) {
-    const collections = await this.getCollections();
-    const fromCol = collections.find(c => c.id === fromCollectionId);
-    const toCol = collections.find(c => c.id === toCollectionId);
-    if (!fromCol || !toCol) return;
+    const changed = await DoobyData.mutate(['collections'], (d) => {
+      const fromCol = d.collections.find(c => c.id === fromCollectionId);
+      const toCol = d.collections.find(c => c.id === toCollectionId);
+      if (!fromCol || !toCol) return DoobyData.unchanged(false);
+      const tabIndex = fromCol.tabs.findIndex(t => t.id === tabId);
+      if (tabIndex === -1) return DoobyData.unchanged(false);
+      const [tab] = fromCol.tabs.splice(tabIndex, 1);
+      toCol.tabs.splice(toIndex, 0, tab);
+      return true;
+    });
+    if (changed) this._onDataChanged();
+  },
 
-    const tabIndex = fromCol.tabs.findIndex(t => t.id === tabId);
-    if (tabIndex === -1) return;
-
-    const [tab] = fromCol.tabs.splice(tabIndex, 1);
-    toCol.tabs.splice(toIndex, 0, tab);
-    await chrome.storage.local.set({ collections });
+  // Replace every collection (used by drag-reordering whole collections).
+  // Prefer the targeted methods above: they cannot lose concurrent edits.
+  async saveCollections(collections) {
+    await DoobyData.mutate(['collections'], (d) => { d.collections = collections; });
     this._onDataChanged();
   },
 
-  async saveCollections(collections) {
-    await chrome.storage.local.set({ collections });
-    this._onDataChanged();
+  _newTab(tab, now = Date.now()) {
+    return {
+      id: DoobyData.newId('tab'),
+      title: (tab && tab.title) || 'Untitled',
+      url: tab && tab.url,
+      favicon: (tab && (tab.favicon || tab.favIconUrl)) || '',
+      addedAt: now
+    };
   },
 
   async searchTabs(query) {
@@ -210,29 +213,29 @@ const Storage = {
 
   // Bulk remove multiple tabs from a collection
   async removeTabsFromCollection(collectionId, tabIds) {
-    const collections = await this.getCollections();
-    const col = collections.find(c => c.id === collectionId);
-    if (col) {
+    const changed = await DoobyData.mutate(['collections'], (d) => {
+      const col = d.collections.find(c => c.id === collectionId);
+      if (!col) return DoobyData.unchanged(false);
       const idSet = new Set(tabIds);
       col.tabs = col.tabs.filter(t => !idSet.has(t.id));
-      await chrome.storage.local.set({ collections });
-      this._onDataChanged();
-    }
+      return true;
+    });
+    if (changed) this._onDataChanged();
   },
 
   // Bulk move tabs between collections
   async moveTabsBulk(fromCollectionId, toCollectionId, tabIds) {
-    const collections = await this.getCollections();
-    const fromCol = collections.find(c => c.id === fromCollectionId);
-    const toCol = collections.find(c => c.id === toCollectionId);
-    if (!fromCol || !toCol) return;
-
-    const idSet = new Set(tabIds);
-    const movedTabs = fromCol.tabs.filter(t => idSet.has(t.id));
-    fromCol.tabs = fromCol.tabs.filter(t => !idSet.has(t.id));
-    toCol.tabs.push(...movedTabs);
-    await chrome.storage.local.set({ collections });
-    this._onDataChanged();
+    const changed = await DoobyData.mutate(['collections'], (d) => {
+      const fromCol = d.collections.find(c => c.id === fromCollectionId);
+      const toCol = d.collections.find(c => c.id === toCollectionId);
+      if (!fromCol || !toCol) return DoobyData.unchanged(false);
+      const idSet = new Set(tabIds);
+      const movedTabs = fromCol.tabs.filter(t => idSet.has(t.id));
+      fromCol.tabs = fromCol.tabs.filter(t => !idSet.has(t.id));
+      toCol.tabs.push(...movedTabs);
+      return true;
+    });
+    if (changed) this._onDataChanged();
   },
 
   // Find duplicate URLs across all collections
@@ -263,163 +266,115 @@ const Storage = {
 
   // Remove specific duplicate entries (keep the first one)
   async removeDuplicates(duplicates) {
-    const collections = await this.getCollections();
-    let removedCount = 0;
-
-    for (const dup of duplicates) {
-      // Skip first entry (keep it), remove the rest
-      for (let i = 1; i < dup.entries.length; i++) {
-        const entry = dup.entries[i];
-        const col = collections.find(c => c.id === entry.collectionId);
-        if (col) {
+    const removedCount = await DoobyData.mutate(['collections'], (d) => {
+      let removed = 0;
+      for (const dup of duplicates) {
+        // Skip first entry (keep it), remove the rest
+        for (let i = 1; i < dup.entries.length; i++) {
+          const entry = dup.entries[i];
+          const col = d.collections.find(c => c.id === entry.collectionId);
+          if (!col) continue;
           const idx = col.tabs.findIndex(t => t.id === entry.tab.id);
-          if (idx !== -1) {
-            col.tabs.splice(idx, 1);
-            removedCount++;
-          }
+          if (idx !== -1) { col.tabs.splice(idx, 1); removed++; }
         }
       }
-    }
-
-    await chrome.storage.local.set({ collections });
-    this._onDataChanged();
+      return removed ? removed : DoobyData.unchanged(0);
+    });
+    if (removedCount) this._onDataChanged();
     return removedCount;
   },
 
-  // Import from Chrome bookmarks HTML format
+  // Import from Chrome bookmarks HTML format (Netscape bookmark file).
+  // Every folder that directly holds links becomes one collection, at any
+  // depth, exactly once, parents before their sub-folders.
   parseBookmarksHtml(html) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
     const results = [];
-
-    function processNode(node, folderName) {
-      for (const child of node.children) {
-        if (child.tagName === 'DT') {
-          const h3 = child.querySelector(':scope > h3');
-          const a = child.querySelector(':scope > a');
-          const dl = child.querySelector(':scope > dl');
-
-          if (h3 && dl) {
-            // It's a folder
-            const name = h3.textContent.trim();
-            const folder = { name, tabs: [] };
-            processNode(dl, name);
-            // Collect links inside this folder
-            const links = dl.querySelectorAll(':scope > dt > a');
-            for (const link of links) {
-              folder.tabs.push({
-                title: link.textContent.trim() || 'Untitled',
-                url: link.getAttribute('href') || '',
-                favicon: link.getAttribute('icon') || ''
-              });
-            }
-            if (folder.tabs.length > 0) {
-              results.push(folder);
-            }
-            // Process sub-folders recursively
-            const subDls = dl.querySelectorAll(':scope > dt > dl');
-            for (const subDl of subDls) {
-              const subH3 = subDl.parentElement.querySelector(':scope > h3');
-              if (subH3) {
-                const subFolder = { name: subH3.textContent.trim(), tabs: [] };
-                const subLinks = subDl.querySelectorAll(':scope > dt > a');
-                for (const link of subLinks) {
-                  subFolder.tabs.push({
-                    title: link.textContent.trim() || 'Untitled',
-                    url: link.getAttribute('href') || '',
-                    favicon: link.getAttribute('icon') || ''
-                  });
-                }
-                if (subFolder.tabs.length > 0) {
-                  results.push(subFolder);
-                }
-              }
-            }
-          }
-        }
+    const linkOf = (a) => ({
+      title: a.textContent.trim() || 'Untitled',
+      url: a.getAttribute('href') || '',
+      favicon: a.getAttribute('icon') || ''
+    });
+    // The parser does not always nest <DL> inside its <DT>, so a folder's list
+    // is the <DL> inside the <DT> or, failing that, the next sibling <DL>.
+    const listOf = (dt) => {
+      const inner = dt.querySelector(':scope > dl');
+      if (inner) return inner;
+      let n = dt.nextElementSibling;
+      while (n && n.tagName === 'P') n = n.nextElementSibling;
+      return n && n.tagName === 'DL' ? n : null;
+    };
+    const entriesOf = (dl) => {
+      const out = [];
+      for (const child of dl.children) {
+        if (child.tagName === 'DT') out.push(child);
+        else if (child.tagName === 'P') for (const dt of child.children) if (dt.tagName === 'DT') out.push(dt);
       }
-    }
+      return out;
+    };
+    const seen = new Set();
+    const walk = (dl) => {
+      if (!dl || seen.has(dl)) return;
+      seen.add(dl);
+      for (const dt of entriesOf(dl)) {
+        const h3 = dt.querySelector(':scope > h3');
+        if (!h3) continue;
+        const sub = listOf(dt);
+        if (!sub) continue;
+        const tabs = entriesOf(sub).map(e => e.querySelector(':scope > a')).filter(Boolean).map(linkOf).filter(t => t.url);
+        if (tabs.length) results.push({ name: h3.textContent.trim() || 'Bookmarks', tabs });
+        walk(sub);
+      }
+    };
+    walk(doc.querySelector('dl'));
 
-    const rootDl = doc.querySelector('dl');
-    if (rootDl) {
-      processNode(rootDl, 'Bookmarks');
-    }
-
-    // If no folders found, collect all links as one collection
+    // No folders with links: collect every link as one collection.
     if (results.length === 0) {
-      const allLinks = doc.querySelectorAll('a');
-      if (allLinks.length > 0) {
-        const tabs = [];
-        for (const link of allLinks) {
-          if (link.getAttribute('href')) {
-            tabs.push({
-              title: link.textContent.trim() || 'Untitled',
-              url: link.getAttribute('href'),
-              favicon: link.getAttribute('icon') || ''
-            });
-          }
-        }
-        if (tabs.length > 0) {
-          results.push({ name: 'Imported Bookmarks', tabs });
-        }
-      }
+      const tabs = Array.from(doc.querySelectorAll('a')).map(linkOf).filter(t => t.url);
+      if (tabs.length > 0) results.push({ name: 'Imported Bookmarks', tabs });
     }
-
     return results;
   },
 
   // Import parsed bookmark folders into current space
   async importBookmarkFolders(spaceId, folders) {
-    const collections = await this.getCollections();
-    let importedCount = 0;
-
-    for (const folder of folders) {
-      const newCollection = {
-        id: 'col-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
-        spaceId,
-        name: folder.name,
-        tabs: folder.tabs.map(t => ({
-          id: 'tab-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
-          title: t.title,
-          url: t.url,
-          favicon: t.favicon || '',
-          addedAt: Date.now()
-        })),
-        createdAt: Date.now()
-      };
-      collections.push(newCollection);
-      importedCount += folder.tabs.length;
-    }
-
-    await chrome.storage.local.set({ collections });
+    const now = Date.now();
+    const created = folders.map(folder => ({
+      id: DoobyData.newId('col'),
+      spaceId,
+      name: folder.name,
+      tabs: folder.tabs.map(t => this._newTab(t, now)),
+      createdAt: now
+    }));
+    await DoobyData.mutate(['collections'], (d) => { d.collections.push(...created); });
     this._onDataChanged();
-    return importedCount;
+    return folders.reduce((n, f) => n + f.tabs.length, 0);
   },
 
   async togglePinCollection(collectionId) {
-    const collections = await this.getCollections();
-    const col = collections.find(c => c.id === collectionId);
-    if (!col) return false;
-    col.pinned = !col.pinned;
-    await chrome.storage.local.set({ collections });
+    const pinned = await DoobyData.mutate(['collections'], (d) => {
+      const col = d.collections.find(c => c.id === collectionId);
+      if (!col) return DoobyData.unchanged(false);
+      col.pinned = !col.pinned;
+      return col.pinned;
+    });
     this._onDataChanged();
-    return col.pinned;
+    return pinned;
   },
 
   async togglePinTab(collectionId, tabId) {
-    const collections = await this.getCollections();
-    const col = collections.find(c => c.id === collectionId);
-    if (!col) return false;
-    const tab = col.tabs.find(t => t.id === tabId);
-    if (!tab) return false;
-    tab.pinned = !tab.pinned;
-    // Move pinned tabs to top, unpinned below
-    const pinned = col.tabs.filter(t => t.pinned);
-    const unpinned = col.tabs.filter(t => !t.pinned);
-    col.tabs = [...pinned, ...unpinned];
-    await chrome.storage.local.set({ collections });
+    const pinned = await DoobyData.mutate(['collections'], (d) => {
+      const col = d.collections.find(c => c.id === collectionId);
+      const tab = col && col.tabs.find(t => t.id === tabId);
+      if (!tab) return DoobyData.unchanged(false);
+      tab.pinned = !tab.pinned;
+      // Move pinned tabs to top, unpinned below
+      col.tabs = [...col.tabs.filter(t => t.pinned), ...col.tabs.filter(t => !t.pinned)];
+      return tab.pinned;
+    });
     this._onDataChanged();
-    return tab.pinned;
+    return pinned;
   },
 
   // Notify sync manager when data changes
