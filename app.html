@@ -262,12 +262,12 @@
     function isWebUrl(u) { return /^https?:\/\/\S+$/i.test(u || ''); }
 
     var sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey, { auth: { flowType: 'pkce', persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
-    var state = { user: null, doc: null, activeSpaceId: null, query: '', lastSync: 0, pollTimer: null, offline: false };
+    var state = { user: null, doc: null, activeSpaceId: null, query: '', lastSync: 0, pollTimer: null, offline: false, stamp: 0 };
     var toastTimer = null;
     var DOC_CACHE_KEY = 'dooby-doc-cache';
     // Last synced document per user, so the installed app opens instantly and still shows collections offline.
     function readDocCache(uid) { try { var c = JSON.parse(localStorage.getItem(DOC_CACHE_KEY) || 'null'); return c && c.uid === uid && c.doc ? c : null; } catch (e) { return null; } }
-    function writeDocCache() { try { if (state.user && state.doc) localStorage.setItem(DOC_CACHE_KEY, JSON.stringify({ uid: state.user.id, doc: state.doc, lastSync: state.lastSync })); } catch (e) {} }
+    function writeDocCache() { try { if (state.user && state.doc) localStorage.setItem(DOC_CACHE_KEY, JSON.stringify({ uid: state.user.id, doc: state.doc, lastSync: state.lastSync, stamp: state.stamp })); } catch (e) {} }
     function clearDocCache() { try { localStorage.removeItem(DOC_CACHE_KEY); } catch (e) {} }
     var isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
     if (isStandalone) document.documentElement.classList.add('standalone');
@@ -318,13 +318,27 @@
       var row = res.data && res.data[0];
       if (!row) return null;
       var doc = normalize(row.data);
-      if (!doc.updatedAt) doc.updatedAt = Date.parse(row.updated_at) || 0;
+      state.stamp = Date.parse(row.updated_at) || 0;
+      if (!doc.updatedAt) doc.updatedAt = state.stamp;
       return doc;
+    }
+    // Cheap probe (a few dozen bytes): the cloud row's updated_at, or null when there is no row.
+    async function fetchStamp() {
+      var res = await sb.from('dooby_data').select('updated_at').eq('user_id', state.user.id);
+      if (res.error) throw new Error(res.error.message);
+      var row = res.data && res.data[0];
+      return row ? (Date.parse(row.updated_at) || 0) : null;
     }
     async function load() {
       if (!state.user) return;
       if (!state.doc) setStatus(t('loading'));
       try {
+        // Polls run every minute: download the whole document only when the cloud copy changed.
+        if (state.doc && state.stamp && (await fetchStamp()) === state.stamp) {
+          state.lastSync = Date.now(); state.offline = false;
+          writeDocCache(); setStatus('');
+          return;
+        }
         state.doc = await fetchDoc();
         state.lastSync = Date.now();
         state.offline = false;
@@ -334,7 +348,7 @@
       } catch (e) {
         var cached = readDocCache(state.user.id);
         if (cached && (navigator.onLine === false || /fetch|network|Load failed/i.test(e.message))) {
-          state.doc = cached.doc; state.lastSync = cached.lastSync || 0; state.offline = true;
+          state.doc = cached.doc; state.lastSync = cached.lastSync || 0; state.stamp = cached.stamp || 0; state.offline = true;
           render(); setStatus(t('offline'));
         } else setStatus(t('loadFailed') + e.message, true);
       }
@@ -348,7 +362,7 @@
       doc.updatedAt = Date.now();
       var res = await sb.from('dooby_data').upsert({ user_id: state.user.id, data: doc, updated_at: new Date(doc.updatedAt).toISOString() }, { onConflict: 'user_id' });
       if (res.error) throw new Error(res.error.message);
-      state.doc = doc; state.lastSync = Date.now(); state.offline = false;
+      state.doc = doc; state.lastSync = Date.now(); state.offline = false; state.stamp = doc.updatedAt;
       writeDocCache();
       setStatus('');
       render();
@@ -482,7 +496,7 @@
       applyLang();
       var s = await sb.auth.getSession();
       setUser(s.data && s.data.session ? s.data.session.user : null);
-      if (state.user) { var cached = readDocCache(state.user.id); if (cached) { state.doc = cached.doc; state.lastSync = cached.lastSync || 0; render(); if (navigator.onLine === false) { state.offline = true; setStatus(t('offline')); } } }
+      if (state.user) { var cached = readDocCache(state.user.id); if (cached) { state.doc = cached.doc; state.lastSync = cached.lastSync || 0; state.stamp = cached.stamp || 0; render(); if (navigator.onLine === false) { state.offline = true; setStatus(t('offline')); } } }
       sb.auth.onAuthStateChange(function (event, session) {
         var u = session ? session.user : null;
         if ((u && !state.user) || (!u && state.user)) { setUser(u); if (u) load().then(afterLoad); }

@@ -13,6 +13,7 @@ function start() {
   const refreshes = new Map(); // refresh_token -> uid
   const rows = new Map();      // uid -> {data, updated_at}
   const log = [];
+  const stats = { reads: 0, fullReads: 0, bytesOut: 0 };
 
   const mkSession = (uid) => {
     const u = users.get(uid);
@@ -22,7 +23,7 @@ function start() {
     return { access_token: access, refresh_token: refresh, expires_in: 3600, token_type: 'bearer',
       user: { id: uid, email: u.email, user_metadata: { full_name: u.name, avatar_url: u.picture, email: u.email } } };
   };
-  const json = (res, code, body) => { res.writeHead(code, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*', 'Access-Control-Allow-Methods': 'GET,POST,DELETE,OPTIONS' }); res.end(body === undefined ? '' : JSON.stringify(body)); };
+  const json = (res, code, body) => { res.writeHead(code, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*', 'Access-Control-Allow-Methods': 'GET,POST,DELETE,OPTIONS' }); const out = body === undefined ? '' : JSON.stringify(body); stats.bytesOut += Buffer.byteLength(out); res.end(out); };
   const auth = (req) => { const m = /^Bearer (.+)$/.exec(req.headers.authorization || ''); return m ? sessions.get(m[1]) : null; };
 
   const server = http.createServer((req, res) => {
@@ -62,11 +63,19 @@ function start() {
         const target = filter.startsWith('eq.') ? filter.slice(3) : null;
         if (req.method === 'GET') {
           if (target !== uid) return json(res, 200, []); // RLS: other users' rows are invisible
-          const r = rows.get(uid); return json(res, 200, r ? [{ data: r.data, updated_at: r.updated_at }] : []);
+          // Honour ?select=a,b like PostgREST, so tests see the real payload size.
+          const r = rows.get(uid);
+          if (!r) return json(res, 200, []);
+          const full = { data: r.data, updated_at: r.updated_at };
+          const cols = (url.searchParams.get('select') || '*').split(',').map(c => c.trim()).filter(Boolean);
+          const row = cols.includes('*') ? full : Object.fromEntries(cols.filter(c => c in full).map(c => [c, full[c]]));
+          stats.reads++; if ('data' in row) stats.fullReads++;
+          return json(res, 200, [row]);
         }
         if (req.method === 'POST') {
           if (data.user_id !== uid) return json(res, 403, { message: 'new row violates row-level security policy' });
-          rows.set(uid, { data: data.data, updated_at: data.updated_at || new Date().toISOString() });
+          // Postgres hands timestamptz back as "...+00:00", not the "...Z" the client sent.
+          rows.set(uid, { data: data.data, updated_at: new Date(data.updated_at || Date.now()).toISOString().replace(/(\.\d*?)0+Z$/, '$1Z').replace(/\.Z$/, 'Z').replace('Z', '+00:00') });
           return json(res, 201);
         }
         if (req.method === 'DELETE') { if (target === uid) rows.delete(uid); return json(res, 204); }
@@ -77,7 +86,7 @@ function start() {
 
   return new Promise(resolve => server.listen(0, '127.0.0.1', () => resolve({
     url: `http://127.0.0.1:${server.address().port}`,
-    close: () => server.close(), rows, users, sessions, refreshes, log,
+    close: () => server.close(), rows, users, sessions, refreshes, log, stats,
     // Fake Google ID token for a user; nonce = sha256(rawNonce) like Google would return.
     idToken: (sub, email, name, hashedNonce) => [b64url(JSON.stringify({ alg: 'none' })), b64url(JSON.stringify({ sub, email, name, picture: '', nonce: hashedNonce, iss: 'https://accounts.google.com' })), 'sig'].join('.')
   })));

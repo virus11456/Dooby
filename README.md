@@ -195,6 +195,10 @@ After donating, DM the developer with your **name + TX hash** to receive your ac
 
 All writes to `spaces` / `collections` go through `DoobyData.mutate()` in `js/datalock.js`, loaded by the new tab page and imported by the background worker. It runs the read-modify-write under a Web Lock shared by every extension context, so the new tab page, other Dooby tabs, toolbar quick-save and Chrome sync / Dooby Cloud pulls cannot overwrite each other, and it stamps `localUpdateTime` on every edit. Ids come from `DoobyData.newId()` (time plus random). Never call `mutate()` from inside a lock callback: Web Locks are not re-entrant. Covered by `tests/e2e/storage-integrity.test.js`.
 
+### Sync traffic and quota
+
+Dooby Cloud polls (every minute on a visible Dooby tab, and on focus) first ask for the row's `updated_at` only (`CloudManager.fetchRemoteStamp()`, a few dozen bytes) and download the document only when it differs from the last stamp this device read or wrote (`cloudRemoteStamp` in `chrome.storage.local`) and is newer than `localUpdateTime`. The web app does the same with `state.stamp`, kept in its local cache. Chrome sync's ~100 KB quota is reported on every push as a `sync_usage` event; from 80% the new tab page shows a one-time toast and a hint in the Dooby Cloud dialog (`syncQuotaWarning` remembers the level shown), skipped for users signed in to Dooby Cloud. Tests: `tests/e2e/cloud.test.js`, `webapp.test.js`, `sync-quota.test.js`.
+
 ## Testing
 
 The test suite runs the extension in a real Chromium (Playwright, new headless mode) plus a few pure-Node unit tests. It runs on every push through GitHub Actions (`.github/workflows/test.yml`).

@@ -208,6 +208,16 @@ const SyncManager = {
       for (const [key, value] of Object.entries(syncData)) {
         estimatedBytes += this._itemBytes(key, value);
       }
+      // Chrome sync only holds ~100 KB (a few hundred bookmarks). Report how
+      // full it is so the page can suggest Dooby Cloud before it overflows.
+      const avgPerTab = localTabCount > 0 ? estimatedBytes / localTabCount : 0;
+      this._notifyListeners('sync_usage', {
+        bytes: estimatedBytes,
+        quota: this.QUOTA_BYTES,
+        percent: Math.round((estimatedBytes / this.QUOTA_BYTES) * 100),
+        tabCount: localTabCount,
+        remainingTabs: avgPerTab ? Math.max(0, Math.floor((this.QUOTA_BYTES - estimatedBytes) / avgPerTab)) : null
+      });
       if (estimatedBytes > this.QUOTA_BYTES) {
         const kb = (estimatedBytes / 1024).toFixed(1);
         console.warn('Dooby: Data too large for sync:', kb, 'KB');

@@ -1278,6 +1278,9 @@ async function initSync() {
         updateSyncUI('error', data?.message || t('sync_failed'));
         // Keep error visible — only clear on next successful sync
         break;
+      case 'sync_usage':
+        maybeWarnSyncQuota(data);
+        break;
       case 'data_updated':
         // Remote data was pulled from another device, refresh UI
         loadApp();
@@ -1377,6 +1380,58 @@ function updateSyncUI(status, text) {
   }
 
   textEl.textContent = text;
+}
+
+// ============================================
+// Chrome sync quota warning
+// ============================================
+
+// Chrome sync holds about 100 KB, a few hundred bookmarks. From 80% on, show a
+// hint in the Dooby Cloud dialog and a toast pointing at Dooby Cloud: once when
+// it gets near, once when it is full, and again at most weekly. Users already
+// on Dooby Cloud are not nagged.
+const SYNC_WARN_PERCENT = 80;
+const SYNC_WARN_REPEAT_MS = 7 * 24 * 60 * 60 * 1000;
+let _lastSyncUsage = null;
+
+function syncQuotaMessage(usage) {
+  if (!usage || usage.percent < SYNC_WARN_PERCENT) return '';
+  if (usage.percent >= 100) return t('sync_quota_full');
+  return t('sync_quota_near', { percent: usage.percent, remaining: usage.remainingTabs == null ? 0 : usage.remainingTabs });
+}
+
+function renderSyncQuotaHint() {
+  const el = document.getElementById('syncQuotaHint');
+  if (!el) return;
+  const onCloud = typeof CloudManager !== 'undefined' && CloudManager.isSignedIn();
+  const msg = onCloud ? '' : syncQuotaMessage(_lastSyncUsage);
+  el.textContent = msg;
+  el.classList.toggle('hidden', !msg);
+  el.classList.toggle('full', !!(_lastSyncUsage && _lastSyncUsage.percent >= 100));
+}
+
+async function maybeWarnSyncQuota(usage) {
+  if (!usage) return;
+  _lastSyncUsage = usage;
+  renderSyncQuotaHint();
+  if (typeof CloudManager !== 'undefined' && CloudManager.isSignedIn()) return;
+  const level = usage.percent >= 100 ? 'full' : usage.percent >= SYNC_WARN_PERCENT ? 'near' : '';
+  const { syncQuotaWarning = {} } = await chrome.storage.local.get('syncQuotaWarning');
+  if (!level) {
+    if (syncQuotaWarning.level) await chrome.storage.local.remove('syncQuotaWarning');
+    return;
+  }
+  const rank = { near: 1, full: 2 };
+  const repeatDue = Date.now() - (syncQuotaWarning.at || 0) > SYNC_WARN_REPEAT_MS;
+  if (syncQuotaWarning.level && rank[syncQuotaWarning.level] >= rank[level] && !repeatDue) return;
+  await chrome.storage.local.set({ syncQuotaWarning: { level, at: Date.now() } });
+  showToast(syncQuotaMessage(usage), { actionLabel: t('sync_quota_action'), onAction: openCloudDialog, duration: 15000 });
+}
+
+function openCloudDialog() {
+  if (typeof refreshCloudUI === 'function') refreshCloudUI();
+  renderSyncQuotaHint();
+  document.getElementById('cloudModal').classList.remove('hidden');
 }
 
 async function updateStorageUsage() {
@@ -1824,14 +1879,10 @@ async function initCloud() {
   if (pulled) await loadApp();
   refreshCloudUI();
 
-  document.getElementById('btnAccount').addEventListener('click', () => {
-    refreshCloudUI();
-    document.getElementById('cloudModal').classList.remove('hidden');
-  });
+  document.getElementById('btnAccount').addEventListener('click', openCloudDialog);
   // The toolbar sync indicator opens the same dialog (Chrome sync controls live there now).
-  const openCloud = () => { refreshCloudUI(); document.getElementById('cloudModal').classList.remove('hidden'); };
-  document.getElementById('syncStatus').addEventListener('click', openCloud);
-  document.getElementById('syncStatus').addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCloud(); } });
+  document.getElementById('syncStatus').addEventListener('click', openCloudDialog);
+  document.getElementById('syncStatus').addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCloudDialog(); } });
   document.getElementById('btnCloseCloud').addEventListener('click', () => {
     document.getElementById('cloudModal').classList.add('hidden');
   });
@@ -1890,6 +1941,7 @@ async function initCloud() {
 }
 
 function refreshCloudUI() {
+  renderSyncQuotaHint();
   if (typeof CloudManager === 'undefined') return;
   const st = CloudManager.getStatus();
   const btn = document.getElementById('btnAccount');

@@ -92,6 +92,31 @@ suite('e2e: Dooby Cloud (Google sign-in + Supabase sync, mocked)', async (check)
     await A.page.waitForTimeout(800);
     check('A receives B\'s addition on poll', (await tabsOf(A.page)).includes('B: Added on iPad-ish device'));
 
+    // Polls while nothing changed only ask for updated_at; no document download.
+    let before = { ...srv.stats };
+    for (let i = 0; i < 5; i++) await A.page.evaluate(() => CloudManager.poll());
+    check('5 idle polls: 5 timestamp probes, 0 document downloads', srv.stats.reads - before.reads === 5 && srv.stats.fullReads === before.fullReads, { reads: srv.stats.reads - before.reads, full: srv.stats.fullReads - before.fullReads });
+    const probeBytes = (srv.stats.bytesOut - before.bytesOut) / 5;
+    const docBytes = JSON.stringify([{ data: srv.rows.get('google-sub-frank').data, updated_at: srv.rows.get('google-sub-frank').updated_at }]).length;
+    check('an idle poll transfers a tiny fraction of the document', probeBytes < 100 && probeBytes * 5 < docBytes, { probeBytes, docBytes });
+    // A device's own upload is not downloaded again on the next poll.
+    await A.page.evaluate(async () => { const cols = await Storage.getCollections(); await Storage.addTabToCollection(cols[0].id, { title: 'A: own edit', url: 'https://example.com/a-own' }); });
+    await A.page.waitForTimeout(3000);
+    check('A\'s own edit was uploaded', srv.rows.get('google-sub-frank').data.collections.flatMap(c => c.tabs.map(t => t.title)).includes('A: own edit'));
+    before = { ...srv.stats };
+    await A.page.evaluate(() => CloudManager.poll());
+    check('poll after its own upload does not re-download', srv.stats.fullReads === before.fullReads && srv.stats.reads - before.reads === 1);
+    // A change from elsewhere (e.g. the web app) is still picked up on the next poll.
+    const row = srv.rows.get('google-sub-frank');
+    const changed = JSON.parse(JSON.stringify(row.data));
+    changed.collections[0].tabs.push({ id: 'tab-web-1', title: 'Web: from phone', url: 'https://example.com/phone', favicon: '', addedAt: Date.now() });
+    changed.updatedAt = Date.now();
+    srv.rows.set('google-sub-frank', { data: changed, updated_at: new Date(changed.updatedAt).toISOString().replace('Z', '+00:00') });
+    before = { ...srv.stats };
+    await A.page.evaluate(() => CloudManager.poll());
+    await A.page.waitForTimeout(500);
+    check('a remote change is downloaded once and applied', srv.stats.fullReads - before.fullReads === 1 && (await tabsOf(A.page)).includes('Web: from phone'));
+
     // Token refresh
     await A.page.evaluate(async () => { CloudManager._session.expires_at = 0; await chrome.storage.local.set({ cloudSession: CloudManager._session }); });
     const pullRes = await A.page.evaluate(() => CloudManager.pull(true).then(() => 'ok').catch(e => 'ERR ' + e.message));

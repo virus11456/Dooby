@@ -152,7 +152,7 @@ const CloudManager = {
     const s = this._session;
     this._session = null;
     this._stopPolling();
-    await chrome.storage.local.remove(['cloudSession']);
+    await chrome.storage.local.remove(['cloudSession', 'cloudRemoteStamp']);
     if (s && s.access_token) {
       fetch(`${DoobyConfig.supabaseUrl}/auth/v1/logout`, {
         method: 'POST',
@@ -192,7 +192,7 @@ const CloudManager = {
     if (!res.ok) {
       // Refresh token revoked/expired: drop the session so the UI asks to sign in again.
       this._session = null;
-      await chrome.storage.local.remove(['cloudSession']);
+      await chrome.storage.local.remove(['cloudSession', 'cloudRemoteStamp']);
       this._notify('auth_changed');
       throw new Error(body.error_description || body.msg || this._t('cloud_err_session_expired', 'Session expired, please sign in again'));
     }
@@ -240,8 +240,29 @@ const CloudManager = {
     const rows = await res.json();
     if (!rows.length) return null;
     const doc = rows[0].data || {};
-    if (!doc.updatedAt) doc.updatedAt = Date.parse(rows[0].updated_at) || 0;
+    const stamp = Date.parse(rows[0].updated_at) || 0;
+    if (!doc.updatedAt) doc.updatedAt = stamp;
+    await this._rememberRemoteStamp(stamp);
     return doc;
+  },
+
+  // Cheap freshness probe: only the row's updated_at (a few dozen bytes)
+  // instead of the whole document. Returns epoch ms, or null when there is no row.
+  async fetchRemoteStamp() {
+    const uid = this.getUser().id;
+    const res = await fetch(`${DoobyConfig.supabaseUrl}/rest/v1/dooby_data?select=updated_at&user_id=eq.${encodeURIComponent(uid)}`, {
+      headers: await this._headers({ Accept: 'application/json' })
+    });
+    if (!res.ok) throw new Error(this._t('cloud_err_read', `Cloud read failed (${res.status})`, { status: res.status }));
+    const rows = await res.json();
+    if (!rows.length) return null;
+    return Date.parse(rows[0].updated_at) || 0;
+  },
+
+  // Remember the updated_at of the cloud copy this device last saw (read or
+  // wrote), so polls skip the download while nothing has changed remotely.
+  async _rememberRemoteStamp(ms) {
+    if (ms) await chrome.storage.local.set({ cloudRemoteStamp: ms });
   },
 
   async writeRemote(doc) {
@@ -255,6 +276,7 @@ const CloudManager = {
       const text = await res.text().catch(() => '');
       throw new Error(this._t('cloud_err_write', `Cloud write failed (${res.status}) ${text.slice(0, 120)}`, { status: res.status, detail: text.slice(0, 120) }));
     }
+    await this._rememberRemoteStamp(Date.parse(new Date(doc.updatedAt || Date.now()).toISOString()));
   },
 
   async deleteRemote() {
@@ -270,6 +292,17 @@ const CloudManager = {
   // storage was replaced.
   async pull(force = false) {
     if (!this.isSignedIn()) return false;
+    if (!force) {
+      // Polls run every minute on every visible Dooby tab: ask only for the
+      // timestamp and download the document only when it actually changed.
+      const stamp = await this.fetchRemoteStamp();
+      if (stamp === null) return false;
+      const { localUpdateTime = 0, cloudRemoteStamp = 0 } = await chrome.storage.local.get(['localUpdateTime', 'cloudRemoteStamp']);
+      if (stamp === cloudRemoteStamp || (localUpdateTime && stamp <= localUpdateTime)) {
+        this._markSynced();
+        return false;
+      }
+    }
     const remote = await this.fetchRemote();
     if (!remote) return false;
     // Compare and replace under the shared data lock: an edit made while the

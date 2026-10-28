@@ -161,7 +161,24 @@ suite('e2e: Dooby web app (iPad / iPhone) against mock Supabase', async (check) 
     await waitFor(page, () => document.querySelectorAll('.card').length > 0 && /已同步|Synced/.test(document.getElementById('status').textContent), { label: 'back online' });
     check('back online: synced again', true);
 
-    // 10. Sign out
+    // 10. Reopening / polling with nothing changed only probes updated_at; a change is downloaded.
+    let before = { ...srv.stats };
+    for (let i = 0; i < 2; i++) {
+      await page.reload();
+      await waitFor(page, () => document.querySelectorAll('.card').length > 0 && /已同步|Synced/.test(document.getElementById('status').textContent), { label: 'reopen synced' });
+    }
+    check('reopening the app twice without changes: no document download', srv.stats.fullReads === before.fullReads && srv.stats.reads - before.reads === 2, { reads: srv.stats.reads - before.reads, full: srv.stats.fullReads - before.fullReads });
+    const cur = srv.rows.get(uid);
+    const next = JSON.parse(JSON.stringify(cur.data));
+    next.collections.find(x => x.id === 'c1').tabs.push({ id: 'tab-ext-9', title: 'Saved in Chrome', url: 'https://example.com/from-chrome', favicon: '', addedAt: Date.now() });
+    next.updatedAt = Date.now();
+    srv.rows.set(uid, { data: next, updated_at: new Date(next.updatedAt).toISOString().replace('Z', '+00:00') });
+    before = { ...srv.stats };
+    await page.reload();
+    await waitFor(page, () => [...document.querySelectorAll('.card li a')].some(a => a.textContent === 'Saved in Chrome'), { label: 'remote change shown' });
+    check('a change made elsewhere is downloaded once and shown', srv.stats.fullReads - before.fullReads === 1);
+
+    // 11. Sign out
     await page.click('#btnSignOut');
     await waitFor(page, () => !document.getElementById('viewSignedOut').classList.contains('hidden'), { label: 'signed-out after sign-out' });
     check('sign out returns to the signed-out view', true);
