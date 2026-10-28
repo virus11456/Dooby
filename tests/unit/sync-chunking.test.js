@@ -42,6 +42,8 @@ function loadSync() {
   };
   vm.createContext(ctx);
   vm.runInContext(
+    // Same load order as pages/newtab.html: the data lock comes before storage.
+    fs.readFileSync(path.join(ROOT, 'js/datalock.js'), 'utf8') + '\n' +
     fs.readFileSync(path.join(ROOT, 'js/storage.js'), 'utf8') + '\n' +
     fs.readFileSync(path.join(ROOT, 'js/sync.js'), 'utf8') +
     '\nthis.SyncManager = SyncManager; this.Storage = Storage;', ctx);

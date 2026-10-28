@@ -279,56 +279,62 @@ const SyncManager = {
         meta = JSON.parse(syncData['dooby_meta']);
       }
 
-      // Timestamp check (skip when forced)
-      if (!force && meta) {
-        const { localUpdateTime } = await chrome.storage.local.get('localUpdateTime');
-        if (localUpdateTime && localUpdateTime >= meta.updatedAt) {
-          const localCollections = await Storage.getCollections();
-          const localTabCount = this._countTabs(localCollections);
-          const cloudTabCount = meta.tabCount || 0;
+      // Decide and apply under the shared data lock, so an edit made while
+      // the pull runs is either seen by the timestamp check or written after.
+      const applied = await DoobyData.withLock(async () => {
+        // Timestamp check (skip when forced)
+        if (!force && meta) {
+          const { localUpdateTime } = await chrome.storage.local.get('localUpdateTime');
+          if (localUpdateTime && localUpdateTime >= meta.updatedAt) {
+            const localCollections = await Storage.getCollections();
+            const localTabCount = this._countTabs(localCollections);
+            const cloudTabCount = meta.tabCount || 0;
 
-          if (cloudTabCount <= localTabCount) {
-            return false;
+            if (cloudTabCount <= localTabCount) {
+              return 'skip';
+            }
+            console.log('Dooby: Cloud has more tabs (' + cloudTabCount + ' vs ' + localTabCount + '), pulling');
           }
-          console.log('Dooby: Cloud has more tabs (' + cloudTabCount + ' vs ' + localTabCount + '), pulling');
         }
-      }
 
-      // Restore spaces
-      if (syncData['dooby_spaces']) {
-        const spaces = JSON.parse(syncData['dooby_spaces']);
-        if (spaces && spaces.length > 0) {
-          await chrome.storage.local.set({ spaces });
+        // Restore spaces
+        if (syncData['dooby_spaces']) {
+          const spaces = JSON.parse(syncData['dooby_spaces']);
+          if (spaces && spaces.length > 0) {
+            await chrome.storage.local.set({ spaces });
+          }
         }
-      }
 
-      // Restore collections — try new chunked format first, fall back to old format
-      let collections = null;
+        // Restore collections — try new chunked format first, fall back to old format
+        let collections = null;
 
-      if (meta && meta.chunkCount > 0) {
-        // New chunked format (v2)
-        let collectionsStr = '';
-        for (let i = 0; i < meta.chunkCount; i++) {
-          const chunk = syncData[`dooby_col_${i}`];
-          if (chunk) collectionsStr += chunk;
+        if (meta && meta.chunkCount > 0) {
+          // New chunked format (v2)
+          let collectionsStr = '';
+          for (let i = 0; i < meta.chunkCount; i++) {
+            const chunk = syncData[`dooby_col_${i}`];
+            if (chunk) collectionsStr += chunk;
+          }
+          if (collectionsStr) {
+            collections = JSON.parse(collectionsStr);
+          }
         }
-        if (collectionsStr) {
-          collections = JSON.parse(collectionsStr);
+
+        if (!collections && hasOldCollections) {
+          // Old format fallback (v1 — single dooby_collections key)
+          console.log('Dooby: Using old format (dooby_collections)');
+          collections = JSON.parse(syncData['dooby_collections']);
         }
-      }
 
-      if (!collections && hasOldCollections) {
-        // Old format fallback (v1 — single dooby_collections key)
-        console.log('Dooby: Using old format (dooby_collections)');
-        collections = JSON.parse(syncData['dooby_collections']);
-      }
+        if (collections && collections.length > 0) {
+          await chrome.storage.local.set({ collections });
+        }
 
-      if (collections && collections.length > 0) {
-        await chrome.storage.local.set({ collections });
-      }
-
-      const updateTime = meta ? meta.updatedAt : Date.now();
-      await chrome.storage.local.set({ localUpdateTime: updateTime });
+        const updateTime = meta ? meta.updatedAt : Date.now();
+        await chrome.storage.local.set({ localUpdateTime: updateTime });
+        return 'applied';
+      });
+      if (applied === 'skip') return false;
       return true;
     } catch (err) {
       console.error('Dooby: Pull failed:', err);
@@ -420,10 +426,11 @@ const SyncManager = {
     if (!data || !data.spaces || !data.collections) {
       throw new Error('Invalid import data');
     }
-    await chrome.storage.local.set({
+    await DoobyData.withLock(() => chrome.storage.local.set({
       spaces: data.spaces,
-      collections: data.collections
-    });
+      collections: data.collections,
+      localUpdateTime: Date.now()
+    }));
     this._notifyListeners('data_updated');
     this.scheduleSyncAfterChange();
     if (typeof CloudManager !== 'undefined') CloudManager.scheduleSyncAfterChange();

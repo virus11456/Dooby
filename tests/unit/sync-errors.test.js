@@ -10,7 +10,7 @@ async function messageFor(errText) {
       local: { async get() { return { spaces: [{ id: 's' }], collections: [{ id: 'c', spaceId: 's', name: 'c', tabs: [{ id: 't', title: 'x', url: 'u', favicon: '', addedAt: 1 }] }] }; }, async set() {} },
       sync: { async get() { return {}; }, async set() { throw new Error(errText); }, async remove() {} } } } };
   vm.createContext(ctx);
-  vm.runInContext(fs.readFileSync(path.join(ROOT, 'js/storage.js'), 'utf8') + '\n' + fs.readFileSync(path.join(ROOT, 'js/sync.js'), 'utf8') + '\nthis.SyncManager = SyncManager;', ctx);
+  vm.runInContext(fs.readFileSync(path.join(ROOT, 'js/datalock.js'), 'utf8') + '\n' + fs.readFileSync(path.join(ROOT, 'js/storage.js'), 'utf8') + '\n' + fs.readFileSync(path.join(ROOT, 'js/sync.js'), 'utf8') + '\nthis.SyncManager = SyncManager;', ctx);
   const ev = []; ctx.SyncManager.on('sync_error', (e, d) => ev.push(d));
   await ctx.SyncManager.pushToSync();
   assert(ev.length, 'no sync_error event emitted');

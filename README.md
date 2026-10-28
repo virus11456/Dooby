@@ -191,6 +191,10 @@ After donating, DM the developer with your **name + TX hash** to receive your ac
 
 ---
 
+### Data integrity
+
+All writes to `spaces` / `collections` go through `DoobyData.mutate()` in `js/datalock.js`, loaded by the new tab page and imported by the background worker. It runs the read-modify-write under a Web Lock shared by every extension context, so the new tab page, other Dooby tabs, toolbar quick-save and Chrome sync / Dooby Cloud pulls cannot overwrite each other, and it stamps `localUpdateTime` on every edit. Ids come from `DoobyData.newId()` (time plus random). Never call `mutate()` from inside a lock callback: Web Locks are not re-entrant. Covered by `tests/e2e/storage-integrity.test.js`.
+
 ## Testing
 
 The test suite runs the extension in a real Chromium (Playwright, new headless mode) plus a few pure-Node unit tests. It runs on every push through GitHub Actions (`.github/workflows/test.yml`).
@@ -229,6 +233,7 @@ Dooby/
 │   ├── background.js       # Service worker (click-to-save, init)
 │   ├── i18n.js             # Loads _locales, t('key'), data-i18n attributes
 │   ├── config.js           # Dooby Cloud endpoints (Supabase URL, Google client ID)
+│   ├── datalock.js         # shared write lock + id helper (page and worker)
 │   ├── storage.js          # Local storage abstraction layer
 │   ├── sync.js             # Chrome sync with chunking
 │   ├── cloud.js            # Dooby Cloud (Google sign-in, Supabase sync)

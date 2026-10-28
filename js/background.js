@@ -1,5 +1,7 @@
 // Background service worker for Dooby
 
+importScripts('datalock.js');
+
 // Send a message to any open Dooby new tab pages. When none are open,
 // chrome.runtime.sendMessage rejects with "Receiving end does not exist";
 // that is expected, so swallow it instead of surfacing an uncaught rejection.
@@ -20,41 +22,47 @@ async function saveTabToQuickSave(tab) {
     return false;
   }
 
-  const { spaces = [], collections = [], activeSpaceId, settings = {} } = await chrome.storage.local.get(['spaces', 'collections', 'activeSpaceId', 'settings']);
-  if (spaces.length === 0) {
+  const { activeSpaceId, settings = {} } = await chrome.storage.local.get(['activeSpaceId', 'settings']);
+  // Runs under the shared data lock so a save from the toolbar can never be
+  // overwritten by an edit happening at the same moment in a Dooby tab.
+  const saved = await DoobyData.mutate(['spaces', 'collections'], ({ spaces, collections }) => {
+    if (spaces.length === 0) return DoobyData.unchanged(null);
+
+    // Prefer the space the user is currently viewing, fall back to the first one.
+    let space = spaces.find(s => s.id === activeSpaceId) || spaces[0];
+
+    // 1. A collection the user picked in Settings (any space), if it still exists.
+    // 2. Otherwise a collection named "Quick Save" (or the original default id)
+    //    in the active space, then the first collection in it.
+    // 3. Otherwise create one in the active space.
+    let target = settings.quickSaveCollectionId ? collections.find(c => c.id === settings.quickSaveCollectionId) : null;
+    if (target) {
+      space = spaces.find(s => s.id === target.spaceId) || space;
+    } else {
+      target = collections.find(c => c.spaceId === space.id && (c.id === 'col-quicksave' || /^quick save$/i.test(c.name || '')))
+        || collections.find(c => c.spaceId === space.id);
+    }
+    if (!target) {
+      target = { id: DoobyData.newId('col'), spaceId: space.id, name: 'Quick Save', tabs: [], createdAt: Date.now() };
+      collections.push(target);
+    }
+    if (!Array.isArray(target.tabs)) target.tabs = [];
+
+    target.tabs.push({
+      id: DoobyData.newId('tab'),
+      title: tab.title || 'Untitled',
+      url: tab.url,
+      favicon: tab.favIconUrl || '',
+      addedAt: Date.now()
+    });
+    return { space, target };
+  });
+  if (!saved) {
     console.warn('Dooby: no spaces exist, cannot quick-save');
     return false;
   }
+  const { space, target } = saved;
 
-  // Prefer the space the user is currently viewing, fall back to the first one.
-  let space = spaces.find(s => s.id === activeSpaceId) || spaces[0];
-
-  // 1. A collection the user picked in Settings (any space), if it still exists.
-  // 2. Otherwise a collection named "Quick Save" (or the original default id)
-  //    in the active space, then the first collection in it.
-  // 3. Otherwise create one in the active space.
-  let target = settings.quickSaveCollectionId ? collections.find(c => c.id === settings.quickSaveCollectionId) : null;
-  if (target) {
-    space = spaces.find(s => s.id === target.spaceId) || space;
-  } else {
-    target = collections.find(c => c.spaceId === space.id && (c.id === 'col-quicksave' || /^quick save$/i.test(c.name || '')))
-      || collections.find(c => c.spaceId === space.id);
-  }
-  if (!target) {
-    target = { id: 'col-' + Date.now(), spaceId: space.id, name: 'Quick Save', tabs: [], createdAt: Date.now() };
-    collections.push(target);
-  }
-  if (!Array.isArray(target.tabs)) target.tabs = [];
-
-  target.tabs.push({
-    id: 'tab-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
-    title: tab.title || 'Untitled',
-    url: tab.url,
-    favicon: tab.favIconUrl || '',
-    addedAt: Date.now()
-  });
-
-  await chrome.storage.local.set({ collections, localUpdateTime: Date.now() });
   console.log('Dooby: quick-saved "' + (tab.title || tab.url) + '" into "' + target.name + '" (' + space.name + ')');
 
   // Notify any open new tab pages to refresh and sync
