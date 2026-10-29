@@ -27,6 +27,12 @@ const SyncManager = {
   // ============================================
 
   async init() {
+    // Safari keeps storage.sync on the device, so there is nothing to sync
+    // with; Dooby Cloud is the sync there.
+    if (typeof DoobyPlatform !== 'undefined' && !DoobyPlatform.chromeSyncWorks) {
+      this._enabled = false;
+      return false;
+    }
     // Listen for changes from other devices
     chrome.storage.onChanged.addListener(async (changes, area) => {
       if (area === 'sync' && !this._pushing) {
@@ -271,6 +277,7 @@ const SyncManager = {
   // ============================================
 
   async pullFromSync(force = false) {
+    if (!this._enabled) return false;
     try {
       const syncData = await chrome.storage.sync.get(null);
 

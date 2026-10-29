@@ -676,5 +676,8 @@
   },
   "sync_quota_action": {
     "message": "Open Dooby Cloud"
+  },
+  "cloud_link_opened": {
+    "message": "Sign-in opened in a new tab. Finish there and Dooby connects automatically."
   }
 }
