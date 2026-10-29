@@ -26,14 +26,39 @@ async function launchExtension(opts = {}) {
   };
   if (process.env.DOOBY_CHROME) launch.executablePath = process.env.DOOBY_CHROME;
   const ctx = await chromium.launchPersistentContext(userData, launch);
-  let sw = ctx.serviceWorkers()[0];
-  if (!sw) sw = await ctx.waitForEvent('serviceworker', { timeout: 30000 });
+  const sw = await liveServiceWorker(ctx);
   const extId = new URL(sw.url()).host;
   const close = async () => {
     await ctx.close().catch(() => {});
     fs.rmSync(userData, { recursive: true, force: true });
   };
   return { ctx, sw, extId, userData, close, newtabUrl: `chrome-extension://${extId}/pages/newtab.html` };
+}
+
+// The extension's background service worker, once it actually runs code.
+// Right after launch Chrome can still replace the first worker instance it
+// starts; a handle to the old one then evaluates in a torn-down global (seen
+// on CI as "setTimeout is not defined"). So probe until a worker answers with
+// its normal globals and the background script loaded, re-reading the list
+// of workers each time.
+async function liveServiceWorker(ctx, timeout = 30000) {
+  const end = Date.now() + timeout;
+  let lastErr = null;
+  while (Date.now() < end) {
+    const workers = ctx.serviceWorkers().filter(w => w.url().startsWith('chrome-extension://'));
+    if (!workers.length) {
+      await ctx.waitForEvent('serviceworker', { timeout: Math.max(1000, end - Date.now()) }).catch(e => { lastErr = e; });
+      continue;
+    }
+    for (const w of workers.reverse()) {
+      try {
+        const ok = await w.evaluate(() => typeof setTimeout === 'function' && typeof chrome !== 'undefined' && !!chrome.runtime && typeof saveTabToQuickSave === 'function');
+        if (ok) return w;
+      } catch (e) { lastErr = e; }
+    }
+    await new Promise(r => setTimeout(r, 200));
+  }
+  throw new Error('extension service worker never became ready' + (lastErr ? ': ' + lastErr.message : ''));
 }
 
 // Open the new-tab page and wait until the app scripts are loaded.
@@ -97,4 +122,4 @@ async function suite(name, fn) {
   process.exit(failed ? 1 : 0);
 }
 
-module.exports = { EXT_DIR, launchExtension, openNewTab, waitFor, collectErrors, startPageServer, suite };
+module.exports = { EXT_DIR, launchExtension, liveServiceWorker, openNewTab, waitFor, collectErrors, startPageServer, suite };
