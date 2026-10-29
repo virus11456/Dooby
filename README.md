@@ -199,6 +199,22 @@ All writes to `spaces` / `collections` go through `DoobyData.mutate()` in `js/da
 
 Dooby Cloud polls (every minute on a visible Dooby tab, and on focus) first ask for the row's `updated_at` only (`CloudManager.fetchRemoteStamp()`, a few dozen bytes) and download the document only when it differs from the last stamp this device read or wrote (`cloudRemoteStamp` in `chrome.storage.local`) and is newer than `localUpdateTime`. The web app does the same with `state.stamp`, kept in its local cache. Chrome sync's ~100 KB quota is reported on every push as a `sync_usage` event; from 80% the new tab page shows a one-time toast and a hint in the Dooby Cloud dialog (`syncQuotaWarning` remembers the level shown), skipped for users signed in to Dooby Cloud. Tests: `tests/e2e/cloud.test.js`, `webapp.test.js`, `sync-quota.test.js`.
 
+## Safari (Mac, iPhone, iPad)
+
+Safari Web Extensions run the same code. Everything Dooby uses is supported (the new tab override needs Safari 14.1+ on macOS or iOS 15+, and the user picks Dooby as the new tab page in Safari settings) except two things, which `js/platform.js` (`DoobyPlatform`) switches on the build flag in `js/build-flags.js`:
+
+- **No `chrome.identity`.** Dooby Cloud sign-in goes through the web app. The new tab page stores a one-time nonce (`cloudLinkPending`) and opens `{webAppUrl}#dooby-ext-link=<nonce>`. `app.html` in link mode signs in with Google in a separate session (storage key `dooby-ext-link`, no auto-refresh) and posts it to `js/ext-link.js`, a content script that only the Safari manifest declares. The background worker (`CloudManager.acceptLinkedSession`) checks the nonce, its age (10 minutes) and that the sender is the web app. It then trades the refresh token for a new session of its own, so the user comes from Supabase and the page's copy stops working. `cloudNeedsMerge` makes sure the first-sign-in union merge runs even if no Dooby tab was waiting.
+- **`storage.sync` does not sync.** Chrome sync is off and its controls are hidden; Dooby Cloud is the sync.
+
+Build:
+
+```bash
+node scripts/stage-safari.js dist/safari/extension   # any OS: Safari manifest + flag
+scripts/build-safari.sh                              # macOS + Xcode: converter, then unsigned macOS and iOS-simulator builds
+```
+
+`.github/workflows/safari.yml` runs `build-safari.sh` on a macOS runner whenever the extension changes and keeps the Xcode project (`dooby-safari-xcode.zip`) as an artifact. Bundle id defaults to `cc.toolist.dooby` (`DOOBY_BUNDLE_ID` overrides). Signing, TestFlight and App Store upload need an Apple Developer account. `tests/e2e/safari-build.test.js` loads the staged Safari build in Chromium and drives the sign-in hand-off end to end against the mock Supabase. Behaviour inside real Safari still has to be checked by hand, on TestFlight or from Xcode.
+
 ## Testing
 
 The test suite runs the extension in a real Chromium (Playwright, new headless mode) plus a few pure-Node unit tests. It runs on every push through GitHub Actions (`.github/workflows/test.yml`).
@@ -250,6 +266,7 @@ Dooby/
 │   ├── icon16.png
 │   ├── icon48.png
 │   └── icon128.png
+├── scripts/stage-safari.js, scripts/build-safari.sh  # Safari build (see "Safari")
 ├── app.html                # Dooby web app (toolist.cc/dooby/app) for iPad / iPhone / Android, installable PWA
 ├── app.webmanifest, sw.js  # PWA manifest (share target, icons) and service worker for the web app
 ├── vendor/                 # supabase-js UMD build used by the web app only
