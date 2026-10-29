@@ -102,12 +102,20 @@ suite('e2e: Safari build (staged, in Chromium)', async (check) => {
 
     // ---------- Real hand-off from the Sign-in button ----------
     await page.click('#btnAccount');
+    // The "continue in the new tab" note is shown only while waiting, so record
+    // whether it ever appeared rather than sampling it at one moment.
+    await page.evaluate(() => {
+      const el = document.getElementById('cloudSignInError');
+      window.__sawLinkNote = false;
+      const look = () => { if (!el.classList.contains('hidden') && el.classList.contains('is-info') && el.textContent.length > 5) window.__sawLinkNote = true; };
+      new MutationObserver(look).observe(el, { attributes: true, childList: true, characterData: true, subtree: true });
+    });
     const linkPagePromise = ext.ctx.waitForEvent('page', { predicate: p => p.url().includes('/dooby/app'), timeout: 10000 });
     await page.click('#btnCloudSignIn');
     const linkPage = await linkPagePromise;
     await waitFor(linkPage, () => !document.getElementById('viewLink').classList.contains('hidden'), { label: 'link view' });
     check('Sign in opens the web app in link mode', linkPage.url().startsWith(appUrl) && !linkPage.url().includes('dooby-ext-link'), linkPage.url());
-    check('the waiting page explains sign-in continues in the new tab', await page.evaluate(() => { const e = document.getElementById('cloudSignInError'); return !e.classList.contains('hidden') && e.classList.contains('is-info') && e.textContent.length > 5; }));
+    check('the waiting page explains sign-in continues in the new tab', await page.evaluate(() => window.__sawLinkNote === true));
     await waitFor(linkPage, () => /已連結|Connected/.test(document.getElementById('linkStatus').textContent), { label: 'web app reports connected', timeout: 15000 });
     check('web app reports success', true);
     check('web app forgets its link session afterwards', await linkPage.evaluate(() => localStorage.getItem('dooby-ext-link') === null && !sessionStorage.getItem('dooby-ext-link-nonce')));
