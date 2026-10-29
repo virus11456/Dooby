@@ -8,10 +8,18 @@
 // Everything here is plain fetch() against Supabase's REST endpoints; no SDK
 // is bundled, so the extension stays free of remote or third-party code.
 //
-// Auth flow (extension):
+// Auth flow (Chrome, Edge):
 //   1. chrome.identity.launchWebAuthFlow → Google OAuth (response_type=id_token)
 //   2. POST {supabase}/auth/v1/token?grant_type=id_token  → Supabase session
 //   3. session kept in chrome.storage.local ("cloudSession"), refreshed as needed
+//
+// Auth flow (Safari, which has no chrome.identity):
+//   1. the page stores a one-time nonce ("cloudLinkPending") and opens the web
+//      app at {webAppUrl}#dooby-ext-link=<nonce>
+//   2. the web app signs in with Google in its own, separate session and posts
+//      it to js/ext-link.js (content script, Safari build only)
+//   3. the background worker checks the nonce and the sender, asks Supabase who
+//      the token belongs to, then stores the session (acceptLinkedSession)
 //
 // Sync policy: one JSON document per user, last-writer-wins by updatedAt.
 // On first sign-in the local and cloud documents are UNION-merged so nothing
@@ -57,14 +65,21 @@ const CloudManager = {
   },
 
   async init() {
-    const { cloudSession, cloudLastSyncAt } = await chrome.storage.local.get(['cloudSession', 'cloudLastSyncAt']);
+    const { cloudSession, cloudLastSyncAt, cloudNeedsMerge } = await chrome.storage.local.get(['cloudSession', 'cloudLastSyncAt', 'cloudNeedsMerge']);
     this._session = cloudSession || null;
     this._lastSyncAt = cloudLastSyncAt || null;
     if (!this.isConfigured() || !this.isSignedIn()) return false;
 
     let pulled = false;
     try {
-      pulled = await this.pull();
+      if (cloudNeedsMerge) {
+        // Signed in through the web app while no Dooby tab was waiting:
+        // do the first-sign-in union merge now.
+        await this._firstSync();
+        pulled = true;
+      } else {
+        pulled = await this.pull();
+      }
     } catch (e) {
       this._fail(e);
     }
@@ -102,6 +117,7 @@ const CloudManager = {
 
   async signIn() {
     if (!this.isConfigured()) throw new Error('Dooby Cloud is not configured in this build');
+    if (typeof DoobyPlatform !== 'undefined' && !DoobyPlatform.canUseIdentity) return this._signInViaWebApp();
 
     // Supabase verifies that the ID token's nonce claim equals SHA-256(nonce),
     // so Google gets the hash and Supabase gets the raw value.
@@ -137,22 +153,98 @@ const CloudManager = {
 
     await this._storeSession(body);
     this._notify('auth_changed');
+    await this._firstSync();
+    this._startPolling();
+    return this.getUser();
+  },
 
-    // First sync: union-merge so neither side loses bookmarks.
+  // First sync after signing in: union-merge so neither side loses bookmarks.
+  async _firstSync() {
     try {
       await this.mergeAndPush();
+      await chrome.storage.local.remove('cloudNeedsMerge');
     } catch (e) {
       this._fail(e);
     }
+  },
+
+  // ---- Safari: sign in on the web app, hand the session back ----
+
+  LINK_TIMEOUT_MS: 10 * 60 * 1000,
+
+  async _signInViaWebApp() {
+    const nonce = this._randomString(16);
+    await chrome.storage.local.set({ cloudLinkPending: { nonce, at: Date.now() } });
+    const url = DoobyConfig.webAppUrl + '#dooby-ext-link=' + nonce;
+    const tab = await chrome.tabs.create({ url, active: true });
+
+    const session = await new Promise((resolve, reject) => {
+      let done = false;
+      const finish = (fn, v) => {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        chrome.storage.onChanged.removeListener(onStorage);
+        chrome.tabs.onRemoved.removeListener(onTabClosed);
+        fn(v);
+      };
+      const onStorage = (changes, area) => {
+        if (area === 'local' && changes.cloudSession && changes.cloudSession.newValue) finish(resolve, changes.cloudSession.newValue);
+      };
+      // Closing the sign-in tab before it finished cancels; a tab the worker
+      // closes after success arrives after the session, so it is ignored.
+      const onTabClosed = (tabId) => {
+        if (tab && tabId === tab.id) setTimeout(() => finish(reject, new Error(this._t('cloud_err_cancelled', 'Sign-in was cancelled'))), 300);
+      };
+      const timer = setTimeout(() => finish(reject, new Error(this._t('cloud_err_cancelled', 'Sign-in was cancelled'))), this.LINK_TIMEOUT_MS);
+      chrome.storage.onChanged.addListener(onStorage);
+      chrome.tabs.onRemoved.addListener(onTabClosed);
+    });
+
+    this._session = session;
+    this._notify('auth_changed');
+    await this._firstSync();
     this._startPolling();
     return this.getUser();
+  },
+
+  // Runs in the background worker when js/ext-link.js forwards a session from
+  // the web app. Trusts nothing in the message: the nonce must match the one
+  // this extension just issued, the sender must be the web app, and the user
+  // comes from Supabase, not from the page.
+  async acceptLinkedSession(message, senderUrl) {
+    const { cloudLinkPending } = await chrome.storage.local.get('cloudLinkPending');
+    if (!cloudLinkPending || !message || message.nonce !== cloudLinkPending.nonce) throw new Error('Unknown sign-in request');
+    if (Date.now() - cloudLinkPending.at > this.LINK_TIMEOUT_MS) throw new Error('Sign-in request expired');
+    const app = new URL(DoobyConfig.webAppUrl);
+    let from;
+    try { from = new URL(senderUrl); } catch (e) { throw new Error('Unexpected sender'); }
+    if (from.origin !== app.origin || !from.pathname.startsWith(app.pathname)) throw new Error('Unexpected sender');
+    const s = message.session || {};
+    if (!s.refresh_token) throw new Error('Incomplete session');
+
+    // Trade the page's refresh token for a brand-new session owned by the
+    // extension: proves the token is real, gets the user from Supabase, and
+    // leaves the copy the web page held unusable (refresh tokens rotate).
+    const res = await fetch(`${DoobyConfig.supabaseUrl}/auth/v1/token?grant_type=refresh_token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: DoobyConfig.supabaseAnonKey },
+      body: JSON.stringify({ refresh_token: s.refresh_token })
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok || !body.access_token || !body.user || !body.user.id) throw new Error('Session rejected by Dooby Cloud');
+
+    await chrome.storage.local.remove('cloudLinkPending');
+    await chrome.storage.local.set({ cloudNeedsMerge: true });
+    await this._storeSession(body);
+    return { ok: true, email: this._session.user.email };
   },
 
   async signOut() {
     const s = this._session;
     this._session = null;
     this._stopPolling();
-    await chrome.storage.local.remove(['cloudSession', 'cloudRemoteStamp']);
+    await chrome.storage.local.remove(['cloudSession', 'cloudRemoteStamp', 'cloudNeedsMerge', 'cloudLinkPending']);
     if (s && s.access_token) {
       fetch(`${DoobyConfig.supabaseUrl}/auth/v1/logout`, {
         method: 'POST',

@@ -2189,3 +2189,9 @@ body::before {
 .sync-quota-hint { margin: 8px 0 4px; padding: 8px 10px; border-radius: 8px; font-size: 12px; line-height: 1.5;
   background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); color: #fcd34d; }
 .sync-quota-hint.full { background: rgba(248, 113, 113, 0.12); border-color: rgba(248, 113, 113, 0.4); color: #fca5a5; }
+
+/* Safari build: storage.sync does not sync there, so the Chrome sync controls are hidden. */
+.platform-safari .chrome-sync { display: none; }
+
+/* Neutral (non-error) message in the Dooby Cloud sign-in area, e.g. Safari's "continue in the new tab". */
+#cloudSignInError.is-info { color: var(--text-secondary); }

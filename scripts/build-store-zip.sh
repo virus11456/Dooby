@@ -25,6 +25,8 @@ for entry in _locales css icons js pages privacy-policy.html; do
   cp -R "$ROOT/$entry" "$STAGE/dooby/"
 done
 rm -f "$STAGE/dooby/icons/generate_icons.html"
+# Safari-only content script (scripts/stage-safari.js adds it to the Safari manifest).
+rm -f "$STAGE/dooby/js/ext-link.js"
 
 DOOBY_KEEP_KEY="$DEV" python3 - "$ROOT/manifest.json" "$STAGE/dooby/manifest.json" <<'PY'
 import json, sys

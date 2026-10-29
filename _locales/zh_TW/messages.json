@@ -676,5 +676,8 @@
   },
   "sync_quota_action": {
     "message": "開啟 Dooby Cloud"
+  },
+  "cloud_link_opened": {
+    "message": "已在新分頁開啟登入頁面，在那裡完成登入後 Dooby 會自動連結。"
   }
 }

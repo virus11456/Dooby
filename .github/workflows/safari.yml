@@ -1,0 +1,55 @@
+name: safari
+
+# Converts the extension into a Safari Web Extension Xcode project (macOS +
+# iOS apps) and compiles both, unsigned, on a macOS runner. Runs when the
+# extension or the Safari build scripts change. The Xcode project is kept as
+# an artifact for signing and App Store upload once an Apple Developer
+# account is set up.
+
+on:
+  pull_request:
+    paths:
+      - 'manifest.json'
+      - 'js/**'
+      - 'pages/**'
+      - 'css/**'
+      - '_locales/**'
+      - 'icons/**'
+      - 'scripts/stage-safari.js'
+      - 'scripts/build-safari.sh'
+      - '.github/workflows/safari.yml'
+  push:
+    branches: [claude/chrome-bookmark-task-manager-r3OnK]
+    paths:
+      - 'manifest.json'
+      - 'js/**'
+      - 'pages/**'
+      - 'css/**'
+      - '_locales/**'
+      - 'icons/**'
+      - 'scripts/stage-safari.js'
+      - 'scripts/build-safari.sh'
+      - '.github/workflows/safari.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Toolchain
+        run: |
+          sw_vers
+          xcodebuild -version
+          xcrun --find safari-web-extension-converter
+      - name: Build Safari extension (macOS + iOS, unsigned)
+        run: bash scripts/build-safari.sh dist/safari
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dooby-safari-xcode
+          path: dist/safari/dooby-safari-xcode.zip
+          retention-days: 30

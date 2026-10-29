@@ -1,5 +1,8 @@
 // Dooby - New Tab Main Application
 
+// Safari: no Chrome sync section (storage.sync never leaves the device there).
+if (typeof DoobyPlatform !== 'undefined' && DoobyPlatform.isSafari) document.documentElement.classList.add('platform-safari');
+
 let activeSpaceId = null;
 let allCollections = [];
 let bulkMode = false;
@@ -1894,11 +1897,20 @@ async function initCloud() {
     const btn = document.getElementById('btnCloudSignIn');
     const err = document.getElementById('cloudSignInError');
     err.classList.add('hidden');
+    err.classList.remove('is-info');
     btn.disabled = true;
+    if (typeof DoobyPlatform !== 'undefined' && !DoobyPlatform.canUseIdentity) {
+      // Safari: sign-in continues on the web app in a new tab.
+      err.textContent = t('cloud_link_opened');
+      err.classList.add('is-info');
+      err.classList.remove('hidden');
+    }
     try {
       await CloudManager.signIn();
+      err.classList.add('hidden');
       await loadApp();
     } catch (e) {
+      err.classList.remove('is-info');
       err.textContent = e.message || t('sign_in_failed');
       err.classList.remove('hidden');
     } finally {

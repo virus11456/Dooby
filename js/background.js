@@ -1,6 +1,6 @@
 // Background service worker for Dooby
 
-importScripts('datalock.js');
+importScripts('build-flags.js', 'platform.js', 'config.js', 'datalock.js', 'cloud.js');
 
 // Send a message to any open Dooby new tab pages. When none are open,
 // chrome.runtime.sendMessage rejects with "Receiving end does not exist";
@@ -145,4 +145,21 @@ chrome.alarms.get('dooby-sync', (alarm) => {
   if (!alarm) {
     chrome.alarms.create('dooby-sync', { periodInMinutes: 5 });
   }
+});
+
+// Safari: Dooby Cloud sign-in happens on the web app (no chrome.identity), and
+// js/ext-link.js forwards the resulting session here. CloudManager checks the
+// one-time nonce and the sender before storing anything.
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (!message || message.type !== 'DOOBY_CLOUD_LINK') return false;
+  const senderUrl = (sender && (sender.url || (sender.tab && sender.tab.url))) || '';
+  CloudManager.acceptLinkedSession(message, senderUrl).then(
+    (result) => {
+      sendResponse(result);
+      // Close the sign-in tab shortly after it has shown its "linked" message.
+      if (sender && sender.tab && sender.tab.id != null) setTimeout(() => chrome.tabs.remove(sender.tab.id).catch(() => {}), 2500);
+    },
+    (err) => sendResponse({ ok: false, error: (err && err.message) || String(err) })
+  );
+  return true; // respond asynchronously
 });
